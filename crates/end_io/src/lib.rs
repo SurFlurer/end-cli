@@ -7,12 +7,14 @@ use std::collections::{BTreeMap, HashMap, HashSet};
 use std::path::{Path, PathBuf};
 use thiserror::Error;
 
+/// Result alias for IO and schema-loading operations.
 pub type Result<T> = std::result::Result<T, Error>;
 
 const BUILTIN_ITEMS: &str = include_str!("items.toml");
 const BUILTIN_FACILITIES: &str = include_str!("facilities.toml");
 const BUILTIN_RECIPES: &str = include_str!("recipes.toml");
 
+/// Errors raised while loading/validating TOML inputs.
 #[derive(Debug, Error)]
 pub enum Error {
     #[error("failed to read {path}: {source}")]
@@ -150,6 +152,9 @@ struct OutpostToml {
     prices: BTreeMap<String, i64>,
 }
 
+/// Load and validate catalog inputs (`items.toml`, `facilities.toml`, `recipes.toml`).
+///
+/// When `data_dir` is `None`, built-in TOML data embedded at compile time is used.
 pub fn load_catalog(data_dir: Option<&Path>) -> Result<Catalog> {
     let (items_path, items_src) = load_data_file(data_dir, "items.toml", BUILTIN_ITEMS)?;
     let (fac_path, fac_src) = load_data_file(data_dir, "facilities.toml", BUILTIN_FACILITIES)?;
@@ -347,6 +352,7 @@ pub fn load_catalog(data_dir: Option<&Path>) -> Result<Catalog> {
     })
 }
 
+/// Load `aic.toml` from disk and resolve key-based references against a catalog.
 pub fn load_aic(path: &Path, catalog: &Catalog) -> Result<AicInputs> {
     let src = std::fs::read_to_string(path).map_err(|source| Error::Io {
         path: path.to_path_buf(),
@@ -359,6 +365,7 @@ pub fn load_aic(path: &Path, catalog: &Catalog) -> Result<AicInputs> {
     resolve_aic(path.to_path_buf(), raw, catalog)
 }
 
+/// Build bundled default AIC inputs and resolve them through the same validation path.
 pub fn default_aic(catalog: &Catalog) -> Result<AicInputs> {
     let mut supply_per_min = BTreeMap::new();
     supply_per_min.insert("Originium Ore".to_string(), 520);
@@ -409,6 +416,7 @@ pub fn default_aic(catalog: &Catalog) -> Result<AicInputs> {
     resolve_aic(PathBuf::from("<default>/aic.toml"), raw, catalog)
 }
 
+/// Serialize [`default_aic`] as pretty TOML.
 pub fn default_aic_toml(catalog: &Catalog) -> Result<String> {
     let raw = aic_inputs_to_toml(default_aic(catalog)?, catalog)?;
     toml::to_string_pretty(&raw).map_err(|source| Error::TomlSerialize { source })

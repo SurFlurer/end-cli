@@ -4,8 +4,10 @@ use end_opt::OptimizationResult;
 use std::io::IsTerminal;
 use thiserror::Error;
 
+/// Result alias for report generation.
 pub type Result<T> = std::result::Result<T, Error>;
 
+/// Errors raised when report rendering references missing catalog/input indices.
 #[derive(Debug, Error)]
 pub enum Error {
     #[error("missing item id {0:?}")]
@@ -21,6 +23,7 @@ pub enum Error {
     MissingRecipe(usize),
 }
 
+/// Report output language.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
 #[value(rename_all = "lower")]
 pub enum Lang {
@@ -28,6 +31,7 @@ pub enum Lang {
     En,
 }
 
+/// Render a human-readable optimization report from solved results.
 pub fn build_report(
     lang: Lang,
     catalog: &Catalog,
@@ -412,7 +416,7 @@ fn format_recipe_label(
     ))
 }
 
-fn outpost_display_name<'a>(lang: Lang, outpost: &'a end_model::OutpostInput) -> &'a str {
+fn outpost_display_name(lang: Lang, outpost: &end_model::OutpostInput) -> &str {
     match lang {
         Lang::Zh => outpost.zh.as_deref().unwrap_or(outpost.key.as_str()),
         Lang::En => outpost.en.as_deref().unwrap_or(outpost.key.as_str()),

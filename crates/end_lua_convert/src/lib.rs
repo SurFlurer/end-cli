@@ -1,19 +1,21 @@
 use mlua::{HookTriggers, Lua, Table, Value, VmState};
 use serde::{Deserialize, Serialize};
+use std::collections::{BTreeMap, BTreeSet};
+use std::fs;
+use std::path::{Path, PathBuf};
 use std::sync::{
     Arc,
     atomic::{AtomicUsize, Ordering},
 };
-use std::collections::{BTreeMap, BTreeSet};
-use std::fs;
-use std::path::{Path, PathBuf};
 use thiserror::Error;
 
+/// Result alias for conversion operations.
 pub type Result<T> = std::result::Result<T, Error>;
 
 const LUA_HOOK_STRIDE: u32 = 1_000;
 const LUA_MAX_INSTRUCTIONS: usize = 2_000_000;
 
+/// Errors raised while converting v1 Lua recipes into v2 TOML files.
 #[derive(Debug, Error)]
 pub enum Error {
     #[error("failed to read {path}: {source}")]
@@ -133,6 +135,7 @@ struct PowerRecipeToml {
     time_s: u32,
 }
 
+/// Serialized output files generated from one conversion run.
 #[derive(Debug, Clone)]
 pub struct ConvertOutput {
     pub items_toml: String,
@@ -140,6 +143,7 @@ pub struct ConvertOutput {
     pub recipes_toml: String,
 }
 
+/// Convert one v1 input directory into in-memory TOML outputs for v2.
 pub fn convert_dir(input_dir: &Path) -> Result<ConvertOutput> {
     let facility_power_path = input_dir.join("facility_power.toml");
     let recipe_dir = input_dir.join("recipe");
