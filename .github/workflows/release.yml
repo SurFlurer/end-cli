@@ -1,0 +1,98 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            archive_ext: tar.gz
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            archive_ext: tar.gz
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            archive_ext: zip
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Build release binaries
+        run: cargo build --workspace --release --locked --target ${{ matrix.target }}
+
+      - name: Package artifacts (Unix)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME:-manual}"
+          out_dir="dist"
+          mkdir -p "${out_dir}"
+
+          for bin in end-cli end-lua2toml; do
+            src="target/${{ matrix.target }}/release/${bin}"
+            pkg="${bin}-${version}-${{ matrix.target }}"
+            cp "${src}" "${pkg}"
+            tar -czf "${out_dir}/${pkg}.${{ matrix.archive_ext }}" "${pkg}"
+          done
+
+      - name: Package artifacts (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $version = if ($env:GITHUB_REF_NAME) { $env:GITHUB_REF_NAME } else { "manual" }
+          $outDir = "dist"
+          New-Item -Path $outDir -ItemType Directory -Force | Out-Null
+
+          foreach ($bin in @("end-cli", "end-lua2toml")) {
+            $src = "target/${{ matrix.target }}/release/$bin.exe"
+            $pkg = "$bin-$version-${{ matrix.target }}"
+            Copy-Item $src "$pkg.exe"
+            Compress-Archive -Path "$pkg.exe" -DestinationPath "$outDir/$pkg.${{ matrix.archive_ext }}"
+          }
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.target }}
+          path: dist/*
+
+  release:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          pattern: release-*
+          merge-multiple: true
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true

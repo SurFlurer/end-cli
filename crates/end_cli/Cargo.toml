@@ -11,3 +11,7 @@ end-model = { path = "../end_model" }
 end-opt = { path = "../end_opt" }
 end-report = { path = "../end_report" }
 toml = { workspace = true }
+
+[dev-dependencies]
+assert_cmd = "2"
+tempfile = "3"
