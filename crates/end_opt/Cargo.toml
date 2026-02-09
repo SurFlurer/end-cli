@@ -6,4 +6,5 @@ edition = "2024"
 [dependencies]
 end-model = { path = "../end_model" }
 good_lp = { workspace = true }
+smallvec = { workspace = true }
 thiserror = { workspace = true }

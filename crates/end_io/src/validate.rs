@@ -2,6 +2,7 @@ use crate::schema::StackToml;
 use crate::{Error, Result};
 use end_model::{ItemId, Stack};
 use std::collections::HashSet;
+use std::num::NonZeroU32;
 use std::path::{Path, PathBuf};
 
 pub(crate) fn resolve_stack_list(
@@ -43,7 +44,10 @@ pub(crate) fn resolve_stack(
         path: path.to_path_buf(),
         key: item_key,
     })?;
-    Ok(Stack { item, count })
+    Ok(Stack {
+        item,
+        count: count.get(),
+    })
 }
 
 pub(crate) fn validate_non_empty(
@@ -110,7 +114,7 @@ pub(crate) fn parse_positive_u32(
     field: &str,
     index: Option<usize>,
     value: i64,
-) -> Result<u32> {
+) -> Result<NonZeroU32> {
     if value < 1 {
         return Err(Error::Schema {
             path: path.to_path_buf(),
@@ -119,11 +123,17 @@ pub(crate) fn parse_positive_u32(
             message: format!("must be >= 1, got {value}"),
         });
     }
-    u32::try_from(value).map_err(|_| Error::Schema {
+    let parsed = u32::try_from(value).map_err(|_| Error::Schema {
         path: path.to_path_buf(),
         field: field.to_string(),
         index,
         message: format!("out of range for u32: {value}"),
+    })?;
+    NonZeroU32::new(parsed).ok_or_else(|| Error::Schema {
+        path: path.to_path_buf(),
+        field: field.to_string(),
+        index,
+        message: format!("must be >= 1, got {value}"),
     })
 }
 

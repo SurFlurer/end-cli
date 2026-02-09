@@ -46,7 +46,7 @@ pub fn convert_dir(input_dir: &Path) -> Result<ConvertOutput> {
             item_set.insert(stack.item.clone());
             ingredients.push(StackToml {
                 item: stack.item,
-                count,
+                count: count.get(),
             });
         }
 
@@ -60,7 +60,7 @@ pub fn convert_dir(input_dir: &Path) -> Result<ConvertOutput> {
             item_set.insert(stack.item.clone());
             products.push(StackToml {
                 item: stack.item,
-                count,
+                count: count.get(),
             });
         }
 
@@ -122,7 +122,7 @@ pub fn convert_dir(input_dir: &Path) -> Result<ConvertOutput> {
 
         machines.push(MachineToml {
             key: facility_key.clone(),
-            power_w,
+            power_w: power_w.get(),
             en: facility_key,
             zh: zh.to_string(),
         });
@@ -196,8 +196,8 @@ fn thermal_to_power(recipe: &V1Recipe, path: &Path) -> Result<(StackToml, u32)> 
     Ok((
         StackToml {
             item: ingredient.item.clone(),
-            count: ingredient_count,
+            count: ingredient_count.get(),
         },
-        power_w,
+        power_w.get(),
     ))
 }

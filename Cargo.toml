@@ -17,5 +17,7 @@ clap = { version = "4", features = ["derive"] }
 good_lp = { version = "1", default-features = false, features = ["highs"] }
 mlua = { version = "0.10", features = ["lua54", "vendored", "send"] }
 serde = { version = "1", features = ["derive"] }
+smallvec = "1"
 thiserror = "2"
 toml = "0.8"
+vector-map = "1"

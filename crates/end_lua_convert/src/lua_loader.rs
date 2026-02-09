@@ -127,7 +127,8 @@ fn load_recipes_from_file(path: &Path) -> Result<Vec<V1Recipe>> {
             path: path.to_path_buf(),
             source,
         })?;
-        let time_s = parse_positive_u32_from_f64(path, format!("recipe[{idx}] time"), time_f64)?;
+        let time_s =
+            parse_positive_u32_from_f64(path, format!("recipe[{idx}] time"), time_f64)?.get();
 
         let ingredients_tbl: Table =
             recipe_tbl.get("ingredients").map_err(|source| Error::Lua {

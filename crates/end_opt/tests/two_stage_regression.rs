@@ -2,7 +2,7 @@ use end_model::{
     AicInputs, Catalog, FacilityDef, FacilityKind, ItemDef, OutpostInput, Recipe, Stack,
 };
 use end_opt::{Error, STAGE2_REVENUE_FLOOR_REL_EPS, SolveInputs, run_two_stage};
-use std::collections::HashMap;
+use std::num::NonZeroU32;
 
 fn sample_catalog(with_recipes: bool) -> (Catalog, end_model::ItemId, end_model::ItemId) {
     let mut b = Catalog::builder();
@@ -25,7 +25,7 @@ fn sample_catalog(with_recipes: bool) -> (Catalog, end_model::ItemId, end_model:
         .add_facility(FacilityDef {
             key: "Smelter".to_string(),
             kind: FacilityKind::Machine,
-            power_w: Some(10),
+            power_w: Some(NonZeroU32::new(10).expect("non-zero")),
             en: "Smelter".to_string(),
             zh: "Smelter_zh".to_string(),
         })
@@ -43,7 +43,10 @@ fn sample_catalog(with_recipes: bool) -> (Catalog, end_model::ItemId, end_model:
         b.push_recipe(Recipe {
             facility: machine,
             time_s: 60,
-            ingredients: vec![Stack { item: ore, count: 1 }],
+            ingredients: vec![Stack {
+                item: ore,
+                count: 1,
+            }],
             products: vec![Stack {
                 item: ingot,
                 count: 1,
@@ -62,13 +65,13 @@ fn sample_catalog_and_inputs(with_recipes: bool) -> (Catalog, SolveInputs) {
         p_core_w: 200,
         aic: AicInputs {
             external_power_consumption_w: 0,
-            supply_per_min: HashMap::from([(ore, 10)]),
+            supply_per_min: vec![(ore, 10)].into(),
             outposts: vec![OutpostInput {
                 key: "Camp".to_string(),
                 en: Some("Camp".to_string()),
                 zh: Some("Camp_zh".to_string()),
                 money_cap_per_hour: 600,
-                prices: HashMap::from([(ingot, 5)]),
+                prices: vec![(ingot, 5)].into(),
             }],
         },
     };

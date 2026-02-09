@@ -51,7 +51,11 @@ pub fn load_catalog(data_dir: Option<&Path>) -> Result<Catalog> {
             });
         }
         builder
-            .add_item(ItemDef { key, en: raw.en, zh: raw.zh })
+            .add_item(ItemDef {
+                key,
+                en: raw.en,
+                zh: raw.zh,
+            })
             .map_err(|source| Error::Schema {
                 path: items_path.clone(),
                 field: "items".to_string(),
@@ -114,8 +118,8 @@ pub fn load_catalog(data_dir: Option<&Path>) -> Result<Catalog> {
             path: fac_path.clone(),
             kind: "facility".to_string(),
             key: thermal_key,
-            });
-        }
+        });
+    }
 
     let thermal_bank = builder
         .add_facility(FacilityDef {
@@ -134,12 +138,13 @@ pub fn load_catalog(data_dir: Option<&Path>) -> Result<Catalog> {
 
     for (i, raw) in recipes_doc.recipes.into_iter().enumerate() {
         let facility_key = validate_key(&recipes_path, "recipes.facility", Some(i), raw.facility)?;
-        let facility = builder
-            .facility_id(facility_key.as_str())
-            .ok_or_else(|| Error::UnknownFacility {
-                path: recipes_path.clone(),
-                key: facility_key.clone(),
-            })?;
+        let facility =
+            builder
+                .facility_id(facility_key.as_str())
+                .ok_or_else(|| Error::UnknownFacility {
+                    path: recipes_path.clone(),
+                    key: facility_key.clone(),
+                })?;
         if facility == thermal_bank {
             return Err(Error::Schema {
                 path: recipes_path.clone(),
@@ -180,7 +185,7 @@ pub fn load_catalog(data_dir: Option<&Path>) -> Result<Catalog> {
 
         builder.push_recipe(Recipe {
             facility,
-            time_s,
+            time_s: time_s.get(),
             ingredients,
             products,
         });
@@ -200,8 +205,8 @@ pub fn load_catalog(data_dir: Option<&Path>) -> Result<Catalog> {
             parse_positive_u32(&recipes_path, "power_recipes.time_s", Some(i), raw.time_s)?;
         builder.push_power_recipe(PowerRecipe {
             ingredient,
-            power_w,
-            time_s,
+            power_w: power_w.get(),
+            time_s: time_s.get(),
         });
     }
 

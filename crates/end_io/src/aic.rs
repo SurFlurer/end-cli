@@ -1,8 +1,8 @@
 use crate::schema::{AicToml, OutpostToml};
 use crate::validate::{parse_non_negative_u32, parse_positive_u32, validate_key, validate_text};
 use crate::{Error, Result};
-use end_model::{AicInputs, Catalog, OutpostInput};
-use std::collections::{BTreeMap, HashMap, HashSet};
+use end_model::{AicInputs, Catalog, ItemU32Map, OutpostInput};
+use std::collections::{BTreeMap, HashSet};
 use std::path::{Path, PathBuf};
 
 /// Load `aic.toml` from disk and resolve key-based references against a catalog.
@@ -131,15 +131,17 @@ fn resolve_aic(path: PathBuf, raw: AicToml, catalog: &Catalog) -> Result<AicInpu
         raw.external_power_consumption_w,
     )?;
 
-    let mut supply_per_min = HashMap::new();
+    let mut supply_per_min = ItemU32Map::with_capacity(raw.supply_per_min.len());
     for (item_key_raw, value_raw) in raw.supply_per_min {
         let item_key = validate_key(&path, "supply_per_min.key", None, item_key_raw)?;
         let value = parse_positive_u32(&path, "supply_per_min.value", None, value_raw)?;
-        let item = catalog.item_id(item_key.as_str()).ok_or_else(|| Error::UnknownItem {
-            path: path.clone(),
-            key: item_key,
-        })?;
-        supply_per_min.insert(item, value);
+        let item = catalog
+            .item_id(item_key.as_str())
+            .ok_or_else(|| Error::UnknownItem {
+                path: path.clone(),
+                key: item_key,
+            })?;
+        supply_per_min.insert(item, value.get());
     }
 
     let mut outposts = Vec::with_capacity(raw.outposts.len());
@@ -168,14 +170,16 @@ fn resolve_aic(path: PathBuf, raw: AicToml, catalog: &Catalog) -> Result<AicInpu
             validate_text(&path, "outposts.zh", Some(i), zh)?;
         }
 
-        let mut prices = HashMap::new();
+        let mut prices = ItemU32Map::with_capacity(o.prices.len());
         for (item_key_raw, price_raw) in o.prices {
             let item_key = validate_key(&path, "outposts.prices.key", Some(i), item_key_raw)?;
             let price = parse_non_negative_u32(&path, "outposts.prices.value", Some(i), price_raw)?;
-            let item = catalog.item_id(item_key.as_str()).ok_or_else(|| Error::UnknownItem {
-                path: path.clone(),
-                key: item_key,
-            })?;
+            let item = catalog
+                .item_id(item_key.as_str())
+                .ok_or_else(|| Error::UnknownItem {
+                    path: path.clone(),
+                    key: item_key,
+                })?;
             prices.insert(item, price);
         }
 

@@ -1,9 +1,10 @@
 use std::collections::HashMap;
+use std::iter::FromIterator;
+use std::num::NonZeroU32;
+use vector_map::VecMap;
 
 /// Base/core generation capacity (watts) used by the default CLI flow.
 pub const P_CORE_W: u32 = 200;
-/// Default external power consumption (watts) used by generated example inputs.
-pub const DEFAULT_EXTERNAL_POWER_CONSUMPTION_W: u32 = 300;
 
 /// Stable identifier for an item in [`Catalog`].
 ///
@@ -19,17 +20,22 @@ pub struct ItemId(u32);
 impl ItemId {
     /// Returns the underlying numeric representation.
     ///
-    /// This is intended for diagnostics/logging and serialization of *derived* data.
-    /// It does **not** make the id safe to construct externally.
+    /// In a single [`Catalog`], item ids are minted densely in insertion order, so this
+    /// value can be used as an index (`as_u32() as usize`) for per-item arrays whose
+    /// length is `catalog.items().len()`.
+    ///
+    /// This is still an opaque id boundary: even though callers can read the number,
+    /// it does **not** make the id safe to construct externally, and ids from different
+    /// catalogs must not be mixed.
     pub fn as_u32(self) -> u32 {
         self.0
     }
 
-    pub(crate) fn from_index(index: usize) -> Self {
+    fn from_index(index: usize) -> Self {
         Self(index as u32)
     }
 
-    pub(crate) fn index(self) -> usize {
+    fn index(self) -> usize {
         self.0 as usize
     }
 }
@@ -42,16 +48,22 @@ impl ItemId {
 pub struct FacilityId(u32);
 
 impl FacilityId {
-    /// Returns the underlying numeric representation (for diagnostics/logging only).
+    /// Returns the underlying numeric representation.
+    ///
+    /// In a single [`Catalog`], facility ids are minted densely in insertion order, so
+    /// this value can be used as an index (`as_u32() as usize`) for per-facility arrays
+    /// whose length is `catalog.facilities().len()`.
+    ///
+    /// As with [`ItemId`], ids are catalog-scoped and must not be mixed across catalogs.
     pub fn as_u32(self) -> u32 {
         self.0
     }
 
-    pub(crate) fn from_index(index: usize) -> Self {
+    fn from_index(index: usize) -> Self {
         Self(index as u32)
     }
 
-    pub(crate) fn index(self) -> usize {
+    fn index(self) -> usize {
         self.0 as usize
     }
 }
@@ -76,7 +88,7 @@ pub struct ItemDef {
 pub struct FacilityDef {
     pub key: String,
     pub kind: FacilityKind,
-    pub power_w: Option<u32>,
+    pub power_w: Option<NonZeroU32>,
     pub en: String,
     pub zh: String,
 }
@@ -141,6 +153,23 @@ impl Catalog {
         self.facilities.get(id.index())
     }
 
+    /// Returns a recipe by its index in [`Catalog::recipes`].
+    ///
+    /// The optimizer and report layers use this index as a stable reference.
+    pub fn recipe(&self, index: usize) -> Option<&Recipe> {
+        self.recipes.get(index)
+    }
+
+    /// Returns a power recipe by its index in [`Catalog::power_recipes`].
+    pub fn power_recipe(&self, index: usize) -> Option<&PowerRecipe> {
+        self.power_recipes.get(index)
+    }
+
+    /// Returns the facility id of the unique thermal bank facility.
+    pub fn thermal_bank(&self) -> FacilityId {
+        self.thermal_bank
+    }
+
     /// Returns all items in id order.
     pub fn items(&self) -> &[ItemDef] {
         &self.items
@@ -156,26 +185,9 @@ impl Catalog {
         &self.recipes
     }
 
-    /// Returns a recipe by its index in [`Catalog::recipes`].
-    ///
-    /// The optimizer and report layers use this index as a stable reference.
-    pub fn recipe(&self, index: usize) -> Option<&Recipe> {
-        self.recipes.get(index)
-    }
-
     /// Returns all thermal-bank power recipes.
     pub fn power_recipes(&self) -> &[PowerRecipe] {
         &self.power_recipes
-    }
-
-    /// Returns a power recipe by its index in [`Catalog::power_recipes`].
-    pub fn power_recipe(&self, index: usize) -> Option<&PowerRecipe> {
-        self.power_recipes.get(index)
-    }
-
-    /// Returns the facility id of the unique thermal bank facility.
-    pub fn thermal_bank(&self) -> FacilityId {
-        self.thermal_bank
     }
 
     /// Resolves an item key into an [`ItemId`].
@@ -306,6 +318,80 @@ pub enum CatalogBuildError {
     MultipleThermalBanks,
 }
 
+/// Sparse map keyed by [`ItemId`] with unique keys guaranteed by representation.
+///
+/// This uses a vector-backed map (`VecMap`) and is intended for small collections
+/// such as scenario supply and outpost price tables.
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct ItemU32Map(VecMap<ItemId, u32>);
+
+impl ItemU32Map {
+    pub fn new() -> Self {
+        Self(VecMap::new())
+    }
+
+    pub fn with_capacity(capacity: usize) -> Self {
+        Self(VecMap::with_capacity(capacity))
+    }
+
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+
+    pub fn insert(&mut self, item: ItemId, value: u32) -> Option<u32> {
+        self.0.insert(item, value)
+    }
+
+    pub fn get(&self, item: ItemId) -> Option<&u32> {
+        self.0.get(&item)
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = (ItemId, u32)> + '_ {
+        self.0.iter().map(|(item, value)| (*item, *value))
+    }
+}
+
+impl Extend<(ItemId, u32)> for ItemU32Map {
+    fn extend<T: IntoIterator<Item = (ItemId, u32)>>(&mut self, iter: T) {
+        for (item, value) in iter {
+            self.insert(item, value);
+        }
+    }
+}
+
+impl FromIterator<(ItemId, u32)> for ItemU32Map {
+    fn from_iter<T: IntoIterator<Item = (ItemId, u32)>>(iter: T) -> Self {
+        let mut map = Self::new();
+        map.extend(iter);
+        map
+    }
+}
+
+impl<const N: usize> From<[(ItemId, u32); N]> for ItemU32Map {
+    fn from(value: [(ItemId, u32); N]) -> Self {
+        value.into_iter().collect()
+    }
+}
+
+impl From<Vec<(ItemId, u32)>> for ItemU32Map {
+    fn from(value: Vec<(ItemId, u32)>) -> Self {
+        value.into_iter().collect()
+    }
+}
+
+impl IntoIterator for ItemU32Map {
+    type Item = (ItemId, u32);
+    type IntoIter = vector_map::IntoIter<ItemId, u32>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
+    }
+}
+
 /// One outpost demand/cap configuration.
 #[derive(Debug, Clone)]
 pub struct OutpostInput {
@@ -313,13 +399,42 @@ pub struct OutpostInput {
     pub en: Option<String>,
     pub zh: Option<String>,
     pub money_cap_per_hour: u32,
-    pub prices: HashMap<ItemId, u32>,
+    /// Sparse per-item price table.
+    pub prices: ItemU32Map,
 }
 
 /// Full scenario inputs consumed by optimization.
 #[derive(Debug, Clone)]
 pub struct AicInputs {
     pub external_power_consumption_w: u32,
-    pub supply_per_min: HashMap<ItemId, u32>,
+    /// Sparse per-item external supply table.
+    pub supply_per_min: ItemU32Map,
     pub outposts: Vec<OutpostInput>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{ItemId, ItemU32Map};
+
+    #[test]
+    fn item_u32_map_keeps_unique_keys() {
+        let item = ItemId::from_index(7);
+        let mut map = ItemU32Map::new();
+
+        assert_eq!(map.insert(item, 10), None);
+        assert_eq!(map.insert(item, 20), Some(10));
+        assert_eq!(map.len(), 1);
+        assert_eq!(map.get(item), Some(&20));
+    }
+
+    #[test]
+    fn item_u32_map_from_vec_uses_last_value_for_duplicates() {
+        let a = ItemId::from_index(1);
+        let b = ItemId::from_index(2);
+        let map: ItemU32Map = vec![(a, 1), (b, 3), (a, 2)].into();
+
+        assert_eq!(map.len(), 2);
+        assert_eq!(map.get(a), Some(&2));
+        assert_eq!(map.get(b), Some(&3));
+    }
 }

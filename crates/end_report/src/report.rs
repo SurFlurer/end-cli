@@ -65,7 +65,7 @@ pub fn build_report(
     for ov in &stage2.outpost_values {
         let outpost = inputs
             .outposts
-            .get(ov.outpost_index)
+            .get(ov.outpost_index.as_usize())
             .ok_or(Error::MissingOutpost(ov.outpost_index))?;
         let name = outpost_display_name(lang, outpost);
         let at_cap = ov.cap_per_min > 0.0 && ov.ratio >= 0.9999;
@@ -109,7 +109,7 @@ pub fn build_report(
         for sale in &stage2.top_sales {
             let outpost = inputs
                 .outposts
-                .get(sale.outpost_index)
+                .get(sale.outpost_index.as_usize())
                 .ok_or(Error::MissingOutpost(sale.outpost_index))?;
             let item = item_display_name(lang, catalog, sale.item)?;
             out.push_str(&format!(
@@ -222,7 +222,7 @@ pub fn build_report(
         ));
         for r in stage2.recipes_used.iter().take(12) {
             let recipe = catalog
-                .recipe(r.recipe_index)
+                .recipe(r.recipe_index.as_usize())
                 .ok_or(Error::MissingRecipe(r.recipe_index))?;
             let label = format_recipe_label(
                 lang,
@@ -255,7 +255,7 @@ pub fn build_report(
             any = true;
             let outpost = inputs
                 .outposts
-                .get(ov.outpost_index)
+                .get(ov.outpost_index.as_usize())
                 .ok_or(Error::MissingOutpost(ov.outpost_index))?;
             out.push_str(&format!(
                 "- {}\n",
