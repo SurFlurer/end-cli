@@ -1,45 +1,65 @@
 use crate::schema::{FacilitiesToml, ItemsToml, RecipesToml};
 use crate::validate::{
-    load_data_file, parse_display_name, parse_key, parse_positive_u32, resolve_stack,
-    resolve_stack_list, validate_non_empty,
+    parse_display_name, parse_key, parse_positive_u32, resolve_stack, resolve_stack_list,
 };
 use crate::{Error, Result};
 use end_model::{Catalog, CatalogBuildError, FacilityDef, FacilityKind, ItemDef, PowerRecipe};
-use std::path::Path;
+use serde::de::DeserializeOwned;
+use std::path::{Path, PathBuf};
 
 const BUILTIN_ITEMS: &str = include_str!("items.toml");
 const BUILTIN_FACILITIES: &str = include_str!("facilities.toml");
 const BUILTIN_RECIPES: &str = include_str!("recipes.toml");
 
+/// Load one data file from `data_dir`, or fall back to built-in TOML contents.
+///
+/// Built-ins return a synthetic `<builtin>/...` path so error messages keep file context.
+fn load_data_file<T: DeserializeOwned>(
+    data_dir: Option<&Path>,
+    filename: &str,
+    builtin: &'static str,
+) -> Result<(PathBuf, T)> {
+    let (path, src) = match data_dir {
+        Some(dir) => {
+            let path = dir.join(filename);
+            let src = std::fs::read_to_string(&path).map_err(|source| Error::Io {
+                path: path.clone(),
+                source,
+            })?;
+            (path, src)
+        }
+        None => (
+            PathBuf::from(format!("<builtin>/{filename}")),
+            builtin.to_string(),
+        ),
+    };
+    let doc = toml::from_str(&src).map_err(|source| Error::TomlParse {
+        path: path.clone(),
+        source,
+    })?;
+    Ok((path, doc))
+}
+
 /// Load and validate catalog inputs (`items.toml`, `facilities.toml`, `recipes.toml`).
 ///
 /// When `data_dir` is `None`, built-in TOML data embedded at compile time is used.
 pub fn load_catalog(data_dir: Option<&Path>) -> Result<Catalog> {
-    let (items_path, items_src) = load_data_file(data_dir, "items.toml", BUILTIN_ITEMS)?;
-    let (fac_path, fac_src) = load_data_file(data_dir, "facilities.toml", BUILTIN_FACILITIES)?;
-    let (recipes_path, recipes_src) = load_data_file(data_dir, "recipes.toml", BUILTIN_RECIPES)?;
+    // bring in our data
+    let (items_path, items_doc): (_, ItemsToml) =
+        load_data_file(data_dir, "items.toml", BUILTIN_ITEMS)?;
+    let (fac_path, facilities_doc): (_, FacilitiesToml) =
+        load_data_file(data_dir, "facilities.toml", BUILTIN_FACILITIES)?;
+    let (recipes_path, recipes_doc): (_, RecipesToml) =
+        load_data_file(data_dir, "recipes.toml", BUILTIN_RECIPES)?;
+    let items = items_doc.items;
+    let (machines, thermal_bank) = (facilities_doc.machines, facilities_doc.thermal_bank);
+    let (recipes, power_recipes) = (recipes_doc.recipes, recipes_doc.power_recipes);
 
-    let items_doc: ItemsToml = toml::from_str(&items_src).map_err(|source| Error::TomlParse {
-        path: items_path.clone(),
-        source,
-    })?;
-    let facilities_doc: FacilitiesToml =
-        toml::from_str(&fac_src).map_err(|source| Error::TomlParse {
-            path: fac_path.clone(),
-            source,
-        })?;
-    let recipes_doc: RecipesToml =
-        toml::from_str(&recipes_src).map_err(|source| Error::TomlParse {
-            path: recipes_path.clone(),
-            source,
-        })?;
-
-    validate_non_empty(items_doc.items.len(), &items_path, "items", None)?;
-    validate_non_empty(recipes_doc.recipes.len(), &recipes_path, "recipes", None)?;
-
+    // create a builder
     let mut builder = Catalog::builder();
 
-    for (i, raw) in items_doc.items.into_iter().enumerate() {
+    // add items
+    for (i, raw) in items.into_iter().enumerate() {
         let key = parse_key(&items_path, "items.key", Some(i), raw.key)?;
         let en = parse_display_name(&items_path, "items.en", Some(i), raw.en)?;
         let zh = parse_display_name(&items_path, "items.zh", Some(i), raw.zh)?;
@@ -48,7 +68,8 @@ pub fn load_catalog(data_dir: Option<&Path>) -> Result<Catalog> {
             .map_err(|source| map_item_build_error(&items_path, i, source))?;
     }
 
-    for (i, machine) in facilities_doc.machines.into_iter().enumerate() {
+    // add machines
+    for (i, machine) in machines.into_iter().enumerate() {
         let key = parse_key(&fac_path, "machines.key", Some(i), machine.key)?;
         let power_w = parse_positive_u32(&fac_path, "machines.power_w", Some(i), machine.power_w)?;
         let en = parse_display_name(&fac_path, "machines.en", Some(i), machine.en)?;
@@ -65,36 +86,22 @@ pub fn load_catalog(data_dir: Option<&Path>) -> Result<Catalog> {
             .map_err(|source| map_machine_build_error(&fac_path, i, source))?;
     }
 
-    let thermal_key = parse_key(
-        &fac_path,
-        "thermal_bank.key",
-        None,
-        facilities_doc.thermal_bank.key,
-    )?;
-    let thermal_en = parse_display_name(
-        &fac_path,
-        "thermal_bank.en",
-        None,
-        facilities_doc.thermal_bank.en,
-    )?;
-    let thermal_zh = parse_display_name(
-        &fac_path,
-        "thermal_bank.zh",
-        None,
-        facilities_doc.thermal_bank.zh,
-    )?;
-
+    // add thermal bank
+    let bank_key = parse_key(&fac_path, "thermal_bank.key", None, thermal_bank.key)?;
+    let bank_en = parse_display_name(&fac_path, "thermal_bank.en", None, thermal_bank.en)?;
+    let bank_zh = parse_display_name(&fac_path, "thermal_bank.zh", None, thermal_bank.zh)?;
     builder
         .add_facility(FacilityDef {
-            key: thermal_key,
+            key: bank_key,
             kind: FacilityKind::ThermalBank,
             power_w: None,
-            en: thermal_en,
-            zh: thermal_zh,
+            en: bank_en,
+            zh: bank_zh,
         })
         .map_err(|source| map_thermal_facility_build_error(&fac_path, source))?;
-
-    for (i, raw) in recipes_doc.recipes.into_iter().enumerate() {
+    
+    // add recipes
+    for (i, raw) in recipes.into_iter().enumerate() {
         let facility_key = parse_key(&recipes_path, "recipes.facility", Some(i), raw.facility)?;
         let facility =
             builder
@@ -126,7 +133,8 @@ pub fn load_catalog(data_dir: Option<&Path>) -> Result<Catalog> {
             .map_err(|source| map_recipe_build_error(&recipes_path, i, source))?;
     }
 
-    for (i, raw) in recipes_doc.power_recipes.into_iter().enumerate() {
+    // add power recipes
+    for (i, raw) in power_recipes.into_iter().enumerate() {
         let ingredient = resolve_stack(
             &recipes_path,
             "power_recipes.ingredient",
@@ -147,6 +155,7 @@ pub fn load_catalog(data_dir: Option<&Path>) -> Result<Catalog> {
             .map_err(|source| map_power_recipe_build_error(&recipes_path, i, source))?;
     }
 
+    // build the catalog
     builder.build().map_err(|source| Error::Schema {
         path: Path::new("<memory>/catalog").to_path_buf(),
         field: "catalog".to_string(),
@@ -155,6 +164,7 @@ pub fn load_catalog(data_dir: Option<&Path>) -> Result<Catalog> {
     })
 }
 
+/// Re-map item-related builder errors to precise user-facing schema fields.
 fn map_item_build_error(path: &Path, index: usize, source: CatalogBuildError) -> Error {
     match source {
         CatalogBuildError::DuplicateItemKey(key) => Error::DuplicateKey {
@@ -171,6 +181,7 @@ fn map_item_build_error(path: &Path, index: usize, source: CatalogBuildError) ->
     }
 }
 
+/// Re-map machine-related builder errors to precise user-facing schema fields.
 fn map_machine_build_error(path: &Path, index: usize, source: CatalogBuildError) -> Error {
     match source {
         CatalogBuildError::DuplicateFacilityKey(key) => Error::DuplicateKey {
@@ -199,6 +210,7 @@ fn map_machine_build_error(path: &Path, index: usize, source: CatalogBuildError)
     }
 }
 
+/// Re-map thermal-bank builder errors to the top-level `thermal_bank` section.
 fn map_thermal_facility_build_error(path: &Path, source: CatalogBuildError) -> Error {
     match source {
         CatalogBuildError::DuplicateFacilityKey(key) => Error::DuplicateKey {
@@ -222,6 +234,7 @@ fn map_thermal_facility_build_error(path: &Path, source: CatalogBuildError) -> E
     }
 }
 
+/// Collapse recipe build errors into the most specific TOML field path possible.
 fn map_recipe_build_error(path: &Path, index: usize, source: CatalogBuildError) -> Error {
     let field = match source {
         CatalogBuildError::UnknownRecipeFacilityId(_)
@@ -260,6 +273,7 @@ fn map_recipe_build_error(path: &Path, index: usize, source: CatalogBuildError) 
     }
 }
 
+/// Collapse power-recipe build errors into the most specific TOML field path possible.
 fn map_power_recipe_build_error(path: &Path, index: usize, source: CatalogBuildError) -> Error {
     let field = match source {
         CatalogBuildError::UnknownPowerRecipeIngredientItemId(_)

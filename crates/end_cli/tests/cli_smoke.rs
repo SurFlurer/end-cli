@@ -28,7 +28,7 @@ fn init_creates_aic_toml() {
 }
 
 #[test]
-fn solve_without_aic_uses_defaults() {
+fn solve_without_aic_fails_with_init_hint() {
     let tmp = tempdir().expect("create temp dir");
 
     let output = Command::new(assert_cmd::cargo::cargo_bin!("end-cli"))
@@ -37,25 +37,11 @@ fn solve_without_aic_uses_defaults() {
         .output()
         .expect("run end-cli solve");
 
-    assert!(
-        output.status.success(),
-        "solve failed: {}",
-        String::from_utf8_lossy(&output.stderr)
-    );
+    assert!(!output.status.success(), "solve unexpectedly succeeded");
 
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(
-        stderr.contains("not found; using defaults"),
-        "stderr did not contain fallback warning: {stderr}"
-    );
-    assert!(
-        stderr.contains("end-cli init --aic aic.toml"),
-        "stderr did not include init hint with aic file name: {stderr}"
-    );
-
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(
-        stdout.contains("Conclusion"),
-        "stdout did not include report heading: {stdout}"
+        stderr.contains("not found; run `end-cli init --aic aic.toml` to create it"),
+        "stderr did not contain missing-file hint: {stderr}"
     );
 }

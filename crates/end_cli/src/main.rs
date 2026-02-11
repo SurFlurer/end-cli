@@ -1,6 +1,6 @@
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
-use end_io::{default_aic, default_aic_toml, load_aic, load_catalog};
+use end_io::{default_aic_toml, load_aic, load_catalog};
 use end_model::P_CORE_W;
 use end_opt::{SolveInputs, run_two_stage};
 use end_report::{Lang, build_report};
@@ -92,17 +92,17 @@ fn init_aic(force: bool, aic: PathBuf, data_dir: Option<PathBuf>) -> Result<()> 
 fn solve(lang: Lang, data_dir: Option<PathBuf>, aic_path: PathBuf) -> Result<()> {
     let catalog = load_catalog(data_dir.as_deref()).context("loading catalog")?;
 
-    let aic = if aic_path.exists() {
-        load_aic(&aic_path, &catalog).with_context(|| format!("loading {}", aic_path.display()))?
-    } else {
+    if !aic_path.exists() {
         let init_hint = format!("end-cli init --aic {}", aic_path.display());
-        eprintln!(
-            "warning: {} not found; using defaults (run `{}` to create it)",
+        anyhow::bail!(
+            "{} not found; run `{}` to create it",
             aic_path.display(),
             init_hint
         );
-        default_aic(&catalog).context("building default solve inputs")?
-    };
+    }
+
+    let aic =
+        load_aic(&aic_path, &catalog).with_context(|| format!("loading {}", aic_path.display()))?;
 
     let inputs = SolveInputs {
         p_core_w: P_CORE_W,

@@ -2,8 +2,11 @@ use crate::schema::StackToml;
 use crate::{Error, Result};
 use end_model::{DisplayName, ItemId, Key, Stack};
 use std::num::NonZeroU32;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
+/// Resolve a list of stack entries with shared path/field/index context.
+///
+/// This keeps diagnostics consistent across all list items and callers.
 pub(crate) fn resolve_stack_list(
     path: &Path,
     field: &str,
@@ -20,6 +23,7 @@ pub(crate) fn resolve_stack_list(
     Ok(resolved)
 }
 
+/// Parse one stack entry and resolve its `item` key into an internal item id.
 pub(crate) fn resolve_stack(
     path: &Path,
     field: &str,
@@ -39,23 +43,7 @@ pub(crate) fn resolve_stack(
     })
 }
 
-pub(crate) fn validate_non_empty(
-    len: usize,
-    path: &Path,
-    field: &str,
-    index: Option<usize>,
-) -> Result<()> {
-    if len == 0 {
-        return Err(Error::Schema {
-            path: path.to_path_buf(),
-            field: field.to_string(),
-            index,
-            message: "must not be empty".to_string(),
-        });
-    }
-    Ok(())
-}
-
+/// Validate and normalize a localized display name.
 pub(crate) fn parse_display_name(
     path: &Path,
     field: &str,
@@ -70,6 +58,7 @@ pub(crate) fn parse_display_name(
     })
 }
 
+/// Parse an optional display name only when provided.
 pub(crate) fn parse_optional_display_name(
     path: &Path,
     field: &str,
@@ -81,6 +70,7 @@ pub(crate) fn parse_optional_display_name(
         .transpose()
 }
 
+/// Validate a user key string and convert it into the strongly typed key wrapper.
 pub(crate) fn parse_key(
     path: &Path,
     field: &str,
@@ -95,6 +85,7 @@ pub(crate) fn parse_key(
     })
 }
 
+/// Parse a positive integer while preserving detailed schema diagnostics.
 pub(crate) fn parse_positive_u32(
     path: &Path,
     field: &str,
@@ -123,6 +114,7 @@ pub(crate) fn parse_positive_u32(
     })
 }
 
+/// Parse a non-negative integer while preserving detailed schema diagnostics.
 pub(crate) fn parse_non_negative_u32(
     path: &Path,
     field: &str,
@@ -143,25 +135,4 @@ pub(crate) fn parse_non_negative_u32(
         index,
         message: format!("out of range for u32: {value}"),
     })
-}
-
-pub(crate) fn load_data_file(
-    data_dir: Option<&Path>,
-    filename: &str,
-    builtin: &'static str,
-) -> Result<(PathBuf, String)> {
-    match data_dir {
-        Some(dir) => {
-            let path = dir.join(filename);
-            let src = std::fs::read_to_string(&path).map_err(|source| Error::Io {
-                path: path.clone(),
-                source,
-            })?;
-            Ok((path, src))
-        }
-        None => Ok((
-            PathBuf::from(format!("<builtin>/{filename}")),
-            builtin.to_string(),
-        )),
-    }
 }

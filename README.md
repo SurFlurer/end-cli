@@ -60,13 +60,13 @@ end-cli solve
 end-cli solve --lang en
 ```
 
-如果你看到下面这条 warning:
+如果你看到下面这条报错:
 
 ```text
-warning: aic.toml not found; using defaults (run `end-cli init --aic aic.toml` to create it)
+Error: aic.toml not found; run `end-cli init --aic aic.toml` to create it
 ```
 
-它表示当前目录没有对应配置文件，程序正在使用内置默认配置继续求解。
+它表示当前目录没有对应配置文件，`solve` 会直接拒绝执行。先运行 `end-cli init` 生成模板并按需修改后再求解。
 
 ## 一次真实运行示例
 

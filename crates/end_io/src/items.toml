@@ -91,17 +91,17 @@ zh = "荞愈胶囊"
 [[items]]
 key = "Buckflower"
 en = "Buckflower"
-zh = "荞愈花"
+zh = "荞花"
 
 [[items]]
 key = "Buckflower Powder"
 en = "Buckflower Powder"
-zh = "荞愈花粉"
+zh = "荞花粉"
 
 [[items]]
 key = "Buckflower Seed"
 en = "Buckflower Seed"
-zh = "荞愈花种子"
+zh = "荞花种子"
 
 [[items]]
 key = "Bumper-Rich"
@@ -336,7 +336,7 @@ zh = "液态希然石"
 [[items]]
 key = "Originium Ore"
 en = "Originium Ore"
-zh = "源石矿"
+zh = "源矿"
 
 [[items]]
 key = "Originium Powder"
@@ -386,17 +386,17 @@ zh = "中容谷地电池"
 [[items]]
 key = "Sandleaf"
 en = "Sandleaf"
-zh = "沙叶"
+zh = "砂叶"
 
 [[items]]
 key = "Sandleaf Powder"
 en = "Sandleaf Powder"
-zh = "沙叶粉"
+zh = "砂叶粉"
 
 [[items]]
 key = "Sandleaf Seed"
 en = "Sandleaf Seed"
-zh = "沙叶种子"
+zh = "砂叶种子"
 
 [[items]]
 key = "Stabilized Carbon"

@@ -4,9 +4,7 @@ members = [
   "crates/end_io",
   "crates/end_opt",
   "crates/end_report",
-  "crates/end_lua_convert",
   "crates/end_cli",
-  "crates/end_lua2toml",
 ]
 default-members = ["crates/end_cli"]
 resolver = "2"

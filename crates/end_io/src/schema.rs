@@ -1,12 +1,14 @@
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
+/// Parsed shape of `items.toml`.
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct ItemsToml {
     pub(crate) items: Vec<ItemToml>,
 }
 
+/// One item entry from `items.toml`.
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct ItemToml {
@@ -15,6 +17,7 @@ pub(crate) struct ItemToml {
     pub(crate) zh: String,
 }
 
+/// Parsed shape of `facilities.toml`.
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct FacilitiesToml {
@@ -23,6 +26,7 @@ pub(crate) struct FacilitiesToml {
     pub(crate) thermal_bank: ThermalBankToml,
 }
 
+/// One machine facility entry from `facilities.toml`.
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct MachineToml {
@@ -32,6 +36,7 @@ pub(crate) struct MachineToml {
     pub(crate) zh: String,
 }
 
+/// Thermal bank facility entry from `facilities.toml`.
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct ThermalBankToml {
@@ -40,6 +45,7 @@ pub(crate) struct ThermalBankToml {
     pub(crate) zh: String,
 }
 
+/// Parsed shape of `recipes.toml`.
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct RecipesToml {
@@ -48,6 +54,7 @@ pub(crate) struct RecipesToml {
     pub(crate) power_recipes: Vec<PowerRecipeToml>,
 }
 
+/// Raw `{ item, count }` pair shared by recipe and AIC inputs.
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct StackToml {
@@ -55,6 +62,7 @@ pub(crate) struct StackToml {
     pub(crate) count: i64,
 }
 
+/// One machine recipe entry from `recipes.toml`.
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct RecipeToml {
@@ -64,6 +72,7 @@ pub(crate) struct RecipeToml {
     pub(crate) products: Vec<StackToml>,
 }
 
+/// One power recipe entry from `recipes.toml`.
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct PowerRecipeToml {
@@ -72,6 +81,7 @@ pub(crate) struct PowerRecipeToml {
     pub(crate) time_s: i64,
 }
 
+/// Parsed shape of `aic.toml`.
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct AicToml {
@@ -82,6 +92,7 @@ pub(crate) struct AicToml {
     pub(crate) outposts: Vec<OutpostToml>,
 }
 
+/// One outpost entry from `aic.toml`.
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct OutpostToml {
