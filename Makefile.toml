@@ -1,0 +1,12 @@
+[tasks.clippy]
+command = "cargo"
+# we are lenient with tests. by default, --lib --bins are included, so we only need to add examples and benches.
+args = ["clippy", "--workspace", "--examples", "--benches"]
+
+[tasks.test]
+command = "cargo"
+args = ["nextest", "run", "--workspace", "--show-progress", "none"]
+
+[tasks.done]
+workspace = false
+dependencies = ["clippy", "test"]

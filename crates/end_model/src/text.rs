@@ -5,6 +5,7 @@ use std::ops::Deref;
 use thiserror::Error;
 
 /// Stable key used by model entities.
+/// Keys must be non-blank and must not have leading/trailing spaces.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Key(String);
 

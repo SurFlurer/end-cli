@@ -1,3 +1,9 @@
-修改代码后跑，没改代码不用跑：
-- `cargo nextest run --workspace`
-- `cargo clippy --workspace --all-targets`
+## Lint 和测试
+
+修改代码后跑，没改代码不用跑：`cargo make done`
+
+## 代码风格
+
+- 充分开发类型系统潜力，parse, don't validate。调用处、业务代码禁止 `allow`/`panic`/`expect`/`unsafe`，类型内部可 `allow`/`panic`/`expect`/`unsafe`。
+- 业务代码的错误处理尽量移动到 IO、model 层等。禁止防御编程，使用类型系统代替，关键路径消除所有死代码或 no-op 代码。
+- 模块里的类型的关系类似C++友元。如果类型依赖私有成员、方法维护不变量，必须最小化能访问到这些成员、方法的类型集合。公开所有成员、方法的平凡的类型允许和别的类型放一起。

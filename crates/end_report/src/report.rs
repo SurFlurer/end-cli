@@ -189,7 +189,7 @@ pub fn build_report(
         }
     ));
 
-    for f in stage2.machines_by_facility.iter().take(12) {
+    for f in stage2.machines_by_facility.iter() {
         let facility = facility_display_name(lang, catalog, f.facility)?;
         out.push_str(&format!("- {}: {}\n", facility, f.machines));
     }
@@ -218,7 +218,7 @@ pub fn build_report(
                 "Top recipes (by machine count):"
             ))
         ));
-        for r in stage2.recipes_used.iter().take(12) {
+        for r in stage2.recipes_used.iter() {
             let recipe = catalog
                 .recipe(r.recipe_index)
                 .ok_or(Error::MissingRecipe(r.recipe_index))?;
@@ -258,11 +258,11 @@ pub fn build_report(
                 "- {}\n",
                 match lang {
                     Lang::Zh => format!(
-                        "{} 交易额已触顶：继续增产也卖不出去，优先改卖单价更高的商品或换/加据点。",
+                        "{}交易额触顶，做的很好！",
                         outpost_display_name(lang, outpost)
                     ),
                     Lang::En => format!(
-                        "{} is capped: producing more won't sell; prioritize higher-price products or switch/add outposts.",
+                        "{} is capped, great job!",
                         outpost_display_name(lang, outpost)
                     ),
                 }

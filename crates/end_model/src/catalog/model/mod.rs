@@ -1,11 +1,15 @@
+mod builder;
+mod types;
+
+pub use builder::CatalogBuilder;
+pub use types::{
+    FacilityDef, FacilityId, ItemDef, ItemId, PowerRecipe, PowerRecipeId, Recipe, RecipeId, Stack,
+    ThermalBankDef,
+};
+
 use std::collections::HashMap;
 
 use crate::Key;
-
-use super::{
-    CatalogBuilder, FacilityDef, FacilityId, ItemDef, ItemId, PowerRecipe, PowerRecipeId, Recipe,
-    RecipeId, ThermalBankDef,
-};
 
 /// Canonical in-memory model resolved from TOML inputs.
 ///
@@ -18,13 +22,13 @@ use super::{
 /// Construct a catalog via [`Catalog::builder`] / [`CatalogBuilder::build`].
 #[derive(Debug, Clone)]
 pub struct Catalog {
-    pub(super) items: Vec<ItemDef>,
-    pub(super) facilities: Vec<FacilityDef>,
-    pub(super) recipes: Vec<Recipe>,
-    pub(super) power_recipes: Vec<PowerRecipe>,
-    pub(super) item_index: HashMap<Key, ItemId>,
-    pub(super) facility_index: HashMap<Key, FacilityId>,
-    pub(super) thermal_bank: ThermalBankDef,
+    items: Vec<ItemDef>,
+    facilities: Vec<FacilityDef>,
+    recipes: Vec<Recipe>,
+    power_recipes: Vec<PowerRecipe>,
+    item_index: HashMap<Key, ItemId>,
+    facility_index: HashMap<Key, FacilityId>,
+    thermal_bank: ThermalBankDef,
 }
 
 impl Catalog {
@@ -84,18 +88,14 @@ impl Catalog {
     }
 
     /// Returns all production recipes paired with ids and already-resolved facility metadata.
-    ///
-    /// Facility lookup is total here because `CatalogBuilder::push_recipe` guarantees each
-    /// `Recipe::facility` points to an existing facility in this catalog.
     pub fn recipes_with_id_and_facility(
         &self,
     ) -> impl Iterator<Item = (RecipeId, &Recipe, &FacilityDef)> + '_ {
         self.recipes.iter().enumerate().map(|(index, recipe)| {
-            (
-                RecipeId::from_index(index),
-                recipe,
-                &self.facilities[recipe.facility.index()],
-            )
+            // SAFETY: `CatalogBuilder::push_recipe` guarantees each `Recipe::facility` points to an
+            // existing facility in this catalog, so the index is always in-bounds.
+            let facility = unsafe { self.facilities.get_unchecked(recipe.facility.index()) };
+            (RecipeId::from_index(index), recipe, facility)
         })
     }
 

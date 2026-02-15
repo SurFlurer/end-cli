@@ -2,9 +2,10 @@ use std::collections::{HashMap, HashSet};
 
 use crate::Key;
 
+use super::super::CatalogBuildError;
 use super::{
-    Catalog, CatalogBuildError, FacilityDef, FacilityId, ItemDef, ItemId, PowerRecipe,
-    PowerRecipeId, Recipe, RecipeId, Stack, ThermalBankDef,
+    Catalog, FacilityDef, FacilityId, ItemDef, ItemId, PowerRecipe, PowerRecipeId, Recipe,
+    RecipeId, Stack, ThermalBankDef,
 };
 
 /// Builder for [`Catalog`].

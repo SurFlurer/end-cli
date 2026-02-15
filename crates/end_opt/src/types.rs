@@ -78,7 +78,7 @@ pub struct ExternalSupplySlack {
 /// Result of one optimization stage.
 #[derive(Debug, Clone)]
 pub struct StageSolution {
-    /// Core/base generation capacity in watts.
+    /// Core generation capacity in watts.
     pub p_core_w: u32,
     /// External power consumption in watts.
     pub p_ext_w: u32,
@@ -96,7 +96,7 @@ pub struct StageSolution {
     pub power_margin_w: i64,
     /// Per-outpost value realization.
     pub outpost_values: Vec<OutpostValue>,
-    /// Top 10 sales by value contribution.
+    /// Top sales by value contribution.
     pub top_sales: Vec<SaleValue>,
     /// Machine counts by facility.
     pub machines_by_facility: Vec<FacilityMachineCount>,

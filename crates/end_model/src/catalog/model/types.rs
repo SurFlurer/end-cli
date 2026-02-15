@@ -36,7 +36,7 @@ impl ItemId {
         self.0 as usize
     }
 
-    pub(crate) fn from_index(index: usize) -> Self {
+    pub(super) fn from_index(index: usize) -> Self {
         Self(index as u32)
     }
 }
@@ -63,11 +63,11 @@ impl FacilityId {
         self.0
     }
 
-    pub(crate) fn from_index(index: usize) -> Self {
+    pub(super) fn from_index(index: usize) -> Self {
         Self(index as u32)
     }
 
-    pub(crate) fn index(self) -> usize {
+    pub fn index(self) -> usize {
         self.0 as usize
     }
 }
@@ -85,11 +85,11 @@ impl RecipeId {
         self.0
     }
 
-    pub(crate) fn from_index(index: usize) -> Self {
+    pub(super) fn from_index(index: usize) -> Self {
         Self(index as u32)
     }
 
-    pub(crate) fn index(self) -> usize {
+    pub fn index(self) -> usize {
         self.0 as usize
     }
 }
@@ -107,11 +107,11 @@ impl PowerRecipeId {
         self.0
     }
 
-    pub(crate) fn from_index(index: usize) -> Self {
+    pub(super) fn from_index(index: usize) -> Self {
         Self(index as u32)
     }
 
-    pub(crate) fn index(self) -> usize {
+    pub fn index(self) -> usize {
         self.0 as usize
     }
 }

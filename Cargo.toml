@@ -17,7 +17,7 @@ mlua = { version = "0.10", features = ["lua54", "vendored", "send"] }
 serde = { version = "1", features = ["derive"] }
 smallvec = "1"
 thiserror = "2"
-toml = "0.8"
+toml = "1"
 vector-map = "1"
 
 [workspace.lints.clippy]
@@ -27,4 +27,7 @@ vector-map = "1"
 # dbg_macro = "warn"
 # cargo = "warn"
 # pedantic = "warn"
-# indexing_slicing = "warn"
+indexing_slicing = "warn"
+
+# [patch.crates-io]
+# highs-sys = { path = "../highs-sys" }

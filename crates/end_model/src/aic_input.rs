@@ -20,7 +20,7 @@ impl OutpostId {
         Self(index as u32)
     }
 
-    fn index(self) -> usize {
+    pub fn index(self) -> usize {
         self.0 as usize
     }
 }
@@ -101,7 +101,7 @@ impl IntoIterator for ItemU32Map {
 
 /// Sparse map keyed by [`ItemId`] with non-zero values and unique keys guaranteed by representation.
 ///
-/// This uses a vector-backed map (`VecMap`) and is intended for small collections
+/// This currently uses a vector-backed map (`VecMap`) and is intended for small collections
 /// such as scenario external supply tables.
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct ItemNonZeroU32Map(VecMap<ItemId, NonZeroU32>);
@@ -173,7 +173,7 @@ impl IntoIterator for ItemNonZeroU32Map {
     }
 }
 
-/// One outpost demand/cap configuration.
+/// One outpost configuration, includes price table and money cap.
 #[derive(Debug, Clone)]
 pub struct OutpostInput {
     pub key: Key,

@@ -49,6 +49,9 @@ struct PowerVars {
 /// Run the two-stage optimizer:
 /// 1) maximize revenue, 2) minimize machines under a near-optimal revenue floor.
 pub fn run_two_stage(catalog: &Catalog, inputs: &SolveInputs) -> Result<OptimizationResult> {
+    // TODO this should be parse instead of validate, but it is not possible to encode checked info into types
+    // without branded types. so we leave this as future work.
+    // Once this done we can eliminate panic in item_balance indexing, or even the check at all.
     validate_aic_item_ids(inputs, catalog.items().len())?;
 
     let stage1 = solve_stage(catalog, inputs, StageObjective::MaxRevenue)?;
@@ -71,17 +74,6 @@ fn solve_stage(
     inputs: &SolveInputs,
     objective: StageObjective,
 ) -> Result<StageSolution> {
-    let item_count = catalog.items().len();
-
-    // preprocess supply into a vector for easy indexing
-    let supplies = inputs.aic.supply_per_min().iter().fold(
-        vec![0_u32; item_count],
-        |mut supplies, (item, supply)| {
-            supplies[item.index()] = supply.get();
-            supplies
-        },
-    );
-
     let mut vars = variables!();
 
     let recipe_vars = catalog
@@ -175,27 +167,41 @@ fn solve_stage(
             .sum::<Expression>();
 
     // Build per-item balances by dispatching each contribution to its item bucket.
-    let mut item_balance = supplies
+    // Seed from external supplies first.
+    let item_count = catalog.items().len();
+    let item_balance = inputs.aic.supply_per_min().iter().fold(
+        vec![Expression::from(0.0); item_count],
+        |mut item_balance, (item, supply)| {
+            item_balance[item.index()] = Expression::from(supply.get() as f64);
+            item_balance
+        },
+    );
+
+    let item_balance = recipe_vars
         .iter()
-        .map(|supply_per_min| Expression::from(*supply_per_min as f64))
-        .collect::<Vec<_>>();
+        .fold(item_balance, |mut item_balance, rv| {
+            rv.net.iter().for_each(|(item, delta)| {
+                item_balance[item.index()] += *delta * rv.x;
+            });
+            item_balance
+        });
 
-    for rv in &recipe_vars {
-        for (item, delta) in &rv.net {
-            item_balance[item.index()] += *delta * rv.x;
-        }
-    }
+    let item_balance = outpost_vars
+        .iter()
+        .fold(item_balance, |mut item_balance, ov| {
+            ov.sell_lines.iter().for_each(|(item, _, qty)| {
+                item_balance[item.index()] -= *qty;
+            });
+            item_balance
+        });
 
-    for ov in &outpost_vars {
-        for (item, _, qty) in &ov.sell_lines {
-            item_balance[item.index()] -= *qty;
-        }
-    }
-
-    for pv in &power_vars {
-        let consume_per_min = 60.0 / pv.duration_s as f64;
-        item_balance[pv.ingredient.index()] -= consume_per_min * pv.z;
-    }
+    let item_balance = power_vars
+        .iter()
+        .fold(item_balance, |mut item_balance, pv| {
+            let consume_per_min = 60.0 / pv.duration_s as f64;
+            item_balance[pv.ingredient.index()] -= consume_per_min * pv.z;
+            item_balance
+        });
 
     let mut model = match objective {
         StageObjective::MaxRevenue => vars.maximise(revenue.clone()).using(default_solver),
@@ -244,7 +250,7 @@ fn solve_stage(
     let power_use_w = near_i64(|| "power_use_w".to_string(), solution.eval(&power_use))?;
     let power_margin_w = power_gen_w - power_use_w;
 
-    let mut top_sales = Vec::with_capacity(
+    let mut sales = Vec::with_capacity(
         outpost_vars
             .iter()
             .map(|ov| ov.sell_lines.len())
@@ -253,7 +259,7 @@ fn solve_stage(
     let outpost_values = outpost_vars
         .iter()
         .map(|ov| {
-            let sales = ov
+            let outpost_sales = ov
                 .sell_lines
                 .iter()
                 .filter_map(|(item, price, qty)| {
@@ -262,9 +268,6 @@ fn solve_stage(
                         return None;
                     }
                     let value = *price as f64 * qty_value;
-                    if value <= 1e-9 {
-                        return None;
-                    }
                     Some(SaleValue {
                         outpost_index: ov.outpost_index,
                         item: *item,
@@ -272,8 +275,11 @@ fn solve_stage(
                     })
                 })
                 .collect::<Vec<_>>();
-            let value_per_min = sales.iter().map(|sale| sale.value_per_min).sum::<f64>();
-            top_sales.extend(sales);
+            let value_per_min = outpost_sales
+                .iter()
+                .map(|sale| sale.value_per_min)
+                .sum::<f64>();
+            sales.extend(outpost_sales);
 
             let cap_per_min = ov.money_cap_per_hour as f64 / 60.0;
             let ratio = value_per_min / cap_per_min;
@@ -287,8 +293,7 @@ fn solve_stage(
         })
         .collect::<Vec<_>>();
 
-    top_sales.sort_by(|a, b| b.value_per_min.total_cmp(&a.value_per_min));
-    top_sales.truncate(10);
+    sales.sort_by(|a, b| b.value_per_min.total_cmp(&a.value_per_min));
 
     let (machines_by_facility_map, mut recipes_used) = recipe_vars.iter().try_fold(
         (
@@ -320,7 +325,6 @@ fn solve_stage(
     machines_by_facility.sort_by(|a, b| b.machines.cmp(&a.machines));
 
     recipes_used.sort_by(|a, b| b.machines.cmp(&a.machines));
-    recipes_used.truncate(20);
 
     let mut thermal_banks_used = power_vars
         .iter()
@@ -348,14 +352,14 @@ fn solve_stage(
         .supply_per_min()
         .iter()
         .map(|(item, supply)| {
-                let expr = &item_balance[item.index()];
-                ExternalSupplySlack {
-                    item,
-                    slack_per_min: solution.eval(expr),
+            let expr = &item_balance[item.index()];
+            ExternalSupplySlack {
+                item,
+                slack_per_min: solution.eval(expr),
                 supply_per_min: supply.get() as f64,
-                }
-            })
-            .collect::<Vec<_>>();
+            }
+        })
+        .collect::<Vec<_>>();
     external_supply_slack.sort_by(|a, b| a.slack_per_min.total_cmp(&b.slack_per_min));
 
     Ok(StageSolution {
@@ -368,7 +372,7 @@ fn solve_stage(
         power_use_w,
         power_margin_w,
         outpost_values,
-        top_sales,
+        top_sales: sales,
         machines_by_facility,
         recipes_used,
         thermal_banks_used,
@@ -377,34 +381,42 @@ fn solve_stage(
 }
 
 fn validate_aic_item_ids(inputs: &SolveInputs, item_count: usize) -> Result<()> {
-    for (item, _) in inputs.aic.supply_per_min().iter() {
-        if item.index() >= item_count {
-            return Err(Error::InvalidInput {
-                message: format!(
-                    "supply_per_min contains item id {} out of bounds for catalog with {} items",
-                    item.as_u32(),
-                    item_count
-                ),
-            });
-        }
-    }
+    let invalid_item: Option<(Option<OutpostId>, ItemId)> = inputs
+        .aic
+        .supply_per_min()
+        .iter()
+        .map(|(item, _)| (None, item))
+        .chain(
+            inputs
+                .aic
+                .outposts_with_id()
+                .flat_map(|(outpost_index, outpost)| {
+                    outpost
+                        .prices
+                        .iter()
+                        .map(move |(item, _)| (Some(outpost_index), item))
+                }),
+        )
+        .find(|(_, item)| item.index() >= item_count);
 
-    for (outpost_index, outpost) in inputs.aic.outposts_with_id() {
-        for (item, _) in outpost.prices.iter() {
-            if item.index() >= item_count {
-                return Err(Error::InvalidInput {
-                    message: format!(
-                        "outposts[{}].prices contains item id {} out of bounds for catalog with {} items",
-                        outpost_index.as_u32(),
-                        item.as_u32(),
-                        item_count
-                    ),
-                });
-            }
-        }
+    match invalid_item {
+        Some((None, item)) => Err(Error::InvalidInput {
+            message: format!(
+                "supply_per_min contains item id {} out of bounds for catalog with {} items",
+                item.as_u32(),
+                item_count
+            ),
+        }),
+        Some((Some(outpost_index), item)) => Err(Error::InvalidInput {
+            message: format!(
+                "outposts[{}].prices contains item id {} out of bounds for catalog with {} items",
+                outpost_index.as_u32(),
+                item.as_u32(),
+                item_count
+            ),
+        }),
+        None => Ok(()),
     }
-
-    Ok(())
 }
 
 fn near_u32<F>(var_name: F, value: f64) -> Result<u32>

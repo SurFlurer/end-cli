@@ -19,6 +19,7 @@ external_power_consumption_w = 300
 key = "Refugee Camp"
 # Max revenue accepted by this outpost per hour.
 money_cap_per_hour = 17316
+# Display name (Optional).
 en = "Refugee Camp"
 zh = "难民暂居处"
 
