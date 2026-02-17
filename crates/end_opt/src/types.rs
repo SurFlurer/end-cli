@@ -117,6 +117,19 @@ impl DemandNodeId {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct LogisticsNodeId(u32);
+
+impl LogisticsNodeId {
+    pub(crate) fn from_index(index: usize) -> Self {
+        Self(index as u32)
+    }
+
+    pub fn as_u32(self) -> u32 {
+        self.0
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct MachineOrdinal(u32);
 
 impl MachineOrdinal {
@@ -184,6 +197,32 @@ pub struct ItemSubproblem {
     pub demands: Vec<DemandNode>,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub enum LogisticsNodeSite {
+    ExternalSupply {
+        item: ItemId,
+    },
+    RecipeMachine {
+        recipe_index: RecipeId,
+        machine: MachineOrdinal,
+    },
+    OutpostSale {
+        outpost_index: OutpostId,
+        item: ItemId,
+    },
+    ThermalBankFuel {
+        power_recipe_index: PowerRecipeId,
+        bank: MachineOrdinal,
+        item: ItemId,
+    },
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct LogisticsNode {
+    pub id: LogisticsNodeId,
+    pub site: LogisticsNodeSite,
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct ItemFlowEdge {
     pub item: ItemId,
@@ -198,9 +237,18 @@ pub struct ItemFlowPlan {
     pub edges: Vec<ItemFlowEdge>,
 }
 
+#[derive(Debug, Clone, PartialEq)]
+pub struct LogisticsEdge {
+    pub item: ItemId,
+    pub from: LogisticsNodeId,
+    pub to: LogisticsNodeId,
+    pub flow_per_min: PosF64,
+}
+
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct LogisticsPlan {
-    pub per_item: Vec<ItemFlowPlan>,
+    pub nodes: Vec<LogisticsNode>,
+    pub edges: Vec<LogisticsEdge>,
 }
 
 /// Remaining slack for each externally supplied item.

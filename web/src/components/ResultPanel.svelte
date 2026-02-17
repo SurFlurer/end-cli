@@ -1,25 +1,203 @@
 <script lang="ts">
+  import { onDestroy } from "svelte";
   import type { LangTag, SolvePayload } from "../lib/types";
 
   interface Props {
     lang: LangTag;
     isBootstrapping: boolean;
+    isSolving: boolean;
+    solveElapsedMs: number | null;
     result: SolvePayload | null;
-    statusMessage: string;
     errorMessage: string;
   }
 
-  let { lang, isBootstrapping, result, statusMessage, errorMessage }: Props =
-    $props();
+  type CopyState = "idle" | "copied" | "failed";
+
+  let {
+    lang,
+    isBootstrapping,
+    isSolving,
+    solveElapsedMs,
+    result,
+    errorMessage,
+  }: Props = $props();
+
+  let liveElapsedMs = $state<number | null>(null);
+  let solveStartedAt = $state<number | null>(null);
+  let solveTimerId: number | null = null;
+
+  let copyState = $state<CopyState>("idle");
+  let copyStateTimerId: number | null = null;
+
+  const headerElapsedMs = $derived<number | null>(
+    isSolving ? liveElapsedMs : solveElapsedMs,
+  );
+
+  const showError = $derived(errorMessage.trim().length > 0);
+
+  const solveOutputText = $derived.by(() => {
+    if (errorMessage.trim().length > 0) {
+      return errorMessage.trim();
+    }
+
+    if (result) {
+      return JSON.stringify(result, null, 2);
+    }
+
+    return "";
+  });
+
+  const copyButtonLabel = $derived.by(() => {
+    if (copyState === "copied") {
+      return t("已复制", "Copied");
+    }
+
+    if (copyState === "failed") {
+      return t("复制失败", "Copy failed");
+    }
+
+    return solveOutputText.length === 0
+      ? t("暂无可复制内容", "Nothing to copy")
+      : t("复制输出", "Copy output");
+  });
 
   function t(zh: string, en: string): string {
     return lang === "zh" ? zh : en;
   }
+
+  function formatElapsed(ms: number | null): string {
+    if (ms === null) {
+      return "--";
+    }
+
+    if (ms < 1000) {
+      return `${ms} ms`;
+    }
+
+    const seconds = ms / 1000;
+    return `${seconds.toFixed(seconds < 10 ? 2 : 1)} s`;
+  }
+
+  function stopSolveTimer(): void {
+    if (solveTimerId === null || typeof window === "undefined") {
+      return;
+    }
+
+    window.clearInterval(solveTimerId);
+    solveTimerId = null;
+  }
+
+  function tickLiveElapsed(): void {
+    if (solveStartedAt === null) {
+      return;
+    }
+
+    liveElapsedMs = Math.max(0, Math.round(performance.now() - solveStartedAt));
+  }
+
+  function resetCopyStateLater(): void {
+    if (copyStateTimerId !== null && typeof window !== "undefined") {
+      window.clearTimeout(copyStateTimerId);
+    }
+
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    copyStateTimerId = window.setTimeout(() => {
+      copyState = "idle";
+      copyStateTimerId = null;
+    }, 1400);
+  }
+
+  function fallbackCopy(text: string): boolean {
+    if (typeof document === "undefined") {
+      return false;
+    }
+
+    const input = document.createElement("textarea");
+    input.value = text;
+    input.setAttribute("readonly", "");
+    input.style.position = "fixed";
+    input.style.left = "-9999px";
+    document.body.append(input);
+    input.select();
+    let copied = false;
+    try {
+      copied = document.execCommand("copy");
+    } catch {
+      copied = false;
+    }
+    input.remove();
+    return copied;
+  }
+
+  async function copyOutput(): Promise<void> {
+    if (solveOutputText.length === 0) {
+      return;
+    }
+
+    let copied = false;
+    if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(solveOutputText);
+        copied = true;
+      } catch {
+        copied = false;
+      }
+    }
+
+    if (!copied) {
+      copied = fallbackCopy(solveOutputText);
+    }
+
+    copyState = copied ? "copied" : "failed";
+    resetCopyStateLater();
+  }
+
+  $effect(() => {
+    if (!isSolving) {
+      stopSolveTimer();
+      solveStartedAt = null;
+      liveElapsedMs = solveElapsedMs;
+      return;
+    }
+
+    if (solveStartedAt === null) {
+      solveStartedAt = performance.now() - (solveElapsedMs ?? 0);
+    }
+
+    tickLiveElapsed();
+
+    if (solveTimerId === null && typeof window !== "undefined") {
+      solveTimerId = window.setInterval(tickLiveElapsed, 80);
+    }
+
+    return () => {
+      stopSolveTimer();
+    };
+  });
+
+  $effect(() => {
+    solveOutputText;
+    copyState = "idle";
+  });
+
+  onDestroy(() => {
+    stopSolveTimer();
+
+    if (copyStateTimerId !== null && typeof window !== "undefined") {
+      window.clearTimeout(copyStateTimerId);
+      copyStateTimerId = null;
+    }
+  });
 </script>
 
 <div class="panel-head">
   <div>
-    <h2>{t("求解结果", "Solver Output")}</h2>
+    <div class="panel-title-row">
+      <h2>{t("求解结果", "Solver Output")}</h2>
+    </div>
     <p class="subtitle">
       {t(
         "追踪收益、电力和产线规模变化。",
@@ -28,15 +206,45 @@
     </p>
   </div>
 
-  <div class="solve-message">
-    {#if statusMessage}
-      <p class="status">{statusMessage}</p>
-    {/if}
-    {#if errorMessage}
-      <p class="error">{errorMessage}</p>
-    {/if}
+  <div class="header-controls">
+    <button
+      type="button"
+      class="copy-btn icon-only"
+      onclick={() => {
+        void copyOutput();
+      }}
+      disabled={solveOutputText.length === 0}
+      aria-label={copyButtonLabel}
+      title={copyButtonLabel}
+    >
+      <span class="material-symbols-outlined icon" aria-hidden="true">
+        {copyState === "copied" ? "check" : "content_copy"}
+      </span>
+    </button>
+
+    <div class="solve-meta">
+      {#if isSolving}
+        <span class="spinner" aria-hidden="true"></span>
+      {:else if errorMessage}
+        <span
+          class="material-symbols-outlined solve-icon danger"
+          aria-hidden="true">error</span
+        >
+      {:else}
+        <span class="material-symbols-outlined solve-icon" aria-hidden="true"
+          >{solveElapsedMs === null ? "schedule" : "check_circle"}</span
+        >
+      {/if}
+      <p class="elapsed" class:danger={showError}>
+        {formatElapsed(headerElapsedMs)}
+      </p>
+    </div>
   </div>
 </div>
+
+{#if showError}
+  <p class="error-message">{errorMessage}</p>
+{/if}
 
 {#if isBootstrapping}
   <p class="hint">
@@ -68,8 +276,8 @@
       <p>{result.summary.totalThermalBanks}</p>
     </article>
     <article>
-      <h3>{t("发电/用电", "Power Gen/Use")}</h3>
-      <p>{result.summary.powerGenW}/{result.summary.powerUseW} W</p>
+      <h3>{t("用电/发电", "Power Use/Gen")}</h3>
+      <p>{result.summary.powerUseW}/{result.summary.powerGenW} W</p>
     </article>
     <article>
       <h3>{t("电力余量", "Power Margin")}</h3>
@@ -104,7 +312,7 @@
   </div>
 
   <div class="table-wrap">
-    <h3>{t("高价值销售", "Top Sales")}</h3>
+    <h3>{t("销售物品", "Sold Items")}</h3>
     <div class="table-scroll">
       <table>
         <thead>
@@ -115,7 +323,7 @@
           </tr>
         </thead>
         <tbody>
-          {#each result.summary.topSales.slice(0, 12) as sale}
+          {#each result.summary.topSales as sale}
             <tr>
               <td>{sale.itemName}</td>
               <td>{sale.outpostName}</td>
@@ -130,7 +338,7 @@
   {#if result.summary.facilities.length > 0}
     <div class="table-wrap">
       <h3>{t("设施负载", "Facility Load")}</h3>
-      <div class="table-scroll compact">
+      <div class="table-scroll">
         <table>
           <thead>
             <tr>
@@ -153,52 +361,110 @@
 {/if}
 
 <style>
-  .panel-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-
-  .subtitle {
-    margin-top: 2px;
-    color: var(--ink-soft);
-    font-size: 12px;
-  }
-
-  .solve-message {
+  .panel-title-row {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
+    gap: var(--space-2);
   }
 
-  .status {
+  .solve-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface-soft);
+    padding: 8px 12px;
+    min-height: var(--control-size);
+  }
+
+  .spinner {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid color-mix(in srgb, var(--line) 80%, #b5d0c5);
+    border-top-color: var(--accent);
+    animation: spin 0.8s linear infinite;
+    flex: 0 0 auto;
+  }
+
+  .solve-icon {
+    font-size: 16px;
+    line-height: 1;
+    color: var(--accent);
+    display: block;
+    font-variation-settings: "FILL" 0, "wght" 600, "GRAD" 0, "opsz" 16;
+  }
+
+  .solve-icon.danger {
+    color: var(--danger);
+  }
+
+  .elapsed {
     margin: 0;
-    color: #0b6f5a;
+    color: var(--accent);
     font-size: 12px;
-    font-weight: 500;
+    font-weight: 600;
+    width: 50px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
   }
 
-  .error {
+  .elapsed.danger {
+    color: var(--danger);
+  }
+
+  .copy-btn {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    background: var(--panel-strong);
+    color: inherit;
+    font: inherit;
+    line-height: 1;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .copy-btn.icon-only {
+    width: var(--control-size);
+    height: var(--control-size);
+    padding: 0;
+  }
+
+  .copy-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .icon {
+    font-size: 18px;
+    line-height: 1;
+    display: block;
+    font-variation-settings: "FILL" 0, "wght" 600, "GRAD" 0, "opsz" 16;
+  }
+
+  .error-message {
     margin: 0;
     color: var(--danger);
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
   }
 
   .kpi-grid {
     display: grid;
-    gap: 8px;
+    gap: var(--space-2);
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .kpi-grid article {
-    border-radius: 10px;
-    background: linear-gradient(170deg, #ffffff 0%, #f8fcf9 100%);
-    border: 1px solid color-mix(in srgb, var(--line) 88%, white);
-    padding: 10px;
+    border-radius: var(--radius-md);
+    background: var(--panel-strong);
+    border: 1px solid var(--line);
+    padding: var(--space-3);
   }
 
   .kpi-grid h3 {
@@ -215,23 +481,17 @@
 
   .table-wrap {
     display: grid;
-    gap: 8px;
+    gap: var(--space-2);
     min-height: 0;
     min-width: 0;
   }
 
   .table-scroll {
-    border: 1px solid color-mix(in srgb, var(--line) 86%, #fff);
-    border-radius: 10px;
-    overflow: auto;
-    max-height: clamp(180px, 28dvh, 360px);
-    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    background: var(--panel-strong);
     min-width: 0;
     max-width: 100%;
-  }
-
-  .table-scroll.compact {
-    max-height: clamp(160px, 22dvh, 280px);
   }
 
   table {
@@ -243,7 +503,7 @@
 
   th,
   td {
-    border-bottom: 1px solid #dde8e1;
+    border-bottom: 1px solid color-mix(in srgb, var(--line) 78%, #d7e5de);
     text-align: left;
     padding: 8px 6px;
     overflow-wrap: anywhere;
@@ -256,7 +516,13 @@
 
   .hint {
     margin: 0;
-    color: var(--ink-soft);
+    color: var(--muted-text);
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(1turn);
+    }
   }
 
   @media (max-width: 1200px) {

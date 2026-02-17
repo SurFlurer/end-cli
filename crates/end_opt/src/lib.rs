@@ -16,7 +16,8 @@ pub use logistics::{
 pub use solver::{NEAR_INT_EPS, run_two_stage};
 pub use types::{
     DemandNode, DemandNodeId, DemandSite, ExternalSupplySlack, FacilityMachineCount, ItemFlowEdge,
-    ItemFlowPlan, ItemSubproblem, LogisticsPlan, MachineOrdinal, OptimizationResult,
-    OutpostSaleQty, OutpostValue, PosF64, RecipeUsage, SaleValue, SolveInputs,
-    StageSolution, SupplyNode, SupplyNodeId, SupplySite, ThermalBankUsage,
+    ItemFlowPlan, ItemSubproblem, LogisticsEdge, LogisticsNode, LogisticsNodeId,
+    LogisticsNodeSite, LogisticsPlan, MachineOrdinal, OptimizationResult, OutpostSaleQty,
+    OutpostValue, PosF64, RecipeUsage, SaleValue, SolveInputs, StageSolution, SupplyNode,
+    SupplyNodeId, SupplySite, ThermalBankUsage,
 };

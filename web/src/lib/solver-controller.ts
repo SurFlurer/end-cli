@@ -13,9 +13,7 @@ interface CreateSolverControllerOptions {
   getSnapshot: () => SolveSnapshot;
   toToml: (draft: AicDraft) => string;
   solve: (lang: LangTag, toml: string) => Promise<SolvePayload>;
-  t: (zh: string, en: string) => string;
   onSolvingChange: (next: boolean) => void;
-  onStatusMessage: (next: string) => void;
   onErrorMessage: (next: string) => void;
   onSolved: (payload: SolvePayload, trigger: SolveTrigger) => void;
 }
@@ -34,6 +32,17 @@ export function createSolverController(options: CreateSolverControllerOptions): 
   let latestSolveSequence = 0;
   let lastSolvedFingerprint = '';
   let isSolving = false;
+  let emittedSolving = false;
+
+  function emitSolvingState(): void {
+    const next = isSolving || autoSolveTimer !== null;
+    if (next === emittedSolving) {
+      return;
+    }
+
+    emittedSolving = next;
+    options.onSolvingChange(next);
+  }
 
   function clearAutoSolveTimer(): void {
     if (autoSolveTimer === null) {
@@ -41,6 +50,7 @@ export function createSolverController(options: CreateSolverControllerOptions): 
     }
     window.clearTimeout(autoSolveTimer);
     autoSolveTimer = null;
+    emitSolvingState();
   }
 
   function scheduleAutoSolve(): void {
@@ -53,8 +63,10 @@ export function createSolverController(options: CreateSolverControllerOptions): 
     clearAutoSolveTimer();
     autoSolveTimer = window.setTimeout(() => {
       autoSolveTimer = null;
+      emitSolvingState();
       void runSolve('auto');
     }, options.debounceMs);
+    emitSolvingState();
   }
 
   async function runSolve(trigger: SolveTrigger = 'manual'): Promise<void> {
@@ -75,15 +87,11 @@ export function createSolverController(options: CreateSolverControllerOptions): 
       toml = options.toToml(snapshot.draft);
     } catch (error) {
       options.onErrorMessage(error instanceof Error ? error.message : String(error));
-      options.onStatusMessage('');
       return;
     }
 
     const fingerprint = `${snapshot.lang}\n${toml}`;
     if (fingerprint === lastSolvedFingerprint) {
-      if (trigger === 'manual') {
-        options.onStatusMessage(options.t('输入未变化，无需重算。', 'Inputs unchanged. Skipped.'));
-      }
       return;
     }
 
@@ -92,11 +100,8 @@ export function createSolverController(options: CreateSolverControllerOptions): 
     latestSolveSequence = sequence;
 
     isSolving = true;
-    options.onSolvingChange(true);
+    emitSolvingState();
     options.onErrorMessage('');
-    options.onStatusMessage(
-      trigger === 'auto' ? options.t('正在自动求解...', 'Auto solving...') : options.t('正在求解...', 'Solving...')
-    );
 
     try {
       const solved = await options.solve(snapshot.lang, toml);
@@ -106,21 +111,15 @@ export function createSolverController(options: CreateSolverControllerOptions): 
 
       options.onSolved(solved, trigger);
       lastSolvedFingerprint = fingerprint;
-      options.onStatusMessage(
-        trigger === 'auto'
-          ? options.t('自动求解完成。', 'Auto solve completed.')
-          : options.t('求解完成。', 'Solve completed.')
-      );
     } catch (error) {
       if (sequence !== latestSolveSequence) {
         return;
       }
       options.onErrorMessage(error instanceof Error ? error.message : String(error));
-      options.onStatusMessage('');
     } finally {
       if (sequence === latestSolveSequence) {
         isSolving = false;
-        options.onSolvingChange(false);
+        emitSolvingState();
       }
 
       if (autoSolveDirty) {

@@ -4,13 +4,14 @@
     min-height: 100dvh;
     padding: clamp(12px, 2.2vw, 28px);
     display: grid;
-    gap: 14px;
+    gap: var(--space-4);
   }
 
   .workspace {
     --left-pane-width: 54%;
+    position: relative;
     display: grid;
-    gap: 14px;
+    gap: var(--space-4);
     min-height: 0;
     height: calc(100dvh - clamp(24px, 4.4vw, 56px));
     grid-template-columns: minmax(340px, var(--left-pane-width)) 12px minmax(420px, 1fr);
@@ -19,12 +20,12 @@
 
   .panel {
     border: 1px solid var(--line);
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
     background: var(--panel);
-    padding: clamp(11px, 1.6vw, 16px);
+    padding: clamp(12px, 1.6vw, 16px);
     box-shadow: var(--shadow-soft);
     display: grid;
-    gap: 12px;
+    gap: var(--space-3);
     align-content: start;
   }
 
@@ -58,29 +59,25 @@
     scrollbar-gutter: stable;
     display: flex;
     flex-direction: column;
-    gap: 14px;
-  }
-
-  .graph {
-    min-height: 600px;
+    gap: var(--space-4);
   }
 
   .mobile-tabs {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 8px;
+    gap: var(--space-2);
     border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 6px;
+    border-radius: var(--radius-md);
+    padding: var(--space-2);
     background: var(--panel);
     box-shadow: var(--shadow-soft);
   }
 
   .mobile-tabs button {
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     border: 1px solid #c2d6ca;
-    background: #f7fbf8;
-    padding: 8px 10px;
+    background: var(--surface-soft);
+    padding: 8px 12px;
     font-weight: 500;
   }
 
@@ -92,6 +89,42 @@
 
   .tab-hidden {
     display: none;
+  }
+
+  .drag-import-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    display: grid;
+    place-items: center;
+    background: color-mix(in srgb, #0b1612 26%, transparent);
+    backdrop-filter: blur(2px);
+    pointer-events: none;
+  }
+
+  .drag-import-card {
+    width: min(560px, calc(100vw - 36px));
+    border: 2px dashed color-mix(in srgb, var(--accent) 64%, #b7ddd0);
+    border-radius: 20px;
+    background: color-mix(in srgb, var(--panel) 86%, #f2fff9);
+    box-shadow: 0 24px 56px rgba(7, 35, 24, 0.24);
+    padding: clamp(22px, 3vw, 34px);
+    text-align: center;
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .drag-import-title {
+    margin: 0;
+    font-size: clamp(1.05rem, 2.1vw, 1.45rem);
+    font-weight: 700;
+    color: color-mix(in srgb, #0c2017 85%, var(--accent));
+  }
+
+  .drag-import-subtitle {
+    margin: 0;
+    color: var(--muted-text);
+    font-size: clamp(0.86rem, 1.6vw, 1rem);
   }
 
   @media (max-width: 1160px) {
@@ -109,7 +142,7 @@
     }
 
     .workspace.mobile {
-      gap: 12px;
+      gap: var(--space-3);
     }
 
     .workspace.mobile .result {
@@ -127,6 +160,6 @@
 
   @media (max-width: 760px) {
     .shell {
-      padding: 12px;
+      padding: var(--space-3);
     }
   }

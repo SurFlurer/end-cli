@@ -85,7 +85,8 @@
   let defaultToml = $state("");
 
   let isBootstrapping = $state(true);
-  let statusMessage = $state("");
+  let isSolving = $state(false);
+  let solveElapsedMs = $state<number | null>(null);
   let errorMessage = $state("");
 
   let result = $state<SolvePayload | null>(null);
@@ -97,6 +98,8 @@
   let activeTab = $state<"editor" | "result" | "graph">("editor");
   let leftPaneRatio = $state(0.55);
   let isDraggingSplitter = $state(false);
+  let isDragImportActive = $state(false);
+  let dragImportDepth = 0;
 
   let hasHydratedLocalState = $state(false);
   let hasRestoredDraftFromStorage = $state(false);
@@ -170,11 +173,90 @@
     result = null;
     graphFilter = "all";
     errorMessage = "";
-    statusMessage = t(
-      "已从 TOML 更新配置。",
-      "Configuration imported from TOML.",
-    );
     solverController?.resetSolvedFingerprint();
+  }
+
+  function isTomlFile(file: File): boolean {
+    return file.name.trim().toLowerCase().endsWith(".toml");
+  }
+
+  async function importTomlFile(file: File): Promise<void> {
+    if (!isTomlFile(file)) {
+      errorMessage = t(
+        "仅支持导入 .toml 文件（例如 aic.toml）。",
+        "Only .toml files are supported for import (for example aic.toml).",
+      );
+      return;
+    }
+
+    try {
+      const text = await file.text();
+      applyToml(text);
+    } catch (error) {
+      errorMessage = error instanceof Error ? error.message : String(error);
+    }
+  }
+
+  function hasFileTransfer(event: DragEvent): boolean {
+    const types = event.dataTransfer?.types;
+    if (!types) {
+      return false;
+    }
+    return Array.from(types).includes("Files");
+  }
+
+  function clearDragImportState(): void {
+    dragImportDepth = 0;
+    isDragImportActive = false;
+  }
+
+  function onWindowDragEnter(event: DragEvent): void {
+    if (!hasFileTransfer(event)) {
+      return;
+    }
+
+    event.preventDefault();
+    dragImportDepth += 1;
+    isDragImportActive = true;
+  }
+
+  function onWindowDragOver(event: DragEvent): void {
+    if (!hasFileTransfer(event)) {
+      return;
+    }
+
+    event.preventDefault();
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = "copy";
+    }
+    isDragImportActive = true;
+  }
+
+  function onWindowDragLeave(event: DragEvent): void {
+    if (!isDragImportActive) {
+      return;
+    }
+
+    event.preventDefault();
+    dragImportDepth = Math.max(0, dragImportDepth - 1);
+    if (dragImportDepth === 0) {
+      isDragImportActive = false;
+    }
+  }
+
+  function onWindowDrop(event: DragEvent): void {
+    if (!hasFileTransfer(event)) {
+      return;
+    }
+
+    event.preventDefault();
+    clearDragImportState();
+    const file = event.dataTransfer?.files.item(0);
+    if (!file) {
+      return;
+    }
+
+    void importTomlFile(file);
   }
 
   async function loadInitialState(): Promise<void> {
@@ -236,10 +318,7 @@
     }
 
     try {
-      const text = await file.text();
-      applyToml(text);
-    } catch (error) {
-      errorMessage = error instanceof Error ? error.message : String(error);
+      await importTomlFile(file);
     } finally {
       input.value = "";
     }
@@ -333,11 +412,19 @@
       debounceMs: AUTO_SOLVE_DEBOUNCE_MS,
       getSnapshot: () => ({ draft, lang, isBootstrapping }),
       toToml: buildAicToml,
-      solve: solveScenario,
-      t,
-      onSolvingChange: () => {},
-      onStatusMessage: (next) => {
-        statusMessage = next;
+      solve: async (solveLang, toml) => {
+        const startedAt = performance.now();
+        try {
+          return await solveScenario(solveLang, toml);
+        } finally {
+          solveElapsedMs = Math.max(0, Math.round(performance.now() - startedAt));
+        }
+      },
+      onSolvingChange: (next) => {
+        isSolving = next;
+        if (next) {
+          solveElapsedMs = null;
+        }
       },
       onErrorMessage: (next) => {
         errorMessage = next;
@@ -361,10 +448,19 @@
 
     updateScreenMode();
     mediaQuery.addEventListener("change", updateScreenMode);
+    window.addEventListener("dragenter", onWindowDragEnter);
+    window.addEventListener("dragover", onWindowDragOver);
+    window.addEventListener("dragleave", onWindowDragLeave);
+    window.addEventListener("drop", onWindowDrop);
     void loadInitialState();
 
     return () => {
       mediaQuery.removeEventListener("change", updateScreenMode);
+      window.removeEventListener("dragenter", onWindowDragEnter);
+      window.removeEventListener("dragover", onWindowDragOver);
+      window.removeEventListener("dragleave", onWindowDragLeave);
+      window.removeEventListener("drop", onWindowDrop);
+      clearDragImportState();
       stopSplitResize();
       solverController?.dispose();
       solverController = null;
@@ -473,8 +569,9 @@
           <ResultPanel
             {lang}
             {isBootstrapping}
+            {isSolving}
+            {solveElapsedMs}
             {result}
-            {statusMessage}
             {errorMessage}
           />
         </section>
@@ -497,8 +594,9 @@
         <ResultPanel
           {lang}
           {isBootstrapping}
+          {isSolving}
+          {solveElapsedMs}
           {result}
-          {statusMessage}
           {errorMessage}
         />
       </section>
@@ -515,6 +613,19 @@
           }}
         />
       </section>
+    {/if}
+
+    {#if isDragImportActive}
+      <div class="drag-import-overlay" aria-live="polite">
+        <div class="drag-import-card">
+          <p class="drag-import-title">
+            {t("松开即可导入 aic.toml", "Drop to import aic.toml")}
+          </p>
+          <p class="drag-import-subtitle">
+            {t("支持拖入 .toml 文件。", "Drop any .toml file here.")}
+          </p>
+        </div>
+      </div>
     {/if}
   </main>
 </div>

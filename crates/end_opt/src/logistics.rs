@@ -1,7 +1,8 @@
 use crate::error::{Error, Result};
 use crate::types::{
     DemandNode, DemandNodeId, DemandSite, ItemFlowEdge, ItemFlowPlan, ItemSubproblem,
-    LogisticsPlan, MachineOrdinal, PosF64, StageSolution, SupplyNode, SupplyNodeId, SupplySite,
+    LogisticsEdge, LogisticsNode, LogisticsNodeId, LogisticsNodeSite, LogisticsPlan,
+    MachineOrdinal, PosF64, StageSolution, SupplyNode, SupplyNodeId, SupplySite,
 };
 use end_model::{AicInputs, Catalog, ItemId, Recipe};
 use std::collections::BTreeMap;
@@ -351,7 +352,172 @@ pub fn build_logistics_plan(
         .map(solve_item_best_fit)
         .collect::<Result<Vec<_>>>()?;
 
-    Ok(LogisticsPlan { per_item })
+    let mut node_index = BTreeMap::<LogisticsNodeKey, LogisticsNodeId>::new();
+    let mut nodes = Vec::<LogisticsNode>::new();
+    let mut edge_flow = BTreeMap::<(ItemId, LogisticsNodeId, LogisticsNodeId), f64>::new();
+
+    for (subproblem, item_plan) in subproblems.iter().zip(&per_item) {
+        let mut supply_nodes = BTreeMap::<SupplyNodeId, LogisticsNodeId>::new();
+        let mut demand_nodes = BTreeMap::<DemandNodeId, LogisticsNodeId>::new();
+
+        for supply in &subproblem.supplies {
+            let key = supply_site_key(&supply.site);
+            let node_id = allocate_logistics_node(&mut node_index, &mut nodes, key);
+            supply_nodes.insert(supply.id, node_id);
+        }
+
+        for demand in &subproblem.demands {
+            let key = demand_site_key(&demand.site);
+            let node_id = allocate_logistics_node(&mut node_index, &mut nodes, key);
+            demand_nodes.insert(demand.id, node_id);
+        }
+
+        for edge in &item_plan.edges {
+            let Some(from) = supply_nodes.get(&edge.from).copied() else {
+                return Err(Error::InvalidInput {
+                    message: format!(
+                        "missing logistics source node mapping for item {} supply {}",
+                        edge.item.as_u32(),
+                        edge.from.as_u32()
+                    ),
+                });
+            };
+            let Some(to) = demand_nodes.get(&edge.to).copied() else {
+                return Err(Error::InvalidInput {
+                    message: format!(
+                        "missing logistics target node mapping for item {} demand {}",
+                        edge.item.as_u32(),
+                        edge.to.as_u32()
+                    ),
+                });
+            };
+            *edge_flow.entry((edge.item, from, to)).or_insert(0.0) += edge.flow_per_min.get();
+        }
+    }
+
+    let edges = edge_flow
+        .into_iter()
+        .map(|((item, from, to), flow_per_min)| {
+            let flow_per_min = PosF64::new(flow_per_min).ok_or(Error::InvalidPositiveFlow {
+                context: format!(
+                    "graph edge item={} from={} to={}",
+                    item.as_u32(),
+                    from.as_u32(),
+                    to.as_u32()
+                ),
+                value: flow_per_min,
+            })?;
+            Ok(LogisticsEdge {
+                item,
+                from,
+                to,
+                flow_per_min,
+            })
+        })
+        .collect::<Result<Vec<_>>>()?;
+
+    Ok(LogisticsPlan { nodes, edges })
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+enum LogisticsNodeKey {
+    ExternalSupply {
+        item: ItemId,
+    },
+    RecipeMachine {
+        recipe_index: end_model::RecipeId,
+        machine: MachineOrdinal,
+    },
+    OutpostSale {
+        outpost_index: end_model::OutpostId,
+        item: ItemId,
+    },
+    ThermalBankFuel {
+        power_recipe_index: end_model::PowerRecipeId,
+        bank: MachineOrdinal,
+        item: ItemId,
+    },
+}
+
+fn allocate_logistics_node(
+    node_index: &mut BTreeMap<LogisticsNodeKey, LogisticsNodeId>,
+    nodes: &mut Vec<LogisticsNode>,
+    key: LogisticsNodeKey,
+) -> LogisticsNodeId {
+    if let Some(id) = node_index.get(&key).copied() {
+        return id;
+    }
+
+    let id = LogisticsNodeId::from_index(nodes.len());
+    let site = key_to_site(key);
+    node_index.insert(key, id);
+    nodes.push(LogisticsNode { id, site });
+    id
+}
+
+fn supply_site_key(site: &SupplySite) -> LogisticsNodeKey {
+    match *site {
+        SupplySite::ExternalSupply { item } => LogisticsNodeKey::ExternalSupply { item },
+        SupplySite::RecipeOutput {
+            recipe_index,
+            machine,
+            item: _,
+        } => LogisticsNodeKey::RecipeMachine {
+            recipe_index,
+            machine,
+        },
+    }
+}
+
+fn demand_site_key(site: &DemandSite) -> LogisticsNodeKey {
+    match *site {
+        DemandSite::RecipeInput {
+            recipe_index,
+            machine,
+            item: _,
+        } => LogisticsNodeKey::RecipeMachine {
+            recipe_index,
+            machine,
+        },
+        DemandSite::OutpostSale {
+            outpost_index,
+            item,
+        } => LogisticsNodeKey::OutpostSale { outpost_index, item },
+        DemandSite::ThermalBankFuel {
+            power_recipe_index,
+            bank,
+            item,
+        } => LogisticsNodeKey::ThermalBankFuel {
+            power_recipe_index,
+            bank,
+            item,
+        },
+    }
+}
+
+fn key_to_site(key: LogisticsNodeKey) -> LogisticsNodeSite {
+    match key {
+        LogisticsNodeKey::ExternalSupply { item } => LogisticsNodeSite::ExternalSupply { item },
+        LogisticsNodeKey::RecipeMachine {
+            recipe_index,
+            machine,
+        } => LogisticsNodeSite::RecipeMachine {
+            recipe_index,
+            machine,
+        },
+        LogisticsNodeKey::OutpostSale { outpost_index, item } => {
+            LogisticsNodeSite::OutpostSale { outpost_index, item }
+        }
+        LogisticsNodeKey::ThermalBankFuel {
+            power_recipe_index,
+            bank,
+            item,
+        } => LogisticsNodeSite::ThermalBankFuel {
+            power_recipe_index,
+            bank,
+            item,
+        },
+    }
 }
 
 fn recipe_net_deltas(recipe: &Recipe) -> Vec<(ItemId, f64)> {
@@ -452,8 +618,8 @@ mod tests {
         LOGISTICS_EPS, build_logistics_plan, expand_recipe_machine_rates, solve_item_best_fit,
     };
     use crate::types::{
-        DemandNode, DemandNodeId, DemandSite, ItemSubproblem, PosF64, SupplyNode, SupplyNodeId,
-        SupplySite,
+        DemandNode, DemandNodeId, DemandSite, ItemSubproblem, LogisticsNodeSite, PosF64,
+        SupplyNode, SupplyNodeId, SupplySite,
     };
     use crate::{SolveInputs, run_two_stage};
     use end_model::{
@@ -614,7 +780,8 @@ mod tests {
         })
         .expect("add thermal bank");
 
-        b.push_recipe(
+        let smelt_recipe = b
+            .push_recipe(
             smelter,
             60,
             vec![Stack {
@@ -675,18 +842,45 @@ mod tests {
             "same inputs should produce identical flow edges"
         );
 
-        for item_plan in &plan_a.per_item {
-            let unique = item_plan
-                .edges
-                .iter()
-                .map(|edge| (edge.from.as_u32(), edge.to.as_u32()))
-                .collect::<BTreeSet<_>>();
-            assert_eq!(
-                unique.len(),
-                item_plan.edges.len(),
-                "same edge pair should have been merged into one record"
-            );
-        }
+        let unique_edges = plan_a
+            .edges
+            .iter()
+            .map(|edge| (edge.item.as_u32(), edge.from.as_u32(), edge.to.as_u32()))
+            .collect::<BTreeSet<_>>();
+        assert_eq!(
+            unique_edges.len(),
+            plan_a.edges.len(),
+            "same item edge pair should have been merged into one record"
+        );
+
+        let unique_nodes = plan_a
+            .nodes
+            .iter()
+            .map(|node| node.id.as_u32())
+            .collect::<BTreeSet<_>>();
+        assert_eq!(
+            unique_nodes.len(),
+            plan_a.nodes.len(),
+            "node ids should be unique"
+        );
+
+        let smelter_node = plan_a
+            .nodes
+            .iter()
+            .find_map(|node| match node.site {
+                LogisticsNodeSite::RecipeMachine {
+                    recipe_index,
+                    machine: _,
+                } if recipe_index == smelt_recipe => Some(node.id),
+                _ => None,
+            })
+            .expect("smelter machine node should exist");
+        let has_outgoing = plan_a.edges.iter().any(|edge| edge.from == smelter_node);
+        let has_incoming = plan_a.edges.iter().any(|edge| edge.to == smelter_node);
+        assert!(
+            has_outgoing && has_incoming,
+            "same machine node should carry both input and output edges across items"
+        );
     }
 
     fn sample_item() -> end_model::ItemId {

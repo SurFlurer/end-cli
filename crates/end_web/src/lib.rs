@@ -1,12 +1,11 @@
 use end_io::{default_aic_toml, load_aic_from_str, load_catalog};
 use end_model::{AicInputs, Catalog, FacilityId, ItemId, OutpostId, RecipeId, P_CORE_W};
 use end_opt::{
-    build_item_subproblems, run_two_stage, DemandNodeId, DemandSite, OptimizationResult,
-    SolveInputs, SupplyNodeId, SupplySite,
+    LogisticsNodeSite, OptimizationResult, SolveInputs, run_two_stage,
 };
 use end_report::{build_report, Lang};
 use serde::Serialize;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::ffi::{c_char, CStr, CString, NulError};
 use thiserror::Error;
 
@@ -39,14 +38,11 @@ pub enum Error {
     #[error("missing outpost id {0:?}")]
     MissingOutpost(OutpostId),
 
-    #[error("missing logistics item subproblem for item {0:?}")]
-    MissingLogisticsItem(ItemId),
-
-    #[error("missing logistics supply node {node:?} for item {item:?}")]
-    MissingLogisticsSupplyNode { item: ItemId, node: SupplyNodeId },
-
-    #[error("missing logistics demand node {node:?} for item {item:?}")]
-    MissingLogisticsDemandNode { item: ItemId, node: DemandNodeId },
+    #[error("missing logistics node {node:?} for item {item:?}")]
+    MissingLogisticsNode {
+        item: ItemId,
+        node: end_opt::LogisticsNodeId,
+    },
 
     #[error("unknown lang `{value}` (expected `zh` or `en`)")]
     UnknownLang { value: String },
@@ -169,8 +165,6 @@ pub struct LogisticsItemSummaryDto {
 #[serde(rename_all = "camelCase")]
 pub struct LogisticsNodeDto {
     pub id: String,
-    pub item_key: String,
-    pub item_name: String,
     pub kind: String,
     pub label: String,
 }
@@ -333,235 +327,153 @@ fn build_logistics_graph(
     inputs: &AicInputs,
     solved: &OptimizationResult,
 ) -> Result<LogisticsGraphDto> {
-    let subproblems =
-        build_item_subproblems(catalog, inputs, &solved.stage2).map_err(Error::Optimize)?;
-    let subproblem_by_item = subproblems
-        .into_iter()
-        .map(|subproblem| (subproblem.item, subproblem))
+    let node_by_id = solved
+        .logistics
+        .nodes
+        .iter()
+        .map(|node| (node.id, node))
         .collect::<BTreeMap<_, _>>();
 
-    let mut nodes = BTreeMap::<String, LogisticsNodeDto>::new();
+    let mut nodes = solved
+        .logistics
+        .nodes
+        .iter()
+        .map(|node| {
+            let (kind, label) = describe_logistics_site(lang, catalog, inputs, &node.site)?;
+            Ok::<_, Error>(LogisticsNodeDto {
+                id: logistics_node_id(node.id),
+                kind,
+                label,
+            })
+        })
+        .collect::<Result<Vec<_>>>()?;
+    nodes.sort_by(|lhs, rhs| lhs.id.cmp(&rhs.id));
+
     let mut edges = Vec::<LogisticsEdgeDto>::new();
-    let mut items = Vec::<LogisticsItemSummaryDto>::new();
+    let mut item_summary = BTreeMap::<ItemId, ItemGraphStats>::new();
 
-    let mut per_item = solved.logistics.per_item.iter().collect::<Vec<_>>();
-    per_item.sort_by_key(|plan| plan.item.as_u32());
+    for edge in &solved.logistics.edges {
+        let item = edge.item;
+        let item_key = item_key(catalog, item)?.to_string();
+        let item_name = item_name(lang, catalog, item)?.to_string();
 
-    for item_plan in per_item {
-        let item_key = item_key(catalog, item_plan.item)?.to_string();
-        let item_name = item_name(lang, catalog, item_plan.item)?.to_string();
-        let subproblem = subproblem_by_item
-            .get(&item_plan.item)
-            .ok_or(Error::MissingLogisticsItem(item_plan.item))?;
-
-        for supply in &subproblem.supplies {
-            let id = supply_node_id(&item_key, supply.id);
-            let (kind, label) = describe_supply_site(lang, catalog, supply.site.clone())?;
-            nodes.entry(id.clone()).or_insert(LogisticsNodeDto {
-                id,
-                item_key: item_key.clone(),
-                item_name: item_name.clone(),
-                kind,
-                label,
+        if !node_by_id.contains_key(&edge.from) {
+            return Err(Error::MissingLogisticsNode {
+                item,
+                node: edge.from,
+            });
+        }
+        if !node_by_id.contains_key(&edge.to) {
+            return Err(Error::MissingLogisticsNode {
+                item,
+                node: edge.to,
             });
         }
 
-        for demand in &subproblem.demands {
-            let id = demand_node_id(&item_key, demand.id);
-            let (kind, label) = describe_demand_site(lang, catalog, inputs, demand.site.clone())?;
-            nodes.entry(id.clone()).or_insert(LogisticsNodeDto {
-                id,
-                item_key: item_key.clone(),
-                item_name: item_name.clone(),
-                kind,
-                label,
-            });
-        }
-
-        for edge in &item_plan.edges {
-            let source = supply_node_id(&item_key, edge.from);
-            let target = demand_node_id(&item_key, edge.to);
-            ensure_supply_node(subproblem, edge.from, item_plan.item)?;
-            ensure_demand_node(subproblem, edge.to, item_plan.item)?;
-
-            edges.push(LogisticsEdgeDto {
-                id: format!("{}:{}:{}", item_key, edge.from.as_u32(), edge.to.as_u32()),
-                item_key: item_key.clone(),
-                item_name: item_name.clone(),
-                source,
-                target,
-                flow_per_min: edge.flow_per_min.get(),
-            });
-        }
-
-        let node_count = subproblem.supplies.len() + subproblem.demands.len();
-        let total_flow_per_min = item_plan
-            .edges
-            .iter()
-            .map(|edge| edge.flow_per_min.get())
-            .sum::<f64>();
-
-        items.push(LogisticsItemSummaryDto {
+        edges.push(LogisticsEdgeDto {
+            id: format!("{}:{}:{}", item_key, edge.from.as_u32(), edge.to.as_u32()),
             item_key,
             item_name,
-            edge_count: item_plan.edges.len(),
-            node_count,
-            total_flow_per_min,
+            source: logistics_node_id(edge.from),
+            target: logistics_node_id(edge.to),
+            flow_per_min: edge.flow_per_min.get(),
         });
+
+        let entry = item_summary.entry(item).or_default();
+        entry.edge_count += 1;
+        entry.node_ids.insert(edge.from.as_u32());
+        entry.node_ids.insert(edge.to.as_u32());
+        entry.total_flow_per_min += edge.flow_per_min.get();
     }
 
-    Ok(LogisticsGraphDto {
-        items,
-        nodes: nodes.into_values().collect(),
-        edges,
-    })
+    let mut items = item_summary
+        .into_iter()
+        .map(|(item, stats)| {
+            Ok::<_, Error>(LogisticsItemSummaryDto {
+                item_key: item_key(catalog, item)?.to_string(),
+                item_name: item_name(lang, catalog, item)?.to_string(),
+                edge_count: stats.edge_count,
+                node_count: stats.node_ids.len(),
+                total_flow_per_min: stats.total_flow_per_min,
+            })
+        })
+        .collect::<Result<Vec<_>>>()?;
+    items.sort_by(|lhs, rhs| lhs.item_key.cmp(&rhs.item_key));
+
+    Ok(LogisticsGraphDto { items, nodes, edges })
 }
 
-fn ensure_supply_node(
-    subproblem: &end_opt::ItemSubproblem,
-    node_id: SupplyNodeId,
-    item: ItemId,
-) -> Result<()> {
-    if subproblem.supplies.iter().any(|node| node.id == node_id) {
-        return Ok(());
-    }
-    Err(Error::MissingLogisticsSupplyNode {
-        item,
-        node: node_id,
-    })
+#[derive(Debug, Default)]
+struct ItemGraphStats {
+    edge_count: usize,
+    node_ids: BTreeSet<u32>,
+    total_flow_per_min: f64,
 }
 
-fn ensure_demand_node(
-    subproblem: &end_opt::ItemSubproblem,
-    node_id: DemandNodeId,
-    item: ItemId,
-) -> Result<()> {
-    if subproblem.demands.iter().any(|node| node.id == node_id) {
-        return Ok(());
-    }
-    Err(Error::MissingLogisticsDemandNode {
-        item,
-        node: node_id,
-    })
-}
-
-fn describe_supply_site(
-    lang: Lang,
-    catalog: &Catalog,
-    site: SupplySite,
-) -> Result<(String, String)> {
-    match site {
-        SupplySite::ExternalSupply { item } => Ok((
-            "external_supply".to_string(),
-            match lang {
-                Lang::Zh => format!("外部供给 ({})", item_name(lang, catalog, item)?),
-                Lang::En => format!("External supply ({})", item_name(lang, catalog, item)?),
-            },
-        )),
-        SupplySite::RecipeOutput {
-            recipe_index,
-            machine,
-            item: _,
-        } => {
-            let recipe = catalog
-                .recipe(recipe_index)
-                .ok_or(Error::MissingRecipe(recipe_index))?;
-            let facility = facility_name(lang, catalog, recipe.facility)?;
-            Ok((
-                "recipe_output".to_string(),
-                match lang {
-                    Lang::Zh => format!(
-                        "{} r{} 产出 #{}",
-                        facility,
-                        recipe_index.as_u32(),
-                        machine.get()
-                    ),
-                    Lang::En => format!(
-                        "{} r{} output #{}",
-                        facility,
-                        recipe_index.as_u32(),
-                        machine.get()
-                    ),
-                },
-            ))
-        }
-    }
-}
-
-fn describe_demand_site(
+fn describe_logistics_site(
     lang: Lang,
     catalog: &Catalog,
     inputs: &AicInputs,
-    site: DemandSite,
+    site: &LogisticsNodeSite,
 ) -> Result<(String, String)> {
     match site {
-        DemandSite::RecipeInput {
+        LogisticsNodeSite::ExternalSupply { item } => Ok((
+            "external_supply".to_string(),
+            match lang {
+                Lang::Zh => format!("外部供给 ({})", item_name(lang, catalog, *item)?),
+                Lang::En => format!("External supply ({})", item_name(lang, catalog, *item)?),
+            },
+        )),
+        LogisticsNodeSite::RecipeMachine {
             recipe_index,
             machine,
-            item: _,
         } => {
             let recipe = catalog
-                .recipe(recipe_index)
-                .ok_or(Error::MissingRecipe(recipe_index))?;
+                .recipe(*recipe_index)
+                .ok_or(Error::MissingRecipe(*recipe_index))?;
             let facility = facility_name(lang, catalog, recipe.facility)?;
             Ok((
-                "recipe_input".to_string(),
+                "recipe_machine".to_string(),
                 match lang {
-                    Lang::Zh => format!(
-                        "{} r{} 投入 #{}",
-                        facility,
-                        recipe_index.as_u32(),
-                        machine.get()
-                    ),
-                    Lang::En => format!(
-                        "{} r{} input #{}",
-                        facility,
-                        recipe_index.as_u32(),
-                        machine.get()
-                    ),
+                    Lang::Zh => format!("{} r{} #{}", facility, recipe_index.as_u32(), machine.get()),
+                    Lang::En => format!("{} r{} #{}", facility, recipe_index.as_u32(), machine.get()),
                 },
             ))
         }
-        DemandSite::OutpostSale {
+        LogisticsNodeSite::OutpostSale {
             outpost_index,
             item,
         } => {
             let outpost = inputs
-                .outpost(outpost_index)
-                .ok_or(Error::MissingOutpost(outpost_index))?;
+                .outpost(*outpost_index)
+                .ok_or(Error::MissingOutpost(*outpost_index))?;
             Ok((
                 "outpost_sale".to_string(),
                 match lang {
                     Lang::Zh => format!(
                         "{} 出售 ({})",
                         outpost_name(lang, outpost),
-                        item_name(lang, catalog, item)?
+                        item_name(lang, catalog, *item)?
                     ),
                     Lang::En => format!(
                         "{} sale ({})",
                         outpost_name(lang, outpost),
-                        item_name(lang, catalog, item)?
+                        item_name(lang, catalog, *item)?
                     ),
                 },
             ))
         }
-        DemandSite::ThermalBankFuel {
+        LogisticsNodeSite::ThermalBankFuel {
             power_recipe_index,
             bank,
             item: _,
         } => Ok((
             "thermal_bank_fuel".to_string(),
             match lang {
-                Lang::Zh => format!(
-                    "热容池 p{} 燃料 #{}",
-                    power_recipe_index.as_u32(),
-                    bank.get()
-                ),
-                Lang::En => format!(
-                    "Thermal bank p{} fuel #{}",
-                    power_recipe_index.as_u32(),
-                    bank.get()
-                ),
+                Lang::Zh => format!("热容池 p{} 燃料 #{}", power_recipe_index.as_u32(), bank.get()),
+                Lang::En => {
+                    format!("Thermal bank p{} fuel #{}", power_recipe_index.as_u32(), bank.get())
+                }
             },
         )),
     }
@@ -625,12 +537,8 @@ fn parse_lang(tag: &str) -> Result<Lang> {
     }
 }
 
-fn supply_node_id(item_key: &str, node: SupplyNodeId) -> String {
-    format!("{item_key}:s{}", node.as_u32())
-}
-
-fn demand_node_id(item_key: &str, node: DemandNodeId) -> String {
-    format!("{item_key}:d{}", node.as_u32())
+fn logistics_node_id(node: end_opt::LogisticsNodeId) -> String {
+    format!("n{}", node.as_u32())
 }
 
 fn envelope_json<T: Serialize>(result: Result<T>) -> String {

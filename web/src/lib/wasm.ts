@@ -32,7 +32,6 @@ let modulePromise: Promise<EndWebModule> | null = null;
 let scriptPromise: Promise<void> | null = null;
 let solveWorker: Worker | null = null;
 let solveRequestId = 1;
-let workerTransportBroken = false;
 
 const pendingSolve = new Map<
   number,
@@ -56,7 +55,9 @@ function getSolveWorker(): Worker {
     return solveWorker;
   }
 
-  solveWorker = new Worker(new URL('./solve.worker.ts', import.meta.url));
+  solveWorker = new Worker(new URL('./solve.worker.ts', import.meta.url), {
+    type: 'classic'
+  });
   solveWorker.onmessage = (event: MessageEvent<SolveResponse>) => {
     const response = event.data;
     const pending = pendingSolve.get(response.id);
@@ -74,7 +75,7 @@ function getSolveWorker(): Worker {
   };
 
   solveWorker.onerror = (event: ErrorEvent) => {
-    workerTransportBroken = true;
+    solveWorker = null;
     rejectAllPendingSolves(new WorkerTransportError(event.message || 'solve worker crashed'));
   };
 
@@ -141,16 +142,7 @@ export async function loadBootstrap(lang: LangTag): Promise<BootstrapPayload> {
   return callJsonApi<BootstrapPayload>(module, 'end_web_bootstrap', [lang]);
 }
 
-async function solveInMainThread(lang: LangTag, aicToml: string): Promise<SolvePayload> {
-  const module = await getModule();
-  return callJsonApi<SolvePayload>(module, 'end_web_solve_from_aic_toml', [lang, aicToml]);
-}
-
 export function solveScenario(lang: LangTag, aicToml: string): Promise<SolvePayload> {
-  if (workerTransportBroken) {
-    return solveInMainThread(lang, aicToml);
-  }
-
   const worker = getSolveWorker();
   const request: SolveRequest = {
     id: solveRequestId,
@@ -166,15 +158,9 @@ export function solveScenario(lang: LangTag, aicToml: string): Promise<SolvePayl
     try {
       worker.postMessage(request);
     } catch (error) {
-      workerTransportBroken = true;
+      solveWorker = null;
       pendingSolve.delete(request.id);
       reject(new WorkerTransportError(error instanceof Error ? error.message : String(error)));
     }
-  }).catch((error) => {
-    if (error instanceof WorkerTransportError) {
-      return solveInMainThread(lang, aicToml);
-    }
-
-    throw error;
   });
 }

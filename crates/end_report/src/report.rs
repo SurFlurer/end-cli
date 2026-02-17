@@ -4,7 +4,7 @@ use crate::format::{
 };
 use crate::{Error, Lang, Result};
 use end_model::{AicInputs, Catalog};
-use end_opt::{DemandSite, ItemSubproblem, OptimizationResult, SupplySite, build_item_subproblems};
+use end_opt::{LogisticsEdge, LogisticsNode, LogisticsNodeSite, OptimizationResult};
 use std::collections::{BTreeMap, BTreeSet};
 
 /// Render a human-readable optimization report from solved results.
@@ -356,23 +356,22 @@ fn render_logistics(
     result: &OptimizationResult,
     out: &mut String,
 ) -> Result<()> {
-    let subproblems =
-        build_item_subproblems(catalog, inputs, &result.stage2).map_err(Error::LogisticsBuild)?;
-    let subproblem_by_item = subproblems
-        .into_iter()
-        .map(|subproblem| (subproblem.item, subproblem))
+    let node_by_id = result
+        .logistics
+        .nodes
+        .iter()
+        .map(|node| (node.id, node))
         .collect::<BTreeMap<_, _>>();
+    let mut edges_by_item = BTreeMap::<end_model::ItemId, Vec<&LogisticsEdge>>::new();
+    for edge in &result.logistics.edges {
+        edges_by_item.entry(edge.item).or_default().push(edge);
+    }
 
-    let mut item_plans = result.logistics.per_item.iter().collect::<Vec<_>>();
-    item_plans.sort_by_key(|plan| plan.item.as_u32());
-
-    let total_edges = item_plans
+    let total_edges = result.logistics.edges.len();
+    let total_flow = result
+        .logistics
+        .edges
         .iter()
-        .map(|plan| plan.edges.len())
-        .sum::<usize>();
-    let total_flow = item_plans
-        .iter()
-        .flat_map(|plan| plan.edges.iter())
         .map(|edge| edge.flow_per_min.get())
         .sum::<f64>();
 
@@ -382,19 +381,19 @@ fn render_logistics(
             Lang::Zh => format!(
                 "总物流连接 {} 条，覆盖 {} 种物品，总流量 {:.3}/min。",
                 total_edges,
-                item_plans.len(),
+                edges_by_item.len(),
                 total_flow
             ),
             Lang::En => format!(
                 "{} logistics edges across {} items, total flow {:.3}/min.",
                 total_edges,
-                item_plans.len(),
+                edges_by_item.len(),
                 total_flow
             ),
         }
     ));
 
-    if item_plans.is_empty() {
+    if edges_by_item.is_empty() {
         out.push_str(&format!(
             "{}\n",
             t(
@@ -407,35 +406,32 @@ fn render_logistics(
     }
 
     let edge_preview_limit = 6usize;
-    for item_plan in item_plans {
-        let item_name = item_display_name(lang, catalog, item_plan.item)?;
-        let subproblem = subproblem_by_item
-            .get(&item_plan.item)
-            .ok_or(Error::MissingLogisticsItem(item_plan.item))?;
-        let total_item_flow = item_plan
-            .edges
+    for (item, edges) in edges_by_item {
+        let item_name = item_display_name(lang, catalog, item)?;
+        let total_item_flow = edges.iter().map(|edge| edge.flow_per_min.get()).sum::<f64>();
+        let node_count = edges
             .iter()
-            .map(|edge| edge.flow_per_min.get())
-            .sum::<f64>();
-        let grouped_edges = group_logistics_edges(lang, catalog, inputs, subproblem, item_plan)?;
+            .flat_map(|edge| [edge.from.as_u32(), edge.to.as_u32()])
+            .collect::<BTreeSet<_>>()
+            .len();
+        let grouped_edges =
+            group_logistics_edges(lang, catalog, inputs, &node_by_id, item, &edges)?;
 
         out.push_str(&format!(
             "- {}: {}\n",
             item_name,
             match lang {
                 Lang::Zh => format!(
-                    "供给点 {}，需求点 {}，连接 {}（合并后 {} 组），流量 {:.3}/min",
-                    subproblem.supplies.len(),
-                    subproblem.demands.len(),
-                    item_plan.edges.len(),
+                    "节点 {}，连接 {}（合并后 {} 组），流量 {:.3}/min",
+                    node_count,
+                    edges.len(),
                     grouped_edges.len(),
                     total_item_flow,
                 ),
                 Lang::En => format!(
-                    "supplies {}, demands {}, edges {} (merged into {} groups), flow {:.3}/min",
-                    subproblem.supplies.len(),
-                    subproblem.demands.len(),
-                    item_plan.edges.len(),
+                    "nodes {}, edges {} (merged into {} groups), flow {:.3}/min",
+                    node_count,
+                    edges.len(),
                     grouped_edges.len(),
                     total_item_flow,
                 ),
@@ -476,38 +472,6 @@ fn render_logistics(
     Ok(())
 }
 
-fn find_supply_site(
-    subproblem: &ItemSubproblem,
-    node_id: end_opt::SupplyNodeId,
-    item: end_model::ItemId,
-) -> Result<&SupplySite> {
-    subproblem
-        .supplies
-        .iter()
-        .find(|node| node.id == node_id)
-        .map(|node| &node.site)
-        .ok_or(Error::MissingLogisticsSupplyNode {
-            item,
-            node: node_id,
-        })
-}
-
-fn find_demand_site(
-    subproblem: &ItemSubproblem,
-    node_id: end_opt::DemandNodeId,
-    item: end_model::ItemId,
-) -> Result<&DemandSite> {
-    subproblem
-        .demands
-        .iter()
-        .find(|node| node.id == node_id)
-        .map(|node| &node.site)
-        .ok_or(Error::MissingLogisticsDemandNode {
-            item,
-            node: node_id,
-        })
-}
-
 #[derive(Debug, Clone)]
 struct RenderedEndpoint {
     base: String,
@@ -529,16 +493,26 @@ fn group_logistics_edges(
     lang: Lang,
     catalog: &Catalog,
     inputs: &AicInputs,
-    subproblem: &ItemSubproblem,
-    item_plan: &end_opt::ItemFlowPlan,
+    node_by_id: &BTreeMap<end_opt::LogisticsNodeId, &LogisticsNode>,
+    item: end_model::ItemId,
+    item_edges: &[&LogisticsEdge],
 ) -> Result<Vec<GroupedLogisticsEdge>> {
     let mut grouped = BTreeMap::<(String, String, i64), GroupedLogisticsEdge>::new();
 
-    for edge in &item_plan.edges {
-        let from_site = find_supply_site(subproblem, edge.from, item_plan.item)?;
-        let to_site = find_demand_site(subproblem, edge.to, item_plan.item)?;
-        let from = describe_supply_site(lang, catalog, from_site)?;
-        let to = describe_demand_site(lang, inputs, catalog, to_site)?;
+    for edge in item_edges {
+        let from_node = node_by_id
+            .get(&edge.from)
+            .copied()
+            .ok_or(Error::MissingLogisticsNode {
+                item,
+                node: edge.from,
+            })?;
+        let to_node = node_by_id
+            .get(&edge.to)
+            .copied()
+            .ok_or(Error::MissingLogisticsNode { item, node: edge.to })?;
+        let from = describe_logistics_site(lang, inputs, catalog, &from_node.site)?;
+        let to = describe_logistics_site(lang, inputs, catalog, &to_node.site)?;
         let flow_per_min = edge.flow_per_min.get();
         let key = (
             from.base.clone(),
@@ -577,13 +551,14 @@ fn group_logistics_edges(
     Ok(groups)
 }
 
-fn describe_supply_site(
+fn describe_logistics_site(
     lang: Lang,
+    inputs: &AicInputs,
     catalog: &Catalog,
-    site: &SupplySite,
+    site: &LogisticsNodeSite,
 ) -> Result<RenderedEndpoint> {
     let rendered = match site {
-        SupplySite::ExternalSupply { item } => {
+        LogisticsNodeSite::ExternalSupply { item } => {
             let item = item_display_name(lang, catalog, *item)?;
             match lang {
                 Lang::Zh => RenderedEndpoint {
@@ -596,10 +571,9 @@ fn describe_supply_site(
                 },
             }
         }
-        SupplySite::RecipeOutput {
+        LogisticsNodeSite::RecipeMachine {
             recipe_index,
             machine,
-            ..
         } => {
             let recipe = catalog
                 .recipe(*recipe_index)
@@ -607,47 +581,16 @@ fn describe_supply_site(
             let facility = facility_display_name(lang, catalog, recipe.facility)?;
             match lang {
                 Lang::Zh => RenderedEndpoint {
-                    base: format!("{} r{} 产出", facility, recipe_index.as_u32()),
+                    base: format!("{} r{}", facility, recipe_index.as_u32()),
                     machine_ordinal: Some(machine.get()),
                 },
                 Lang::En => RenderedEndpoint {
-                    base: format!("{} r{} output", facility, recipe_index.as_u32()),
+                    base: format!("{} r{}", facility, recipe_index.as_u32()),
                     machine_ordinal: Some(machine.get()),
                 },
             }
         }
-    };
-    Ok(rendered)
-}
-
-fn describe_demand_site(
-    lang: Lang,
-    inputs: &AicInputs,
-    catalog: &Catalog,
-    site: &DemandSite,
-) -> Result<RenderedEndpoint> {
-    let rendered = match site {
-        DemandSite::RecipeInput {
-            recipe_index,
-            machine,
-            ..
-        } => {
-            let recipe = catalog
-                .recipe(*recipe_index)
-                .ok_or(Error::MissingRecipe(*recipe_index))?;
-            let facility = facility_display_name(lang, catalog, recipe.facility)?;
-            match lang {
-                Lang::Zh => RenderedEndpoint {
-                    base: format!("{} r{} 投入", facility, recipe_index.as_u32()),
-                    machine_ordinal: Some(machine.get()),
-                },
-                Lang::En => RenderedEndpoint {
-                    base: format!("{} r{} input", facility, recipe_index.as_u32()),
-                    machine_ordinal: Some(machine.get()),
-                },
-            }
-        }
-        DemandSite::OutpostSale {
+        LogisticsNodeSite::OutpostSale {
             outpost_index,
             item,
         } => {
@@ -666,7 +609,7 @@ fn describe_demand_site(
                 },
             }
         }
-        DemandSite::ThermalBankFuel {
+        LogisticsNodeSite::ThermalBankFuel {
             power_recipe_index,
             bank,
             ..

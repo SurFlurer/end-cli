@@ -100,7 +100,16 @@
   <article class="sub-panel">
     <div class="sub-header">
       <h3>{t("外部供给 / min", "External Supply / min")}</h3>
-      <button class="tiny" onclick={actions.supply.add}>+</button>
+      <button
+        class="tiny"
+        onclick={actions.supply.add}
+        aria-label={t("添加供给条目", "Add supply row")}
+        title={t("添加供给条目", "Add supply row")}
+      >
+        <span class="material-symbols-outlined icon" aria-hidden="true"
+          >add</span
+        >
+      </button>
     </div>
 
     {#if draft.supply.length === 0}
@@ -133,9 +142,16 @@
             )}
         />
 
-        <button class="danger" onclick={() => actions.supply.remove(rowIndex)}
-          >×</button
+        <button
+          class="danger tiny row-action"
+          onclick={() => actions.supply.remove(rowIndex)}
+          aria-label={t("删除供给条目", "Remove supply row")}
+          title={t("删除供给条目", "Remove supply row")}
         >
+          <span class="material-symbols-outlined icon" aria-hidden="true"
+            >close</span
+          >
+        </button>
       </div>
     {/each}
   </article>
@@ -143,7 +159,16 @@
   <article class="sub-panel">
     <div class="sub-header">
       <h3>{t("据点", "Outposts")}</h3>
-      <button class="tiny" onclick={actions.outposts.add}>+</button>
+      <button
+        class="tiny"
+        onclick={actions.outposts.add}
+        aria-label={t("添加据点", "Add outpost")}
+        title={t("添加据点", "Add outpost")}
+      >
+        <span class="material-symbols-outlined icon" aria-hidden="true"
+          >add</span
+        >
+      </button>
     </div>
 
     {#if draft.outposts.length === 0}
@@ -180,15 +205,20 @@
                   `${t("据点", "Outpost")} ${(selectedOutpostIndex >= 0 ? selectedOutpostIndex : 0) + 1}`}
               </h4>
               <button
-                class="danger"
+                class="danger tiny"
                 onclick={() => actions.outposts.remove(selectedOutpostIndex)}
-                >×</button
+                aria-label={t("删除据点", "Remove outpost")}
+                title={t("删除据点", "Remove outpost")}
               >
+                <span class="material-symbols-outlined icon" aria-hidden="true"
+                  >close</span
+                >
+              </button>
             </div>
 
             <div class="row-grid two">
               <label>
-                {t("Key", "Key")}
+                {t("键", "Key")}
                 <input
                   type="text"
                   value={selectedOutpost.key}
@@ -200,35 +230,6 @@
                     )}
                 />
               </label>
-
-              <label>
-                EN
-                <input
-                  type="text"
-                  value={selectedOutpost.en}
-                  oninput={(event) =>
-                    actions.outposts.setField(
-                      selectedOutpostIndex,
-                      "en",
-                      (event.currentTarget as HTMLInputElement).value,
-                    )}
-                />
-              </label>
-
-              <label>
-                ZH
-                <input
-                  type="text"
-                  value={selectedOutpost.zh}
-                  oninput={(event) =>
-                    actions.outposts.setField(
-                      selectedOutpostIndex,
-                      "zh",
-                      (event.currentTarget as HTMLInputElement).value,
-                    )}
-                />
-              </label>
-
               <label>
                 {t("每小时交易上限", "Money Cap / h")}
                 <input
@@ -243,6 +244,34 @@
                     )}
                 />
               </label>
+
+              <label>
+                {t("英文显示名", "En Display Name")}
+                <input
+                  type="text"
+                  value={selectedOutpost.en}
+                  oninput={(event) =>
+                    actions.outposts.setField(
+                      selectedOutpostIndex,
+                      "en",
+                      (event.currentTarget as HTMLInputElement).value,
+                    )}
+                />
+              </label>
+
+              <label>
+                {t("中文显示名", "Zh Display Name")}
+                <input
+                  type="text"
+                  value={selectedOutpost.zh}
+                  oninput={(event) =>
+                    actions.outposts.setField(
+                      selectedOutpostIndex,
+                      "zh",
+                      (event.currentTarget as HTMLInputElement).value,
+                    )}
+                />
+              </label>
             </div>
 
             <div class="sub-header mini">
@@ -250,8 +279,13 @@
               <button
                 class="tiny"
                 onclick={() => actions.prices.add(selectedOutpostIndex)}
-                >+</button
+                aria-label={t("添加价格条目", "Add price row")}
+                title={t("添加价格条目", "Add price row")}
               >
+                <span class="material-symbols-outlined icon" aria-hidden="true"
+                  >add</span
+                >
+              </button>
             </div>
 
             {#if selectedOutpost.prices.length === 0}
@@ -287,11 +321,17 @@
                 />
 
                 <button
-                  class="danger"
+                  class="danger tiny row-action"
                   onclick={() =>
                     actions.prices.remove(selectedOutpostIndex, priceIndex)}
-                  >×</button
+                  aria-label={t("删除价格条目", "Remove price row")}
+                  title={t("删除价格条目", "Remove price row")}
                 >
+                  <span
+                    class="material-symbols-outlined icon"
+                    aria-hidden="true">close</span
+                  >
+                </button>
               </div>
             {/each}
           </article>
@@ -304,60 +344,32 @@
 <style>
   .editor-shell {
     display: grid;
-    gap: 12px;
-  }
-
-  .panel-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-
-  .subtitle {
-    color: var(--ink-soft);
-    font-size: 12px;
-    margin-top: 3px;
-  }
-
-  .panel-actions {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
+    gap: var(--space-3);
   }
 
   .sub-panel {
-    border: 1px solid color-mix(in srgb, var(--line) 82%, #fff);
-    border-radius: 12px;
-    padding: 11px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
     display: grid;
-    gap: 9px;
-    background: color-mix(in srgb, var(--panel) 84%, #fafffd);
-  }
-
-  .sub-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
+    gap: var(--space-2);
+    background: color-mix(in srgb, var(--panel-strong) 92%, #eef7f2);
   }
 
   .sub-header.mini {
-    margin-top: 4px;
+    margin-top: var(--space-1);
   }
 
   .field-row {
     display: grid;
     grid-template-columns: 1fr 190px;
-    gap: 8px;
+    gap: var(--space-2);
     align-items: center;
   }
 
   .row-grid {
     display: grid;
-    gap: 8px;
+    gap: var(--space-2);
     grid-template-columns: 1fr 140px 36px;
   }
 
@@ -367,30 +379,30 @@
 
   .outpost-layout {
     display: grid;
-    gap: 10px;
+    gap: var(--space-3);
     grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
   }
 
   .outpost-list {
     display: grid;
-    gap: 8px;
+    gap: var(--space-2);
     align-content: start;
   }
 
   .outpost-pick {
-    border: 1px solid #c9ddd1;
-    border-radius: 10px;
-    background: linear-gradient(170deg, #f7fcf8 0%, #f3faf6 100%);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    background: var(--panel-strong);
     display: grid;
-    gap: 3px;
+    gap: var(--space-1);
     text-align: left;
-    padding: 10px;
+    padding: var(--space-3);
   }
 
   .outpost-pick.active {
-    border-color: #52ab8f;
-    background: linear-gradient(170deg, #ebf9f2 0%, #e0f5ec 100%);
-    box-shadow: inset 0 0 0 1px #8ccdb8;
+    border-color: color-mix(in srgb, var(--accent) 58%, #79c2ab);
+    background: color-mix(in srgb, var(--accent-soft) 62%, #f9fdfb);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, #cde7dd);
   }
 
   .outpost-pick-title {
@@ -406,36 +418,36 @@
   }
 
   .outpost-card {
-    border: 1px solid #cfe2d8;
-    border-radius: 10px;
-    padding: 10px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
     display: grid;
-    gap: 8px;
-    background: #fcfefc;
+    gap: var(--space-2);
+    background: var(--panel-strong);
   }
 
   .outpost-head {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 8px;
+    gap: var(--space-2);
   }
 
   input,
   select {
-    border: 1px solid #bdd3c8;
-    border-radius: 8px;
-    padding: 7px 9px;
-    background: #fff;
+    border: 1px solid color-mix(in srgb, var(--line) 90%, #b6cec2);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    background: var(--panel-strong);
     color: inherit;
   }
 
   button,
   .file-btn {
-    border: 1px solid #bdd3c8;
-    border-radius: 8px;
-    padding: 7px 9px;
-    background: #fff;
+    border: 1px solid color-mix(in srgb, var(--line) 90%, #b6cec2);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    background: var(--panel-strong);
     color: inherit;
     font: inherit;
     line-height: 1.2;
@@ -448,19 +460,19 @@
   }
 
   .secondary {
-    background: #f8fbf9;
+    background: var(--surface-soft);
   }
 
   .file-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 36px;
+    min-height: var(--control-size);
   }
 
   .icon-btn {
-    width: 36px;
-    height: 36px;
+    width: var(--control-size);
+    height: var(--control-size);
     padding: 0;
     display: inline-flex;
     align-items: center;
@@ -472,6 +484,11 @@
     font-size: 20px;
     line-height: 1;
     display: block;
+    font-variation-settings:
+      "FILL" 0,
+      "wght" 400,
+      "GRAD" 0,
+      "opsz" 20;
   }
 
   .file-btn input {
@@ -479,22 +496,29 @@
   }
 
   .tiny {
-    width: 32px;
+    width: var(--control-size);
+    height: var(--control-size);
     padding: 0;
-    font-size: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     line-height: 1;
-    font-weight: 500;
+    flex: 0 0 auto;
+  }
+
+  .row-action {
+    width: 100%;
   }
 
   .danger {
     color: var(--danger);
-    border-color: #dca3b4;
-    background: #fff5f8;
+    border-color: color-mix(in srgb, var(--danger) 38%, #d7b0bc);
+    background: color-mix(in srgb, var(--danger) 8%, #fff);
   }
 
   .hint {
     margin: 0;
-    color: var(--ink-soft);
+    color: var(--muted-text);
     font-size: 13px;
   }
 
@@ -510,7 +534,7 @@
     }
 
     .row-grid {
-      grid-template-columns: 1fr 104px 34px;
+      grid-template-columns: 1fr 104px 36px;
     }
 
     .row-grid.two {

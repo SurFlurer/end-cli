@@ -60,8 +60,7 @@ export interface SummaryDto {
 
 export type LogisticsNodeKind =
   | 'external_supply'
-  | 'recipe_output'
-  | 'recipe_input'
+  | 'recipe_machine'
   | 'outpost_sale'
   | 'thermal_bank_fuel';
 
@@ -75,8 +74,6 @@ export interface LogisticsItemSummaryDto {
 
 export interface LogisticsNodeDto {
   id: string;
-  itemKey: string;
-  itemName: string;
   kind: LogisticsNodeKind | string;
   label: string;
 }
