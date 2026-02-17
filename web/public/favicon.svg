@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="amber" x1="48" y1="32" x2="220" y2="220" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F8E8C7"/>
+      <stop offset="0.32" stop-color="#D8922B"/>
+      <stop offset="0.70" stop-color="#A06024"/>
+      <stop offset="1" stop-color="#3F2A1C"/>
+    </linearGradient>
+
+    <linearGradient id="amber2" x1="80" y1="48" x2="200" y2="200" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFEECF" stop-opacity="0.9"/>
+      <stop offset="0.55" stop-color="#E3A63A" stop-opacity="0.6"/>
+      <stop offset="1" stop-color="#6A3B1C" stop-opacity="0.65"/>
+    </linearGradient>
+
+    <linearGradient id="shine" x1="52" y1="44" x2="140" y2="160" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.9"/>
+      <stop offset="0.45" stop-color="#FFFFFF" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#shadow)" shape-rendering="geometricPrecision">
+    <!-- outer crystal -->
+    <path d="M77 75 L196 33 L217 39 L229 67 L211 172 L173 208 L116 214 L38 171 L33 135 Z"
+          fill="url(#amber)" />
+
+    <!-- big internal body -->
+    <path d="M71 86 L188 46 L220 70 L206 170 L168 202 L118 206 L50 168 L47 135 Z"
+          fill="url(#amber2)" opacity="0.75"/>
+
+    <!-- facets -->
+    <path d="M77 75 L196 33 L166 96 L116 100 Z" fill="#FCE7BE" opacity="0.55"/>
+    <path d="M196 33 L229 67 L166 96 Z" fill="#B86E25" opacity="0.45"/>
+    <path d="M166 96 L229 67 L211 172 L170 148 Z" fill="#8B4D22" opacity="0.45"/>
+    <path d="M116 100 L166 96 L170 148 L112 154 Z" fill="#E6A83B" opacity="0.38"/>
+    <path d="M112 154 L170 148 L173 208 L122 205 Z" fill="#6E3F20" opacity="0.42"/>
+    <path d="M33 135 L77 75 L116 100 L84 150 L38 171 Z" fill="#F7DFAE" opacity="0.25"/>
+
+    <!-- highlight -->
+    <path d="M62 84 L104 66 L116 124 L72 144 Z" fill="url(#shine)"/>
+
+    <!-- facet lines -->
+    <path d="M77 75 L116 100 L166 96 L196 33
+             M116 100 L112 154 L170 148
+             M170 148 L211 172
+             M84 150 L112 154
+             M38 171 L84 150
+             M33 135 L84 150"
+          fill="none" stroke="#FFFFFF" stroke-opacity="0.18" stroke-width="2" stroke-linejoin="round"/>
+
+    <!-- subtle rim gloss -->
+    <path d="M77 75 L196 33 L217 39 L229 67 L211 172 L173 208 L116 214 L38 171 L33 135 Z"
+          fill="none" stroke="#FFFFFF" stroke-opacity="0.10" stroke-width="2.5" stroke-linejoin="round"/>
+  </g>
+</svg>
