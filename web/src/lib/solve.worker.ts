@@ -69,7 +69,7 @@ function loadWasmScriptOnce(): void {
     return;
   }
 
-  importScripts('/wasm/end_web.js');
+  importScripts('../wasm/end_web.js');
   scriptLoaded = true;
 }
 
@@ -91,7 +91,7 @@ async function getModule(): Promise<EndWebModule> {
 
     return factory({
       noInitialRun: true,
-      locateFile: (path: string) => `/wasm/${path}`,
+      locateFile: (path: string) => `../wasm/${path}`,
       printErr: (...args: unknown[]) => {
         console.error('[end-web wasm worker]', ...args);
       }
