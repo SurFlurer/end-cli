@@ -114,7 +114,7 @@ async function getModule(): Promise<EndWebModule> {
   }
 
   modulePromise = (async () => {
-    await loadScriptOnce('/wasm/end_web.js');
+    await loadScriptOnce('./wasm/end_web.js');
 
     const factory = window.createEndWebModule;
     if (!factory) {
@@ -125,7 +125,7 @@ async function getModule(): Promise<EndWebModule> {
 
     const module = await factory({
       noInitialRun: true,
-      locateFile: (path: string) => `/wasm/${path}`,
+      locateFile: (path: string) => `./wasm/${path}`,
       printErr: (...args: unknown[]) => {
         console.error('[end-web wasm]', ...args);
       }
