@@ -1,13 +1,5 @@
-use end_model::{AicInputs, FacilityId, ItemId, OutpostId, PowerRecipeId, RecipeId};
-
-/// Input bundle for optimization.
-#[derive(Debug, Clone)]
-pub struct SolveInputs {
-    /// Core generation capacity in watts.
-    pub p_core_w: u32,
-    /// Scenario inputs (external power, supply, outposts).
-    pub aic: AicInputs,
-}
+use end_model::{FacilityId, ItemId, OutpostId, PowerRecipeId, RecipeId};
+use std::num::NonZeroU32;
 
 /// Finite, strictly positive floating-point value.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
@@ -33,16 +25,6 @@ pub struct OutpostValue {
     pub cap_per_min: f64,
     /// `value_per_min / cap_per_min`, in `[0, +inf)`.
     pub ratio: f64,
-}
-
-/// One sale line contribution in the ranked top-sales list.
-#[derive(Debug, Clone)]
-pub struct SaleValue {
-    pub outpost_index: OutpostId,
-    /// Item being sold.
-    pub item: ItemId,
-    /// Revenue contribution.
-    pub value_per_min: f64,
 }
 
 /// One sale line contribution with quantity information.
@@ -71,7 +53,7 @@ pub struct FacilityMachineCount {
 pub struct RecipeUsage {
     pub recipe_index: RecipeId,
     /// Integer machine count assigned to the recipe.
-    pub machines: u32,
+    pub machines: NonZeroU32,
     /// Recipe runs per minute.
     pub executions_per_min: f64,
 }
@@ -83,7 +65,7 @@ pub struct ThermalBankUsage {
     /// Fuel item consumed by the thermal bank.
     pub ingredient: ItemId,
     /// Number of thermal banks.
-    pub banks: u32,
+    pub banks: NonZeroU32,
     /// Per-bank power output.
     pub power_w: u32,
     /// Per-bank cycle duration in seconds.
@@ -129,23 +111,6 @@ impl LogisticsNodeId {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct MachineOrdinal(u32);
-
-impl MachineOrdinal {
-    pub(crate) fn from_1_based(value: u32) -> Self {
-        Self(value)
-    }
-
-    pub fn new(value: u32) -> Option<Self> {
-        (value > 0).then_some(Self(value))
-    }
-
-    pub fn get(self) -> u32 {
-        self.0
-    }
-}
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SupplySite {
     ExternalSupply {
@@ -153,7 +118,6 @@ pub enum SupplySite {
     },
     RecipeOutput {
         recipe_index: RecipeId,
-        machine: MachineOrdinal,
         item: ItemId,
     },
 }
@@ -162,7 +126,6 @@ pub enum SupplySite {
 pub enum DemandSite {
     RecipeInput {
         recipe_index: RecipeId,
-        machine: MachineOrdinal,
         item: ItemId,
     },
     OutpostSale {
@@ -171,7 +134,6 @@ pub enum DemandSite {
     },
     ThermalBankFuel {
         power_recipe_index: PowerRecipeId,
-        bank: MachineOrdinal,
         item: ItemId,
     },
 }
@@ -202,17 +164,15 @@ pub enum LogisticsNodeSite {
     ExternalSupply {
         item: ItemId,
     },
-    RecipeMachine {
+    RecipeGroup {
         recipe_index: RecipeId,
-        machine: MachineOrdinal,
     },
     OutpostSale {
         outpost_index: OutpostId,
         item: ItemId,
     },
-    ThermalBankFuel {
+    ThermalBankGroup {
         power_recipe_index: PowerRecipeId,
-        bank: MachineOrdinal,
         item: ItemId,
     },
 }
@@ -283,9 +243,8 @@ pub struct StageSolution {
     pub power_margin_w: i64,
     /// Per-outpost value realization.
     pub outpost_values: Vec<OutpostValue>,
-    /// Top sales by value contribution.
-    pub top_sales: Vec<SaleValue>,
-    /// Full sale lines with quantities, used to reconstruct logistics demands.
+    /// Full sale lines with quantities and unit prices.
+    /// Used to reconstruct logistics demands and derive top-sales summaries.
     pub outpost_sales_qty: Vec<OutpostSaleQty>,
     /// Machine counts by facility.
     pub machines_by_facility: Vec<FacilityMachineCount>,

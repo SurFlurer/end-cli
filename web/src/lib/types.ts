@@ -33,6 +33,8 @@ export interface FacilityUsageDto {
   key: string;
   name: string;
   machines: number;
+  powerW: number;
+  totalPowerW: number;
 }
 
 export interface ExternalSupplySlackDto {
@@ -60,9 +62,9 @@ export interface SummaryDto {
 
 export type LogisticsNodeKind =
   | 'external_supply'
-  | 'recipe_machine'
+  | 'recipe_group'
   | 'outpost_sale'
-  | 'thermal_bank_fuel';
+  | 'thermal_bank_group';
 
 export interface LogisticsItemSummaryDto {
   itemKey: string;

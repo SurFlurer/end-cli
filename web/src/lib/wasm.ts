@@ -1,4 +1,5 @@
 import type { BootstrapPayload, LangTag, SolvePayload } from './types';
+import { publicAsset, publicDir } from './public-asset';
 import { callJsonApi, type EndWebModule } from './wasm-core';
 
 interface SolveRequest {
@@ -6,6 +7,11 @@ interface SolveRequest {
   kind: 'solve';
   lang: LangTag;
   aicToml: string;
+}
+
+interface WorkerInitRequest {
+  kind: 'init';
+  wasmBase: string;
 }
 
 interface SolveOk {
@@ -32,6 +38,7 @@ let modulePromise: Promise<EndWebModule> | null = null;
 let scriptPromise: Promise<void> | null = null;
 let solveWorker: Worker | null = null;
 let solveRequestId = 1;
+const wasmBase = publicDir('wasm');
 
 const pendingSolve = new Map<
   number,
@@ -79,6 +86,18 @@ function getSolveWorker(): Worker {
     rejectAllPendingSolves(new WorkerTransportError(event.message || 'solve worker crashed'));
   };
 
+  try {
+    const initRequest: WorkerInitRequest = {
+      kind: 'init',
+      wasmBase
+    };
+    solveWorker.postMessage(initRequest);
+  } catch (error) {
+    solveWorker.terminate();
+    solveWorker = null;
+    throw new WorkerTransportError(error instanceof Error ? error.message : String(error));
+  }
+
   return solveWorker;
 }
 
@@ -114,7 +133,7 @@ async function getModule(): Promise<EndWebModule> {
   }
 
   modulePromise = (async () => {
-    await loadScriptOnce('./wasm/end_web.js');
+    await loadScriptOnce(publicAsset('wasm/end_web.js'));
 
     const factory = window.createEndWebModule;
     if (!factory) {
@@ -125,7 +144,7 @@ async function getModule(): Promise<EndWebModule> {
 
     const module = await factory({
       noInitialRun: true,
-      locateFile: (path: string) => `./wasm/${path}`,
+      locateFile: (path: string) => `${wasmBase}${path}`,
       printErr: (...args: unknown[]) => {
         console.error('[end-web wasm]', ...args);
       }

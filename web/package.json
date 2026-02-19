@@ -10,6 +10,7 @@
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "test:unit": "vitest run",
     "test:e2e": "mkdir -p /tmp/playwright-home/.pki/nssdb && HOME=/tmp/playwright-home PLAYWRIGHT_BROWSERS_PATH=/home/xks/.cache/ms-playwright playwright test",
+    "test:console": "mkdir -p /tmp/playwright-home/.pki/nssdb && HOME=/tmp/playwright-home PLAYWRIGHT_BROWSERS_PATH=/home/xks/.cache/ms-playwright playwright test console-errors.spec.ts",
     "build:wasm": "bash ../scripts/build_web_wasm.sh"
   },
   "dependencies": {

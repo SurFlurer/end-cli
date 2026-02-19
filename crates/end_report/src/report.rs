@@ -3,9 +3,16 @@ use crate::format::{
     facility_display_name, format_recipe_label, item_display_name, outpost_display_name, t,
 };
 use crate::{Error, Lang, Result};
-use end_model::{AicInputs, Catalog};
+use end_model::{AicInputs, Catalog, ItemId, OutpostId};
 use end_opt::{LogisticsEdge, LogisticsNode, LogisticsNodeSite, OptimizationResult};
 use std::collections::{BTreeMap, BTreeSet};
+
+#[derive(Debug, Clone, Copy)]
+struct ReportSaleValue {
+    outpost_index: OutpostId,
+    item: ItemId,
+    value_per_min: f64,
+}
 
 /// Render a human-readable optimization report from solved results.
 pub fn build_report(
@@ -97,7 +104,8 @@ pub fn build_report(
         ));
     }
 
-    if !stage2.top_sales.is_empty() {
+    let top_sales = top_sales_by_value(&stage2.outpost_sales_qty);
+    if !top_sales.is_empty() {
         out.push_str(&format!(
             "{}\n",
             a.dim(t(
@@ -106,7 +114,7 @@ pub fn build_report(
                 "Top sales (by revenue):"
             ))
         ));
-        for sale in &stage2.top_sales {
+        for sale in top_sales {
             let outpost = inputs
                 .outpost(sale.outpost_index)
                 .ok_or(Error::MissingOutpost(sale.outpost_index))?;
@@ -162,7 +170,7 @@ pub fn build_report(
             out.push_str(&format!(
                 "- {} x{}: {}\n",
                 item,
-                tb.banks,
+                tb.banks.get(),
                 match lang {
                     Lang::Zh => format!(
                         "每台 {}W，耗时 {}s（消耗 {:.3}/min）",
@@ -235,7 +243,7 @@ pub fn build_report(
                 "- {} | {} {} | {:.3} {}\n",
                 label,
                 t(lang, "机器", "machines"),
-                r.machines,
+                r.machines.get(),
                 r.executions_per_min,
                 t(lang, "次/min", "runs/min")
             ));
@@ -349,6 +357,19 @@ pub fn build_report(
     Ok(out)
 }
 
+fn top_sales_by_value(lines: &[end_opt::OutpostSaleQty]) -> Vec<ReportSaleValue> {
+    let mut sales = lines
+        .iter()
+        .map(|line| ReportSaleValue {
+            outpost_index: line.outpost_index,
+            item: line.item,
+            value_per_min: line.qty_per_min.get() * line.price as f64,
+        })
+        .collect::<Vec<_>>();
+    sales.sort_by(|a, b| b.value_per_min.total_cmp(&a.value_per_min));
+    sales
+}
+
 fn render_logistics(
     lang: Lang,
     catalog: &Catalog,
@@ -408,7 +429,10 @@ fn render_logistics(
     let edge_preview_limit = 6usize;
     for (item, edges) in edges_by_item {
         let item_name = item_display_name(lang, catalog, item)?;
-        let total_item_flow = edges.iter().map(|edge| edge.flow_per_min.get()).sum::<f64>();
+        let total_item_flow = edges
+            .iter()
+            .map(|edge| edge.flow_per_min.get())
+            .sum::<f64>();
         let node_count = edges
             .iter()
             .flat_map(|edge| [edge.from.as_u32(), edge.to.as_u32()])
@@ -510,7 +534,10 @@ fn group_logistics_edges(
         let to_node = node_by_id
             .get(&edge.to)
             .copied()
-            .ok_or(Error::MissingLogisticsNode { item, node: edge.to })?;
+            .ok_or(Error::MissingLogisticsNode {
+                item,
+                node: edge.to,
+            })?;
         let from = describe_logistics_site(lang, inputs, catalog, &from_node.site)?;
         let to = describe_logistics_site(lang, inputs, catalog, &to_node.site)?;
         let flow_per_min = edge.flow_per_min.get();
@@ -571,10 +598,7 @@ fn describe_logistics_site(
                 },
             }
         }
-        LogisticsNodeSite::RecipeMachine {
-            recipe_index,
-            machine,
-        } => {
+        LogisticsNodeSite::RecipeGroup { recipe_index } => {
             let recipe = catalog
                 .recipe(*recipe_index)
                 .ok_or(Error::MissingRecipe(*recipe_index))?;
@@ -582,11 +606,11 @@ fn describe_logistics_site(
             match lang {
                 Lang::Zh => RenderedEndpoint {
                     base: format!("{} r{}", facility, recipe_index.as_u32()),
-                    machine_ordinal: Some(machine.get()),
+                    machine_ordinal: None,
                 },
                 Lang::En => RenderedEndpoint {
                     base: format!("{} r{}", facility, recipe_index.as_u32()),
-                    machine_ordinal: Some(machine.get()),
+                    machine_ordinal: None,
                 },
             }
         }
@@ -609,18 +633,16 @@ fn describe_logistics_site(
                 },
             }
         }
-        LogisticsNodeSite::ThermalBankFuel {
-            power_recipe_index,
-            bank,
-            ..
+        LogisticsNodeSite::ThermalBankGroup {
+            power_recipe_index, ..
         } => match lang {
             Lang::Zh => RenderedEndpoint {
-                base: format!("热容池 p{} 燃料", power_recipe_index.as_u32()),
-                machine_ordinal: Some(bank.get()),
+                base: format!("热容池组 p{}", power_recipe_index.as_u32()),
+                machine_ordinal: None,
             },
             Lang::En => RenderedEndpoint {
-                base: format!("Thermal bank p{} fuel", power_recipe_index.as_u32()),
-                machine_ordinal: Some(bank.get()),
+                base: format!("Thermal bank group p{}", power_recipe_index.as_u32()),
+                machine_ordinal: None,
             },
         },
     };

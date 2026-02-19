@@ -1,8 +1,7 @@
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 use end_io::{default_aic_toml, load_aic, load_catalog};
-use end_model::P_CORE_W;
-use end_opt::{SolveInputs, run_two_stage};
+use end_opt::run_two_stage;
 use end_report::{Lang, build_report};
 use std::path::PathBuf;
 
@@ -104,12 +103,7 @@ fn solve(lang: Lang, data_dir: Option<PathBuf>, aic_path: PathBuf) -> Result<()>
     let aic =
         load_aic(&aic_path, &catalog).with_context(|| format!("loading {}", aic_path.display()))?;
 
-    let inputs = SolveInputs {
-        p_core_w: P_CORE_W,
-        aic: aic.clone(),
-    };
-
-    let solution = run_two_stage(&catalog, &inputs).context("running optimization")?;
+    let solution = run_two_stage(&catalog, &aic).context("running optimization")?;
     let report = build_report(lang, &catalog, &aic, &solution).context("building report")?;
 
     println!("{}", report);

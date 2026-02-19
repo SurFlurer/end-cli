@@ -1,12 +1,10 @@
 use end_io::{default_aic_toml, load_aic_from_str, load_catalog};
-use end_model::{AicInputs, Catalog, FacilityId, ItemId, OutpostId, RecipeId, P_CORE_W};
-use end_opt::{
-    LogisticsNodeSite, OptimizationResult, SolveInputs, run_two_stage,
-};
-use end_report::{build_report, Lang};
+use end_model::{AicInputs, Catalog, FacilityId, ItemId, OutpostId, RecipeId};
+use end_opt::{LogisticsNodeSite, OptimizationResult, run_two_stage};
+use end_report::{Lang, build_report};
 use serde::Serialize;
 use std::collections::{BTreeMap, BTreeSet};
-use std::ffi::{c_char, CStr, CString, NulError};
+
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -52,12 +50,16 @@ pub enum Error {
 
     #[error("argument `{name}` is not valid UTF-8")]
     InvalidUtf8 { name: &'static str },
-
-    #[error("response contains embedded NUL byte")]
-    EmbeddedNul(#[source] NulError),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
+
+#[derive(Debug, Clone, Copy)]
+struct ComputedSaleValue {
+    outpost_index: OutpostId,
+    item: ItemId,
+    value_per_min: f64,
+}
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -132,6 +134,10 @@ pub struct FacilityUsageDto {
     pub key: String,
     pub name: String,
     pub machines: u32,
+    /// 每台机器的耗电（瓦）
+    pub power_w: u32,
+    /// 该类机器的总耗电（瓦）
+    pub total_power_w: u32,
 }
 
 #[derive(Debug, Serialize)]
@@ -221,12 +227,7 @@ pub fn solve_from_aic_toml(lang: Lang, aic_toml: &str) -> Result<SolvePayload> {
     let catalog = load_catalog(None).map_err(Error::Catalog)?;
     let aic = load_aic_from_str(aic_toml, &catalog).map_err(Error::Aic)?;
 
-    let inputs = SolveInputs {
-        p_core_w: P_CORE_W,
-        aic: aic.clone(),
-    };
-
-    let solved = run_two_stage(&catalog, &inputs).map_err(Error::Optimize)?;
+    let solved = run_two_stage(&catalog, &aic).map_err(Error::Optimize)?;
     let report_text = build_report(lang, &catalog, &aic, &solved).map_err(Error::Report)?;
 
     Ok(SolvePayload {
@@ -262,9 +263,8 @@ fn build_summary(
         })
         .collect::<Result<Vec<_>>>()?;
 
-    let top_sales = stage2
-        .top_sales
-        .iter()
+    let top_sales = top_sales_by_value(&stage2.outpost_sales_qty)
+        .into_iter()
         .map(|sale| {
             let outpost = inputs
                 .outpost(sale.outpost_index)
@@ -283,10 +283,15 @@ fn build_summary(
         .machines_by_facility
         .iter()
         .map(|usage| {
+            let facility_def = catalog
+                .facility(usage.facility)
+                .ok_or(Error::MissingFacility(usage.facility))?;
             Ok::<_, Error>(FacilityUsageDto {
                 key: facility_key(catalog, usage.facility)?.to_string(),
                 name: facility_name(lang, catalog, usage.facility)?.to_string(),
                 machines: usage.machines,
+                power_w: facility_def.power_w.get(),
+                total_power_w: facility_def.power_w.get() * usage.machines,
             })
         })
         .collect::<Result<Vec<_>>>()?;
@@ -321,12 +326,40 @@ fn build_summary(
     })
 }
 
+fn top_sales_by_value(lines: &[end_opt::OutpostSaleQty]) -> Vec<ComputedSaleValue> {
+    let mut sales = lines
+        .iter()
+        .map(|line| ComputedSaleValue {
+            outpost_index: line.outpost_index,
+            item: line.item,
+            value_per_min: line.qty_per_min.get() * line.price as f64,
+        })
+        .collect::<Vec<_>>();
+    sales.sort_by(|a, b| b.value_per_min.total_cmp(&a.value_per_min));
+    sales
+}
+
 fn build_logistics_graph(
     lang: Lang,
     catalog: &Catalog,
     inputs: &AicInputs,
     solved: &OptimizationResult,
 ) -> Result<LogisticsGraphDto> {
+    // 构建配方机器数查找表
+    let recipe_machines: std::collections::BTreeMap<end_model::RecipeId, u32> = solved
+        .stage2
+        .recipes_used
+        .iter()
+        .map(|r| (r.recipe_index, r.machines.get()))
+        .collect();
+    // 构建热容池数量查找表
+    let thermal_banks: std::collections::BTreeMap<end_model::PowerRecipeId, u32> = solved
+        .stage2
+        .thermal_banks_used
+        .iter()
+        .map(|t| (t.power_recipe_index, t.banks.get()))
+        .collect();
+
     let node_by_id = solved
         .logistics
         .nodes
@@ -339,7 +372,14 @@ fn build_logistics_graph(
         .nodes
         .iter()
         .map(|node| {
-            let (kind, label) = describe_logistics_site(lang, catalog, inputs, &node.site)?;
+            let (kind, label) = describe_logistics_site(
+                lang,
+                catalog,
+                inputs,
+                &node.site,
+                &recipe_machines,
+                &thermal_banks,
+            )?;
             Ok::<_, Error>(LogisticsNodeDto {
                 id: logistics_node_id(node.id),
                 kind,
@@ -400,7 +440,11 @@ fn build_logistics_graph(
         .collect::<Result<Vec<_>>>()?;
     items.sort_by(|lhs, rhs| lhs.item_key.cmp(&rhs.item_key));
 
-    Ok(LogisticsGraphDto { items, nodes, edges })
+    Ok(LogisticsGraphDto {
+        items,
+        nodes,
+        edges,
+    })
 }
 
 #[derive(Debug, Default)]
@@ -415,6 +459,8 @@ fn describe_logistics_site(
     catalog: &Catalog,
     inputs: &AicInputs,
     site: &LogisticsNodeSite,
+    recipe_machines: &std::collections::BTreeMap<end_model::RecipeId, u32>,
+    thermal_banks: &std::collections::BTreeMap<end_model::PowerRecipeId, u32>,
 ) -> Result<(String, String)> {
     match site {
         LogisticsNodeSite::ExternalSupply { item } => Ok((
@@ -424,19 +470,17 @@ fn describe_logistics_site(
                 Lang::En => format!("External supply ({})", item_name(lang, catalog, *item)?),
             },
         )),
-        LogisticsNodeSite::RecipeMachine {
-            recipe_index,
-            machine,
-        } => {
+        LogisticsNodeSite::RecipeGroup { recipe_index } => {
             let recipe = catalog
                 .recipe(*recipe_index)
                 .ok_or(Error::MissingRecipe(*recipe_index))?;
             let facility = facility_name(lang, catalog, recipe.facility)?;
+            let machines = recipe_machines.get(recipe_index).copied().unwrap_or(1);
             Ok((
-                "recipe_machine".to_string(),
+                "recipe_group".to_string(),
                 match lang {
-                    Lang::Zh => format!("{} r{} #{}", facility, recipe_index.as_u32(), machine.get()),
-                    Lang::En => format!("{} r{} #{}", facility, recipe_index.as_u32(), machine.get()),
+                    Lang::Zh => format!("{} x{} (r{})", facility, machines, recipe_index.as_u32()),
+                    Lang::En => format!("{} x{} (r{})", facility, machines, recipe_index.as_u32()),
                 },
             ))
         }
@@ -463,19 +507,23 @@ fn describe_logistics_site(
                 },
             ))
         }
-        LogisticsNodeSite::ThermalBankFuel {
+        LogisticsNodeSite::ThermalBankGroup {
             power_recipe_index,
-            bank,
             item: _,
-        } => Ok((
-            "thermal_bank_fuel".to_string(),
-            match lang {
-                Lang::Zh => format!("热容池 p{} 燃料 #{}", power_recipe_index.as_u32(), bank.get()),
-                Lang::En => {
-                    format!("Thermal bank p{} fuel #{}", power_recipe_index.as_u32(), bank.get())
-                }
-            },
-        )),
+        } => {
+            let banks = thermal_banks.get(power_recipe_index).copied().unwrap_or(1);
+            Ok((
+                "thermal_bank_group".to_string(),
+                match lang {
+                    Lang::Zh => format!("热容池组 x{} (p{})", banks, power_recipe_index.as_u32()),
+                    Lang::En => format!(
+                        "Thermal bank group x{} (p{})",
+                        banks,
+                        power_recipe_index.as_u32()
+                    ),
+                },
+            ))
+        }
     }
 }
 
@@ -558,76 +606,112 @@ fn envelope_json<T: Serialize>(result: Result<T>) -> String {
     }
 }
 
-fn into_c_string(value: String) -> *mut c_char {
-    match CString::new(value) {
-        Ok(raw) => raw.into_raw(),
-        Err(_) => {
-            match CString::new(
-                "{\"status\":\"err\",\"error\":{\"message\":\"response contains embedded NUL byte\"}}",
-            ) {
-                Ok(raw) => raw.into_raw(),
-                Err(_) => std::ptr::null_mut(),
-            }
-        }
-    }
+/// FFI slice representation.
+#[repr(C)]
+pub struct Slice {
+    pub ptr: *const u8,
+    pub len: usize,
+    pub cap: usize,
 }
 
-unsafe fn read_c_string_arg<'a>(ptr: *const c_char, name: &'static str) -> Result<&'a str> {
-    if ptr.is_null() {
-        return Err(Error::NullPointer { name });
+impl Slice {
+    /// Create a Slice from a string.
+    /// Reuses the string allocation and transfers ownership to the FFI caller.
+    fn from_string(s: String) -> *mut Slice {
+        let mut bytes = std::mem::ManuallyDrop::new(s.into_bytes());
+        let ptr = bytes.as_mut_ptr() as *const u8;
+        let len = bytes.len();
+        let cap = bytes.capacity();
+        Box::into_raw(Box::new(Slice { ptr, len, cap }))
     }
-    let value = {
-        // SAFETY: caller provides a valid NUL-terminated C string pointer by contract.
-        let cstr = unsafe { CStr::from_ptr(ptr) };
-        cstr.to_str().map_err(|_| Error::InvalidUtf8 { name })?
-    };
-    Ok(value)
+
+    /// Read the slice as a string slice.
+    ///
+    /// # Safety
+    /// `ptr` must be valid for `len` bytes.
+    unsafe fn as_str(&self) -> Result<&str> {
+        if self.ptr.is_null() {
+            return Err(Error::NullPointer { name: "slice" });
+        }
+        let slice = unsafe { std::slice::from_raw_parts(self.ptr, self.len) };
+        std::str::from_utf8(slice).map_err(|_| Error::InvalidUtf8 { name: "slice" })
+    }
 }
 
 #[unsafe(no_mangle)]
-/// Build bootstrap payload JSON string (`catalog` + default `aic.toml`) and return as C string.
+/// Free a Slice allocated by Rust.
 ///
 /// # Safety
+/// `s` must be a pointer previously returned by `end_web_bootstrap` or
+/// `end_web_solve_from_aic_toml`, and must be freed exactly once.
+pub unsafe extern "C" fn end_web_free_slice(s: *mut Slice) {
+    if s.is_null() {
+        return;
+    }
+    // SAFETY: caller ensures s is valid and freed exactly once
+    let s_ref = unsafe { Box::from_raw(s) };
+    if s_ref.cap == 0 || s_ref.ptr.is_null() {
+        return;
+    }
+    // SAFETY: from_string constructed (ptr, len, cap) from a Vec<u8>.
+    unsafe {
+        _ = Vec::from_raw_parts(s_ref.ptr as *mut u8, s_ref.len, s_ref.cap);
+    }
+}
+
+#[unsafe(no_mangle)]
+/// Build bootstrap payload JSON string (`catalog` + default `aic.toml`).
 ///
-/// `lang` must be a valid, NUL-terminated UTF-8 C string (`\"zh\"` or `\"en\"`).
-/// The returned pointer must be released by calling [`end_web_free_c_string`].
-pub unsafe extern "C" fn end_web_bootstrap(lang: *const c_char) -> *mut c_char {
+/// # Safety
+/// `lang` must be a valid pointer to a Slice.
+/// Returns a pointer to a Slice on success, or null on failure.
+pub unsafe extern "C" fn end_web_bootstrap(lang: *const Slice) -> *mut Slice {
+    if lang.is_null() {
+        return Slice::from_string(envelope_json::<BootstrapPayload>(Err(Error::NullPointer {
+            name: "lang",
+        })));
+    }
     let result = {
-        // SAFETY: FFI boundary validates and parses the incoming C string.
-        let lang = match unsafe { read_c_string_arg(lang, "lang") } {
-            Ok(value) => value,
-            Err(err) => return into_c_string(envelope_json::<BootstrapPayload>(Err(err))),
+        let lang = match unsafe { (*lang).as_str() } {
+            Ok(s) => s,
+            Err(e) => return Slice::from_string(envelope_json::<BootstrapPayload>(Err(e))),
         };
         match parse_lang(lang) {
             Ok(lang) => bootstrap(lang),
             Err(err) => Err(err),
         }
     };
-
-    into_c_string(envelope_json(result))
+    Slice::from_string(envelope_json(result))
 }
 
 #[unsafe(no_mangle)]
-/// Run optimization from `aic.toml` text and return JSON result as C string.
+/// Run optimization from `aic.toml` text and return JSON result.
 ///
 /// # Safety
-///
-/// `lang` and `aic_toml` must be valid, NUL-terminated UTF-8 C strings.
-/// The returned pointer must be released by calling [`end_web_free_c_string`].
+/// `lang` and `aic_toml` must be valid pointers to Slice.
+/// Returns a pointer to a Slice on success, or null on failure.
 pub unsafe extern "C" fn end_web_solve_from_aic_toml(
-    lang: *const c_char,
-    aic_toml: *const c_char,
-) -> *mut c_char {
+    lang: *const Slice,
+    aic_toml: *const Slice,
+) -> *mut Slice {
+    if lang.is_null() {
+        return Slice::from_string(envelope_json::<SolvePayload>(Err(Error::NullPointer {
+            name: "lang",
+        })));
+    }
+    if aic_toml.is_null() {
+        return Slice::from_string(envelope_json::<SolvePayload>(Err(Error::NullPointer {
+            name: "aic_toml",
+        })));
+    }
     let result = {
-        // SAFETY: FFI boundary validates and parses the incoming C strings.
-        let lang = match unsafe { read_c_string_arg(lang, "lang") } {
-            Ok(value) => value,
-            Err(err) => return into_c_string(envelope_json::<SolvePayload>(Err(err))),
+        let lang = match unsafe { (*lang).as_str() } {
+            Ok(s) => s,
+            Err(e) => return Slice::from_string(envelope_json::<SolvePayload>(Err(e))),
         };
-        // SAFETY: FFI boundary validates and parses the incoming C strings.
-        let aic_toml = match unsafe { read_c_string_arg(aic_toml, "aic_toml") } {
-            Ok(value) => value,
-            Err(err) => return into_c_string(envelope_json::<SolvePayload>(Err(err))),
+        let aic_toml = match unsafe { (*aic_toml).as_str() } {
+            Ok(s) => s,
+            Err(e) => return Slice::from_string(envelope_json::<SolvePayload>(Err(e))),
         };
 
         match parse_lang(lang) {
@@ -635,24 +719,7 @@ pub unsafe extern "C" fn end_web_solve_from_aic_toml(
             Err(err) => Err(err),
         }
     };
-
-    into_c_string(envelope_json(result))
-}
-
-#[unsafe(no_mangle)]
-/// Free C string pointer returned by this crate's FFI functions.
-///
-/// # Safety
-///
-/// `ptr` must be either null or a pointer previously returned by
-/// [`end_web_bootstrap`] or [`end_web_solve_from_aic_toml`], and it must be
-/// freed exactly once.
-pub unsafe extern "C" fn end_web_free_c_string(ptr: *mut c_char) {
-    if ptr.is_null() {
-        return;
-    }
-    // SAFETY: `ptr` was allocated by `CString::into_raw` in this module and is freed exactly once.
-    let _ = unsafe { CString::from_raw(ptr) };
+    Slice::from_string(envelope_json(result))
 }
 
 #[cfg(test)]

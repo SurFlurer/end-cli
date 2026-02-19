@@ -2,8 +2,41 @@ import { expect, test } from '@playwright/test';
 
 const wasmShim = `
 (() => {
-  const payloadByPtr = new Map();
-  let nextPtr = 1;
+  const encoder = new TextEncoder();
+  const memory = new ArrayBuffer(2 * 1024 * 1024);
+  const HEAPU8 = new Uint8Array(memory);
+  const HEAPU32 = new Uint32Array(memory);
+  let nextPtr = 8;
+  const SLICE_SIZE = 12;
+
+  const align4 = (value) => (value + 3) & ~3;
+  const malloc = (size) => {
+    const requested = Number(size) || 0;
+    if (requested <= 0) {
+      return 0;
+    }
+
+    const ptr = nextPtr;
+    nextPtr = align4(nextPtr + requested);
+    if (nextPtr > HEAPU8.length) {
+      throw new Error('mock wasm heap exhausted');
+    }
+    return ptr;
+  };
+
+  const writeEnvelope = (envelope) => {
+    const payload = JSON.stringify(envelope);
+    const bytes = encoder.encode(payload);
+    const strPtr = malloc(bytes.length);
+    HEAPU8.set(bytes, strPtr);
+
+    const slicePtr = malloc(SLICE_SIZE);
+    const base = slicePtr >>> 2;
+    HEAPU32[base] = strPtr;
+    HEAPU32[base + 1] = bytes.length;
+    HEAPU32[base + 2] = bytes.length;
+    return slicePtr;
+  };
 
   const bootstrap = {
     status: 'ok',
@@ -12,20 +45,20 @@ const wasmShim = `
         'external_power_consumption_w = 120',
         '',
         '[supply_per_min]',
-        '"IronOre" = 40',
+        '"Originium Ore" = 40',
         '',
         '[[outposts]]',
-        'key = "Refugee_Camp"',
+        'key = "Refugee Camp"',
         'en = "Refugee Camp"',
         'zh = "难民营"',
         'money_cap_per_hour = 12000',
         '[outposts.prices]',
-        '"Battery" = 30'
+        '"SC Valley Battery" = 30'
       ].join('\\n'),
       catalog: {
         items: [
-          { key: 'IronOre', en: 'Iron Ore', zh: '铁矿' },
-          { key: 'Battery', en: 'Battery', zh: '电池' }
+          { key: 'Originium Ore', en: 'Originium Ore', zh: '源石矿' },
+          { key: 'SC Valley Battery', en: 'SC Valley Battery', zh: 'SC 山谷电池' }
         ]
       }
     }
@@ -47,7 +80,7 @@ const wasmShim = `
         powerMarginW: 30,
         outposts: [
           {
-            key: 'Refugee_Camp',
+            key: 'Refugee Camp',
             name: 'Refugee Camp',
             valuePerMin: 12.34,
             capPerMin: 20,
@@ -56,10 +89,10 @@ const wasmShim = `
         ],
         topSales: [
           {
-            outpostKey: 'Refugee_Camp',
+            outpostKey: 'Refugee Camp',
             outpostName: 'Refugee Camp',
-            itemKey: 'Battery',
-            itemName: 'Battery',
+            itemKey: 'SC Valley Battery',
+            itemName: 'SC Valley Battery',
             valuePerMin: 12.34
           }
         ],
@@ -75,9 +108,14 @@ const wasmShim = `
   };
 
   globalThis.createEndWebModule = async () => ({
+    HEAPU8,
+    HEAPU32,
     ccall(ident, returnType, argTypes, args) {
-      if (ident === 'end_web_free_c_string') {
-        payloadByPtr.delete(args[0]);
+      if (ident === 'malloc') {
+        return malloc(args[0]);
+      }
+
+      if (ident === 'free' || ident === 'end_web_free_slice') {
         return undefined;
       }
 
@@ -88,19 +126,14 @@ const wasmShim = `
             ? solved
             : { status: 'err', error: { message: 'unknown wasm call: ' + ident } };
 
-      const ptr = nextPtr++;
-      payloadByPtr.set(ptr, JSON.stringify(envelope));
-      return ptr;
-    },
-    UTF8ToString(ptr) {
-      return payloadByPtr.get(ptr) ?? '';
+      return writeEnvelope(envelope);
     }
   });
 })();
 `;
 
 test('workspace boots and auto solve produces result panels', async ({ page }) => {
-  await page.route('**/wasm/end_web.js', async (route) => {
+  await page.context().route('**/wasm/end_web.js*', async (route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/javascript',
@@ -110,9 +143,8 @@ test('workspace boots and auto solve produces result panels', async ({ page }) =
 
   await page.goto('/');
 
-  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  await expect(page.getByText(/Configuration Editor|配置编辑器/)).toBeVisible();
-  await expect(page.getByText(/Solver Output|求解结果/)).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Configuration Editor|配置编辑器/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Solver Output|求解结果/ })).toBeVisible();
 
   const externalPowerInput = page.locator('#external-power');
   await expect(externalPowerInput).toBeVisible();

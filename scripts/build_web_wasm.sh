@@ -4,6 +4,8 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WASM_TARGET_DIR="$ROOT_DIR/target/wasm32-unknown-emscripten/release"
 WEB_WASM_DIR="$ROOT_DIR/web/public/wasm"
+# Keep this enabled by default to rewrite legacy EH ops into exnref/try_table form.
+ENABLE_WASM_EH_POSTPROCESS="${END_WEB_WASM_EH_POSTPROCESS:-1}"
 
 mkdir -p "$WEB_WASM_DIR"
 
@@ -40,8 +42,8 @@ RUSTFLAGS_ARGS=(
   "-Clink-arg=-sMODULARIZE=1"
   "-Clink-arg=-sEXPORT_NAME=createEndWebModule"
   "-Clink-arg=-sENVIRONMENT=web,worker"
-  "-Clink-arg=-sEXPORTED_FUNCTIONS=[\"_end_web_bootstrap\",\"_end_web_solve_from_aic_toml\",\"_end_web_free_c_string\"]"
-  "-Clink-arg=-sEXPORTED_RUNTIME_METHODS=[\"ccall\",\"UTF8ToString\"]"
+  "-Clink-arg=-sEXPORTED_FUNCTIONS=[\"_end_web_bootstrap\",\"_end_web_solve_from_aic_toml\",\"_end_web_free_slice\",\"_malloc\",\"_free\"]"
+  "-Clink-arg=-sEXPORTED_RUNTIME_METHODS=[\"ccall\",\"HEAPU8\",\"HEAPU32\"]"
 )
 
 if [[ "${END_WEB_WASM_DEBUG:-0}" == "1" ]]; then
@@ -63,5 +65,33 @@ cargo build --target wasm32-unknown-emscripten --release -p end-web --bin end-we
 
 cp "$WASM_TARGET_DIR/end-web.js" "$WEB_WASM_DIR/end_web.js"
 cp "$WASM_TARGET_DIR/end_web.wasm" "$WEB_WASM_DIR/end_web.wasm"
+if [[ "$ENABLE_WASM_EH_POSTPROCESS" == "1" ]]; then
+  WASM_OPT_BIN="$(command -v wasm-opt || true)"
+  if [[ -z "$WASM_OPT_BIN" ]]; then
+    # Some shells expose emcc in PATH but not wasm-opt; derive it from emcc's InstalledDir.
+    EMCC_INSTALLED_DIR="$(emcc -v 2>&1 | sed -n 's/^InstalledDir: //p' | tail -n 1)"
+    if [[ -n "$EMCC_INSTALLED_DIR" && -x "$EMCC_INSTALLED_DIR/wasm-opt" ]]; then
+      WASM_OPT_BIN="$EMCC_INSTALLED_DIR/wasm-opt"
+    fi
+  fi
+
+  if [[ -z "$WASM_OPT_BIN" ]]; then
+    echo "wasm-opt not found. Activate emsdk or set END_WEB_WASM_EH_POSTPROCESS=0 to skip EH post-process." >&2
+    exit 1
+  fi
+
+  postprocess_tmp_wasm="$(mktemp)"
+  # The generated wasm uses multiple proposal features, so keep feature gates open here.
+  if ! "$WASM_OPT_BIN" "$WEB_WASM_DIR/end_web.wasm" \
+    --all-features \
+    --translate-to-exnref \
+    -o "$postprocess_tmp_wasm"; then
+    rm -f "$postprocess_tmp_wasm"
+    echo "Failed to post-process wasm EH instructions." >&2
+    exit 1
+  fi
+
+  mv "$postprocess_tmp_wasm" "$WEB_WASM_DIR/end_web.wasm"
+fi
 
 echo "Copied wasm artifacts to $WEB_WASM_DIR"

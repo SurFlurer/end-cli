@@ -1,8 +1,8 @@
 use crate::error::{Error, Result};
 use crate::types::{
     DemandNode, DemandNodeId, DemandSite, ItemFlowEdge, ItemFlowPlan, ItemSubproblem,
-    LogisticsEdge, LogisticsNode, LogisticsNodeId, LogisticsNodeSite, LogisticsPlan,
-    MachineOrdinal, PosF64, StageSolution, SupplyNode, SupplyNodeId, SupplySite,
+    LogisticsEdge, LogisticsNode, LogisticsNodeId, LogisticsNodeSite, LogisticsPlan, PosF64,
+    StageSolution, SupplyNode, SupplyNodeId, SupplySite,
 };
 use end_model::{AicInputs, Catalog, ItemId, Recipe};
 use std::collections::BTreeMap;
@@ -16,30 +16,7 @@ struct ItemAccumulator {
     demands: Vec<(DemandSite, PosF64)>,
 }
 
-/// Split one recipe run across machine instances using the stable formula from the logistics plan.
-pub fn expand_recipe_machine_rates(
-    executions_per_min: f64,
-    machines: u32,
-    throughput_per_machine_per_min: f64,
-) -> Vec<(MachineOrdinal, f64)> {
-    if machines == 0 || executions_per_min <= LOGISTICS_EPS {
-        return Vec::new();
-    }
-
-    (0..machines)
-        .filter_map(|index| {
-            let machine = MachineOrdinal::from_1_based(index + 1);
-            let consumed_capacity = index as f64 * throughput_per_machine_per_min;
-            let remaining = executions_per_min - consumed_capacity;
-            let rho = remaining
-                .max(0.0)
-                .min(throughput_per_machine_per_min.max(0.0));
-            (rho > LOGISTICS_EPS).then_some((machine, rho))
-        })
-        .collect()
-}
-
-/// Build machine-granularity per-item flow subproblems from stage-2 closure data.
+/// Build per-item flow subproblems from stage-2 closure data.
 pub fn build_item_subproblems(
     catalog: &Catalog,
     inputs: &AicInputs,
@@ -63,7 +40,7 @@ pub fn build_item_subproblems(
     recipe_usage.sort_by_key(|run| run.recipe_index.as_u32());
 
     for run in recipe_usage {
-        if run.executions_per_min <= LOGISTICS_EPS || run.machines == 0 {
+        if run.executions_per_min <= LOGISTICS_EPS {
             continue;
         }
 
@@ -74,7 +51,7 @@ pub fn build_item_subproblems(
             })?;
 
         let throughput_per_machine_per_min = 60.0 / recipe.time_s as f64;
-        let machine_capacity = throughput_per_machine_per_min * run.machines as f64;
+        let machine_capacity = throughput_per_machine_per_min * run.machines.get() as f64;
         if run.executions_per_min > machine_capacity + LOGISTICS_EPS {
             return Err(Error::InvalidInput {
                 message: format!(
@@ -87,40 +64,30 @@ pub fn build_item_subproblems(
         }
 
         let net = recipe_net_deltas(recipe);
-        let machine_rates = expand_recipe_machine_rates(
-            run.executions_per_min,
-            run.machines,
-            throughput_per_machine_per_min,
-        );
-
-        for (machine, rho) in machine_rates {
-            for (item, delta) in &net {
-                let flow = *delta * rho;
-                if flow > LOGISTICS_EPS {
-                    push_supply(
-                        &mut per_item,
-                        *item,
-                        SupplySite::RecipeOutput {
-                            recipe_index: run.recipe_index,
-                            machine,
-                            item: *item,
-                        },
-                        flow,
-                        "recipe_output",
-                    )?;
-                } else if flow < -LOGISTICS_EPS {
-                    push_demand(
-                        &mut per_item,
-                        *item,
-                        DemandSite::RecipeInput {
-                            recipe_index: run.recipe_index,
-                            machine,
-                            item: *item,
-                        },
-                        -flow,
-                        "recipe_input",
-                    )?;
-                }
+        for (item, delta) in &net {
+            let flow = *delta * run.executions_per_min;
+            if flow > LOGISTICS_EPS {
+                push_supply(
+                    &mut per_item,
+                    *item,
+                    SupplySite::RecipeOutput {
+                        recipe_index: run.recipe_index,
+                        item: *item,
+                    },
+                    flow,
+                    "recipe_output",
+                )?;
+            } else if flow < -LOGISTICS_EPS {
+                push_demand(
+                    &mut per_item,
+                    *item,
+                    DemandSite::RecipeInput {
+                        recipe_index: run.recipe_index,
+                        item: *item,
+                    },
+                    -flow,
+                    "recipe_input",
+                )?;
             }
         }
     }
@@ -143,25 +110,17 @@ pub fn build_item_subproblems(
     let mut thermal_banks = stage.thermal_banks_used.clone();
     thermal_banks.sort_by_key(|run| run.power_recipe_index.as_u32());
     for run in thermal_banks {
-        if run.banks == 0 {
-            continue;
-        }
-
-        let demand_per_bank_per_min = 60.0 / run.duration_s as f64;
-        for bank in 1..=run.banks {
-            let bank = MachineOrdinal::from_1_based(bank);
-            push_demand(
-                &mut per_item,
-                run.ingredient,
-                DemandSite::ThermalBankFuel {
-                    power_recipe_index: run.power_recipe_index,
-                    bank,
-                    item: run.ingredient,
-                },
-                demand_per_bank_per_min,
-                "thermal_bank_fuel",
-            )?;
-        }
+        let demand_per_min = (60.0 / run.duration_s as f64) * run.banks.get() as f64;
+        push_demand(
+            &mut per_item,
+            run.ingredient,
+            DemandSite::ThermalBankFuel {
+                power_recipe_index: run.power_recipe_index,
+                item: run.ingredient,
+            },
+            demand_per_min,
+            "thermal_bank_fuel",
+        )?;
     }
 
     let subproblems = per_item
@@ -272,15 +231,14 @@ pub fn solve_item_best_fit(subproblem: &ItemSubproblem) -> Result<ItemFlowPlan> 
                 });
             };
 
-            let Some(supply) = remaining_supply.get_mut(supply_index) else {
-                return Err(Error::InvalidInput {
-                    message: format!(
-                        "selected supply index {} out of bounds for item {}",
-                        supply_index,
-                        subproblem.item.as_u32()
-                    ),
-                });
-            };
+            debug_assert!(
+                supply_index < remaining_supply.len(),
+                "selected supply index {} out of bounds for item {}",
+                supply_index,
+                subproblem.item.as_u32()
+            );
+            // SAFETY: supply_index comes from searching remaining_supply in this loop and is valid.
+            let supply = unsafe { remaining_supply.get_unchecked_mut(supply_index) };
             let supply_id = supply.id;
             let available = supply.remaining;
             let flow = available.min(remaining_demand);
@@ -424,17 +382,15 @@ enum LogisticsNodeKey {
     ExternalSupply {
         item: ItemId,
     },
-    RecipeMachine {
+    RecipeGroup {
         recipe_index: end_model::RecipeId,
-        machine: MachineOrdinal,
     },
     OutpostSale {
         outpost_index: end_model::OutpostId,
         item: ItemId,
     },
-    ThermalBankFuel {
+    ThermalBankGroup {
         power_recipe_index: end_model::PowerRecipeId,
-        bank: MachineOrdinal,
         item: ItemId,
     },
 }
@@ -460,12 +416,8 @@ fn supply_site_key(site: &SupplySite) -> LogisticsNodeKey {
         SupplySite::ExternalSupply { item } => LogisticsNodeKey::ExternalSupply { item },
         SupplySite::RecipeOutput {
             recipe_index,
-            machine,
             item: _,
-        } => LogisticsNodeKey::RecipeMachine {
-            recipe_index,
-            machine,
-        },
+        } => LogisticsNodeKey::RecipeGroup { recipe_index },
     }
 }
 
@@ -473,23 +425,20 @@ fn demand_site_key(site: &DemandSite) -> LogisticsNodeKey {
     match *site {
         DemandSite::RecipeInput {
             recipe_index,
-            machine,
             item: _,
-        } => LogisticsNodeKey::RecipeMachine {
-            recipe_index,
-            machine,
-        },
+        } => LogisticsNodeKey::RecipeGroup { recipe_index },
         DemandSite::OutpostSale {
             outpost_index,
             item,
-        } => LogisticsNodeKey::OutpostSale { outpost_index, item },
+        } => LogisticsNodeKey::OutpostSale {
+            outpost_index,
+            item,
+        },
         DemandSite::ThermalBankFuel {
             power_recipe_index,
-            bank,
             item,
-        } => LogisticsNodeKey::ThermalBankFuel {
+        } => LogisticsNodeKey::ThermalBankGroup {
             power_recipe_index,
-            bank,
             item,
         },
     }
@@ -498,23 +447,21 @@ fn demand_site_key(site: &DemandSite) -> LogisticsNodeKey {
 fn key_to_site(key: LogisticsNodeKey) -> LogisticsNodeSite {
     match key {
         LogisticsNodeKey::ExternalSupply { item } => LogisticsNodeSite::ExternalSupply { item },
-        LogisticsNodeKey::RecipeMachine {
-            recipe_index,
-            machine,
-        } => LogisticsNodeSite::RecipeMachine {
-            recipe_index,
-            machine,
-        },
-        LogisticsNodeKey::OutpostSale { outpost_index, item } => {
-            LogisticsNodeSite::OutpostSale { outpost_index, item }
+        LogisticsNodeKey::RecipeGroup { recipe_index } => {
+            LogisticsNodeSite::RecipeGroup { recipe_index }
         }
-        LogisticsNodeKey::ThermalBankFuel {
-            power_recipe_index,
-            bank,
+        LogisticsNodeKey::OutpostSale {
+            outpost_index,
             item,
-        } => LogisticsNodeSite::ThermalBankFuel {
+        } => LogisticsNodeSite::OutpostSale {
+            outpost_index,
+            item,
+        },
+        LogisticsNodeKey::ThermalBankGroup {
             power_recipe_index,
-            bank,
+            item,
+        } => LogisticsNodeSite::ThermalBankGroup {
+            power_recipe_index,
             item,
         },
     }
@@ -614,14 +561,12 @@ fn find_largest_non_empty_supply(remaining_supply: &[SupplyState]) -> Option<usi
 
 #[cfg(test)]
 mod tests {
-    use super::{
-        LOGISTICS_EPS, build_logistics_plan, expand_recipe_machine_rates, solve_item_best_fit,
-    };
+    use super::{LOGISTICS_EPS, build_logistics_plan, solve_item_best_fit};
+    use crate::run_two_stage;
     use crate::types::{
         DemandNode, DemandNodeId, DemandSite, ItemSubproblem, LogisticsNodeSite, PosF64,
         SupplyNode, SupplyNodeId, SupplySite,
     };
-    use crate::{SolveInputs, run_two_stage};
     use end_model::{
         AicInputs, Catalog, DisplayName, FacilityDef, ItemDef, Key, OutpostInput, Stack,
         ThermalBankDef,
@@ -639,24 +584,6 @@ mod tests {
 
     fn nz(value: u32) -> NonZeroU32 {
         NonZeroU32::new(value).expect("non-zero")
-    }
-
-    #[test]
-    fn machine_rate_split_preserves_total_execution() {
-        let per_machine_cap = 3.0;
-        let executions = 7.25;
-        let machine_rates = expand_recipe_machine_rates(executions, 4, per_machine_cap);
-        let total = machine_rates.iter().map(|(_, rho)| rho).sum::<f64>();
-        assert!(
-            (total - executions).abs() <= 1e-9,
-            "expanded execution should preserve total flow"
-        );
-        assert!(
-            machine_rates
-                .iter()
-                .all(|(_, rho)| *rho <= per_machine_cap + 1e-9),
-            "each machine rate must be bounded by per-machine throughput"
-        );
     }
 
     #[test]
@@ -782,18 +709,18 @@ mod tests {
 
         let smelt_recipe = b
             .push_recipe(
-            smelter,
-            60,
-            vec![Stack {
-                item: ore,
-                count: 1,
-            }],
-            vec![Stack {
-                item: ingot,
-                count: 1,
-            }],
-        )
-        .expect("push smelting recipe");
+                smelter,
+                60,
+                vec![Stack {
+                    item: ore,
+                    count: 1,
+                }],
+                vec![Stack {
+                    item: ingot,
+                    count: 1,
+                }],
+            )
+            .expect("push smelting recipe");
         b.push_recipe(
             assembler,
             60,
@@ -823,14 +750,7 @@ mod tests {
         )
         .expect("valid aic");
 
-        let solved = run_two_stage(
-            &catalog,
-            &SolveInputs {
-                p_core_w: 500,
-                aic: aic.clone(),
-            },
-        )
-        .expect("solve scenario");
+        let solved = run_two_stage(&catalog, &aic).expect("solve scenario");
 
         let plan_a = build_logistics_plan(&catalog, &aic, &solved.stage2)
             .expect("logistics plan should build");
@@ -868,13 +788,12 @@ mod tests {
             .nodes
             .iter()
             .find_map(|node| match node.site {
-                LogisticsNodeSite::RecipeMachine {
-                    recipe_index,
-                    machine: _,
-                } if recipe_index == smelt_recipe => Some(node.id),
+                LogisticsNodeSite::RecipeGroup { recipe_index } if recipe_index == smelt_recipe => {
+                    Some(node.id)
+                }
                 _ => None,
             })
-            .expect("smelter machine node should exist");
+            .expect("smelter recipe group node should exist");
         let has_outgoing = plan_a.edges.iter().any(|edge| edge.from == smelter_node);
         let has_incoming = plan_a.edges.iter().any(|edge| edge.to == smelter_node);
         assert!(

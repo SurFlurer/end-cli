@@ -2,14 +2,15 @@ use crate::error::{Error, Result};
 use crate::logistics::{LOGISTICS_EPS, build_logistics_plan};
 use crate::types::{
     ExternalSupplySlack, FacilityMachineCount, OptimizationResult, OutpostSaleQty, OutpostValue,
-    PosF64, RecipeUsage, SaleValue, SolveInputs, StageSolution, ThermalBankUsage,
+    PosF64, RecipeUsage, StageSolution, ThermalBankUsage,
 };
-use end_model::{Catalog, FacilityId, ItemId, OutpostId, PowerRecipeId, RecipeId};
+use end_model::{AicInputs, Catalog, FacilityId, ItemId, OutpostId, PowerRecipeId, RecipeId};
 use good_lp::{
     Expression, Solution, SolverModel, Variable, constraint, default_solver, variable, variables,
 };
 use smallvec::SmallVec;
 use std::collections::HashMap;
+use std::num::NonZeroU32;
 
 /// Maximum tolerated distance from an integer value for decoded integer variables.
 pub const NEAR_INT_EPS: f64 = 1e-6;
@@ -49,24 +50,24 @@ struct PowerVars {
 
 /// Run the two-stage optimizer:
 /// 1) maximize revenue, 2) minimize machines under a near-optimal revenue floor.
-pub fn run_two_stage(catalog: &Catalog, inputs: &SolveInputs) -> Result<OptimizationResult> {
+pub fn run_two_stage(catalog: &Catalog, aic: &AicInputs) -> Result<OptimizationResult> {
     // TODO this should be parse instead of validate, but it is not possible to encode checked info into types
     // without branded types. so we leave this as future work.
     // Once this done we can eliminate panic in item_balance indexing, or even the check at all.
-    validate_aic_item_ids(inputs, catalog.items().len())?;
+    validate_aic_item_ids(aic, catalog.items().len())?;
 
-    let stage1 = solve_stage(catalog, inputs, StageObjective::MaxRevenue)?;
+    let stage1 = solve_stage(catalog, aic, StageObjective::MaxRevenue)?;
 
     let rel_eps = NEAR_INT_EPS * stage1.revenue_per_min.max(1.0);
     let revenue_floor_per_min = (stage1.revenue_per_min - rel_eps).max(0.0);
     let stage2 = solve_stage(
         catalog,
-        inputs,
+        aic,
         StageObjective::MinMachines {
             revenue_floor_per_min,
         },
     )?;
-    let logistics = build_logistics_plan(catalog, &inputs.aic, &stage2)?;
+    let logistics = build_logistics_plan(catalog, aic, &stage2)?;
 
     Ok(OptimizationResult {
         stage1,
@@ -77,7 +78,7 @@ pub fn run_two_stage(catalog: &Catalog, inputs: &SolveInputs) -> Result<Optimiza
 
 fn solve_stage(
     catalog: &Catalog,
-    inputs: &SolveInputs,
+    aic: &AicInputs,
     objective: StageObjective,
 ) -> Result<StageSolution> {
     let mut vars = variables!();
@@ -130,8 +131,7 @@ fn solve_stage(
         })
         .collect::<Vec<_>>();
 
-    let outpost_vars = inputs
-        .aic
+    let outpost_vars = aic
         .outposts_with_id()
         .map(|(id, outpost)| {
             let sell_lines = outpost
@@ -160,13 +160,13 @@ fn solve_stage(
     let total_machines: Expression = recipe_vars.iter().map(|rv| rv.y).sum();
     let total_thermal_banks: Expression = power_vars.iter().map(|pv| pv.z).sum();
 
-    let power_gen = inputs.p_core_w as f64
+    let power_gen = catalog.core_power_w() as f64
         + power_vars
             .iter()
             .map(|pv| pv.z * pv.power_w)
             .sum::<Expression>();
 
-    let power_use = Expression::from(inputs.aic.external_power_consumption_w() as f64)
+    let power_use = Expression::from(aic.external_power_consumption_w() as f64)
         + recipe_vars
             .iter()
             .map(|rv| rv.y * rv.facility_power_w)
@@ -175,7 +175,7 @@ fn solve_stage(
     // Build per-item balances by dispatching each contribution to its item bucket.
     // Seed from external supplies first.
     let item_count = catalog.items().len();
-    let item_balance = inputs.aic.supply_per_min().iter().fold(
+    let item_balance = aic.supply_per_min().iter().fold(
         vec![Expression::from(0.0); item_count],
         |mut item_balance, (item, supply)| {
             item_balance[item.index()] = Expression::from(supply.get() as f64);
@@ -256,12 +256,6 @@ fn solve_stage(
     let power_use_w = near_i64(|| "power_use_w".to_string(), solution.eval(&power_use))?;
     let power_margin_w = power_gen_w - power_use_w;
 
-    let mut sales = Vec::with_capacity(
-        outpost_vars
-            .iter()
-            .map(|ov| ov.sell_lines.len())
-            .sum::<usize>(),
-    );
     let mut outpost_sales_qty = Vec::with_capacity(
         outpost_vars
             .iter()
@@ -286,11 +280,6 @@ fn solve_stage(
                     value: qty_value,
                 })?;
                 let value = *price as f64 * qty_value;
-                sales.push(SaleValue {
-                    outpost_index: ov.outpost_index,
-                    item: *item,
-                    value_per_min: value,
-                });
                 outpost_sales_qty.push(OutpostSaleQty {
                     outpost_index: ov.outpost_index,
                     item: *item,
@@ -312,10 +301,11 @@ fn solve_stage(
         })
         .collect::<Result<Vec<_>>>()?;
 
-    sales.sort_by(|a, b| b.value_per_min.total_cmp(&a.value_per_min));
-
     let (machines_by_facility_map, mut recipes_used) = recipe_vars.iter().try_fold(
-        (HashMap::<FacilityId, u32>::new(), Vec::with_capacity(recipe_vars.len())),
+        (
+            HashMap::<FacilityId, u32>::new(),
+            Vec::with_capacity(recipe_vars.len()),
+        ),
         |(mut machines_by_facility_map, mut recipes_used), rv| -> Result<_> {
             let machines = near_u32(
                 || format!("recipes[{}].machines", rv.recipe_index.as_u32()),
@@ -324,6 +314,12 @@ fn solve_stage(
             let executions_per_min = solution.value(rv.x);
             if machines > 0 {
                 *machines_by_facility_map.entry(rv.facility).or_insert(0) += machines;
+                let machines = NonZeroU32::new(machines).ok_or_else(|| Error::InvalidInput {
+                    message: format!(
+                        "recipes[{}].machines decoded as zero unexpectedly",
+                        rv.recipe_index.as_u32()
+                    ),
+                })?;
                 recipes_used.push(RecipeUsage {
                     recipe_index: rv.recipe_index,
                     machines,
@@ -352,6 +348,12 @@ fn solve_stage(
             continue;
         }
 
+        let banks = NonZeroU32::new(banks).ok_or_else(|| Error::InvalidInput {
+            message: format!(
+                "power_recipes[{}].banks decoded as zero unexpectedly",
+                pv.power_recipe_index.as_u32()
+            ),
+        })?;
         thermal_banks_used.push(ThermalBankUsage {
             power_recipe_index: pv.power_recipe_index,
             ingredient: pv.ingredient,
@@ -362,8 +364,7 @@ fn solve_stage(
     }
     thermal_banks_used.sort_by(|a, b| b.banks.cmp(&a.banks));
 
-    let mut external_supply_slack = inputs
-        .aic
+    let mut external_supply_slack = aic
         .supply_per_min()
         .iter()
         .map(|(item, supply)| {
@@ -378,8 +379,8 @@ fn solve_stage(
     external_supply_slack.sort_by(|a, b| a.slack_per_min.total_cmp(&b.slack_per_min));
 
     Ok(StageSolution {
-        p_core_w: inputs.p_core_w,
-        p_ext_w: inputs.aic.external_power_consumption_w(),
+        p_core_w: catalog.core_power_w(),
+        p_ext_w: aic.external_power_consumption_w(),
         revenue_per_min,
         total_machines,
         total_thermal_banks,
@@ -387,7 +388,6 @@ fn solve_stage(
         power_use_w,
         power_margin_w,
         outpost_values,
-        top_sales: sales,
         outpost_sales_qty,
         machines_by_facility,
         recipes_used,
@@ -396,23 +396,17 @@ fn solve_stage(
     })
 }
 
-fn validate_aic_item_ids(inputs: &SolveInputs, item_count: usize) -> Result<()> {
-    let invalid_item: Option<(Option<OutpostId>, ItemId)> = inputs
-        .aic
+fn validate_aic_item_ids(aic: &AicInputs, item_count: usize) -> Result<()> {
+    let invalid_item: Option<(Option<OutpostId>, ItemId)> = aic
         .supply_per_min()
         .iter()
         .map(|(item, _)| (None, item))
-        .chain(
-            inputs
-                .aic
-                .outposts_with_id()
-                .flat_map(|(outpost_index, outpost)| {
-                    outpost
-                        .prices
-                        .iter()
-                        .map(move |(item, _)| (Some(outpost_index), item))
-                }),
-        )
+        .chain(aic.outposts_with_id().flat_map(|(outpost_index, outpost)| {
+            outpost
+                .prices
+                .iter()
+                .map(move |(item, _)| (Some(outpost_index), item))
+        }))
         .find(|(_, item)| item.index() >= item_count);
 
     match invalid_item {

@@ -1,7 +1,7 @@
 ## Lint 和测试
 
 修改rust代码后跑，没改rust代码不用跑：`cargo make done`
-修改前端代码后在`web`目录下跑：`npm run check`
+修改前端代码后在`web`目录下跑：`npm run check` 检查类型和 `npm run test:console` 检查console error。
 
 ## 代码风格
 

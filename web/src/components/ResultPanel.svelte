@@ -343,6 +343,8 @@
             <tr>
               <th>{t("设施", "Facility")}</th>
               <th>{t("机器数", "Machines")}</th>
+              <th>{t("每台耗电", "Power/Unit")}</th>
+              <th>{t("总耗电", "Total Power")}</th>
             </tr>
           </thead>
           <tbody>
@@ -350,6 +352,8 @@
               <tr>
                 <td>{facility.name}</td>
                 <td>{facility.machines}</td>
+                <td>{facility.powerW} W</td>
+                <td>{facility.totalPowerW} W</td>
               </tr>
             {/each}
           </tbody>
@@ -392,7 +396,11 @@
     line-height: 1;
     color: var(--accent);
     display: block;
-    font-variation-settings: "FILL" 0, "wght" 600, "GRAD" 0, "opsz" 16;
+    font-variation-settings:
+      "FILL" 0,
+      "wght" 600,
+      "GRAD" 0,
+      "opsz" 16;
   }
 
   .solve-icon.danger {
@@ -443,7 +451,11 @@
     font-size: 18px;
     line-height: 1;
     display: block;
-    font-variation-settings: "FILL" 0, "wght" 600, "GRAD" 0, "opsz" 16;
+    font-variation-settings:
+      "FILL" 0,
+      "wght" 600,
+      "GRAD" 0,
+      "opsz" 16;
   }
 
   .error-message {
@@ -493,6 +505,11 @@
     max-width: 100%;
   }
 
+  th:first-child,
+  td:first-child {
+    padding-left: 12px;
+  }
+
   table {
     width: max-content;
     min-width: 100%;
@@ -524,15 +541,9 @@
     }
   }
 
-  @media (max-width: 1200px) {
-    .kpi-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-
   @media (max-width: 760px) {
     .kpi-grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 </style>

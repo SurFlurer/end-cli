@@ -8,8 +8,5 @@ pub use model::{
     Recipe, RecipeId, Stack, ThermalBankDef,
 };
 
-/// Core generation capacity (watts).
-pub const P_CORE_W: u32 = 200;
-
 #[cfg(test)]
 mod tests;

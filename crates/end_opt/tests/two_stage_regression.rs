@@ -1,7 +1,7 @@
 use end_model::{
     AicInputs, Catalog, DisplayName, FacilityDef, ItemDef, Key, OutpostInput, Stack, ThermalBankDef,
 };
-use end_opt::{Error as OptError, NEAR_INT_EPS, SolveInputs, run_two_stage};
+use end_opt::{Error as OptError, NEAR_INT_EPS, run_two_stage};
 use std::num::NonZeroU32;
 
 fn key(value: &str) -> Key {
@@ -68,49 +68,43 @@ fn sample_catalog(with_recipes: bool) -> (Catalog, end_model::ItemId, end_model:
     (catalog, ore, ingot)
 }
 
-fn sample_catalog_and_inputs(with_recipes: bool) -> (Catalog, SolveInputs) {
+fn sample_catalog_and_aic(with_recipes: bool) -> (Catalog, AicInputs) {
     let (catalog, ore, ingot) = sample_catalog(with_recipes);
 
-    let inputs = SolveInputs {
-        p_core_w: 200,
-        aic: AicInputs::new(
-            0,
-            vec![(ore, nz(10))].into(),
-            vec![OutpostInput {
-                key: key("Camp"),
-                en: Some(name("Camp")),
-                zh: Some(name("Camp_zh")),
-                money_cap_per_hour: 600,
-                prices: vec![(ingot, 5)].into(),
-            }],
-        )
-        .expect("valid aic inputs"),
-    };
+    let aic = AicInputs::new(
+        0,
+        vec![(ore, nz(10))].into(),
+        vec![OutpostInput {
+            key: key("Camp"),
+            en: Some(name("Camp")),
+            zh: Some(name("Camp_zh")),
+            money_cap_per_hour: 600,
+            prices: vec![(ingot, 5)].into(),
+        }],
+    )
+    .expect("valid aic inputs");
 
-    (catalog, inputs)
+    (catalog, aic)
 }
 
 #[test]
 fn run_two_stage_allows_empty_recipes_with_direct_external_sales() {
     let (catalog, ore, _ingot) = sample_catalog(false);
-    let inputs = SolveInputs {
-        p_core_w: 200,
-        aic: AicInputs::new(
-            0,
-            vec![(ore, nz(10))].into(),
-            vec![OutpostInput {
-                key: key("Camp"),
-                en: Some(name("Camp")),
-                zh: Some(name("Camp_zh")),
-                money_cap_per_hour: 600,
-                prices: vec![(ore, 2)].into(),
-            }],
-        )
-        .expect("valid aic inputs"),
-    };
+    let aic = AicInputs::new(
+        0,
+        vec![(ore, nz(10))].into(),
+        vec![OutpostInput {
+            key: key("Camp"),
+            en: Some(name("Camp")),
+            zh: Some(name("Camp_zh")),
+            money_cap_per_hour: 600,
+            prices: vec![(ore, 2)].into(),
+        }],
+    )
+    .expect("valid aic inputs");
 
     let result =
-        run_two_stage(&catalog, &inputs).expect("empty recipes with direct sales should solve");
+        run_two_stage(&catalog, &aic).expect("empty recipes with direct sales should solve");
 
     assert!(
         (result.stage1.revenue_per_min - 10.0).abs() <= 1e-9,
@@ -143,15 +137,15 @@ fn run_two_stage_allows_empty_recipes_with_direct_external_sales() {
         "stage2 should report no recipe usage"
     );
     assert!(
-        !result.stage1.top_sales.is_empty(),
-        "stage1 should report non-empty direct sales"
+        !result.stage1.outpost_sales_qty.is_empty(),
+        "stage1 should report non-empty direct sales qty"
     );
 }
 
 #[test]
 fn stage2_respects_revenue_floor_and_basic_invariants() {
-    let (catalog, inputs) = sample_catalog_and_inputs(true);
-    let result = run_two_stage(&catalog, &inputs).expect("solve sample model");
+    let (catalog, aic) = sample_catalog_and_aic(true);
+    let result = run_two_stage(&catalog, &aic).expect("solve sample model");
 
     let floor = (result.stage1.revenue_per_min
         - NEAR_INT_EPS * result.stage1.revenue_per_min.max(1.0))
@@ -168,13 +162,13 @@ fn stage2_respects_revenue_floor_and_basic_invariants() {
     );
 
     assert!(
-        result.stage2.top_sales.len() <= 10,
-        "top_sales must be capped at 10"
+        !result.stage2.outpost_sales_qty.is_empty(),
+        "stage2 should include sale quantity lines"
     );
-    for pair in result.stage2.top_sales.windows(2) {
+    for sale in &result.stage2.outpost_sales_qty {
         assert!(
-            pair[0].value_per_min + 1e-9 >= pair[1].value_per_min,
-            "top_sales must be sorted descending by value"
+            sale.qty_per_min.get() > 0.0,
+            "sale qty must stay strictly positive"
         );
     }
 
@@ -225,23 +219,20 @@ fn run_two_stage_rejects_out_of_bounds_aic_item_id_at_entry() {
         .expect("add thermal bank");
     let _other_catalog = other.build().expect("build other catalog");
 
-    let inputs = SolveInputs {
-        p_core_w: 200,
-        aic: AicInputs::new(
-            0,
-            vec![(alien_item, nz(10))].into(),
-            vec![OutpostInput {
-                key: key("Camp"),
-                en: Some(name("Camp")),
-                zh: Some(name("Camp_zh")),
-                money_cap_per_hour: 600,
-                prices: vec![(ore, 2)].into(),
-            }],
-        )
-        .expect("valid aic inputs"),
-    };
+    let aic = AicInputs::new(
+        0,
+        vec![(alien_item, nz(10))].into(),
+        vec![OutpostInput {
+            key: key("Camp"),
+            en: Some(name("Camp")),
+            zh: Some(name("Camp_zh")),
+            money_cap_per_hour: 600,
+            prices: vec![(ore, 2)].into(),
+        }],
+    )
+    .expect("valid aic inputs");
 
-    let err = run_two_stage(&catalog, &inputs).expect_err("mismatched item id should be rejected");
+    let err = run_two_stage(&catalog, &aic).expect_err("mismatched item id should be rejected");
     match err {
         OptError::InvalidInput { message } => {
             assert!(

@@ -1,7 +1,7 @@
 use end_model::{
     AicInputs, Catalog, DisplayName, FacilityDef, ItemDef, Key, OutpostInput, Stack, ThermalBankDef,
 };
-use end_opt::{SolveInputs, run_two_stage};
+use end_opt::run_two_stage;
 use end_report::{Lang, build_report};
 use std::num::NonZeroU32;
 
@@ -78,14 +78,7 @@ fn sample_catalog_and_inputs() -> (Catalog, AicInputs, end_opt::OptimizationResu
     )
     .expect("valid aic inputs");
 
-    let result = run_two_stage(
-        &catalog,
-        &SolveInputs {
-            p_core_w: 200,
-            aic: aic.clone(),
-        },
-    )
-    .expect("solve sample model");
+    let result = run_two_stage(&catalog, &aic).expect("solve sample model");
 
     (catalog, aic, result)
 }

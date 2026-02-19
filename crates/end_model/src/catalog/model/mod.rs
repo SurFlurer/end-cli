@@ -31,10 +31,18 @@ pub struct Catalog {
     thermal_bank: ThermalBankDef,
 }
 
+/// Core power generation capacity in watts (fixed game constant).
+const CORE_POWER_W: u32 = 200;
+
 impl Catalog {
     /// Starts building a self-consistent [`Catalog`].
     pub fn builder() -> CatalogBuilder {
         CatalogBuilder::new()
+    }
+
+    /// Returns the core generation capacity in watts (fixed at 200W).
+    pub fn core_power_w(&self) -> u32 {
+        CORE_POWER_W
     }
 
     /// Returns item metadata by id.

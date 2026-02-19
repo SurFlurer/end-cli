@@ -26,7 +26,7 @@
   }
 
   let { lang, result }: Props = $props();
-  let panelElement = $state<HTMLElement | null>(null);
+  let flowElement = $state<HTMLElement | null>(null);
   let isFullscreen = $state(false);
 
   const flow = $derived<{ nodes: Node[]; edges: Edge[] }>(
@@ -46,19 +46,24 @@
   }
 
   function syncFullscreenState(): void {
-    isFullscreen = getFullscreenElement() === panelElement;
+    const fsElement = getFullscreenElement();
+    if (fsElement === null || flowElement === null) {
+      isFullscreen = false;
+    } else {
+      isFullscreen = flowElement.contains(fsElement as globalThis.Node);
+    }
   }
 
   async function toggleFullscreen(): Promise<void> {
-    if (!panelElement || typeof document === "undefined") {
+    if (!flowElement || typeof document === "undefined") {
       return;
     }
 
     try {
       const doc = document as FullscreenDocument;
-      const element = panelElement as FullscreenHostElement;
+      const element = flowElement as FullscreenHostElement;
 
-      if (getFullscreenElement() === panelElement) {
+      if (getFullscreenElement() === flowElement) {
         if (doc.exitFullscreen) {
           await doc.exitFullscreen();
         } else if (doc.webkitExitFullscreen) {
@@ -99,10 +104,7 @@
   });
 </script>
 
-<section
-  class={`graph-panel ${isFullscreen ? "is-fullscreen" : ""}`}
-  bind:this={panelElement}
->
+<section class="graph-panel">
   <div class="sub-header">
     <div>
       <h2>{t("物流图", "Logistics Graph")}</h2>
@@ -115,26 +117,19 @@
     </div>
 
     {#if result}
-      <div class="header-controls">
-        <button
-          type="button"
-          class="fullscreen-toggle"
-          aria-pressed={isFullscreen}
-          aria-label={isFullscreen
-            ? t("退出全屏", "Exit fullscreen")
-            : t("全屏", "Fullscreen")}
-          title={isFullscreen
-            ? t("退出全屏", "Exit fullscreen")
-            : t("全屏", "Fullscreen")}
-          onclick={() => {
-            void toggleFullscreen();
-          }}
-        >
-          <span class="material-symbols-outlined icon" aria-hidden="true">
-            {isFullscreen ? "fullscreen_exit" : "fullscreen"}
-          </span>
-        </button>
-      </div>
+      <button
+        type="button"
+        class="fullscreen-toggle"
+        aria-label={t("全屏", "Fullscreen")}
+        title={t("全屏", "Fullscreen")}
+        onclick={() => {
+          void toggleFullscreen();
+        }}
+      >
+        <span class="material-symbols-outlined icon" aria-hidden="true">
+          fullscreen
+        </span>
+      </button>
     {/if}
   </div>
 
@@ -143,12 +138,27 @@
       {t("求解后这里显示物流网络。", "Logistics network appears after solving.")}
     </p>
   {:else}
-    <div class="flow-wrap">
+    <div class="flow-wrap" bind:this={flowElement}>
       <SvelteFlow nodes={flow.nodes} edges={flow.edges} fitView>
         <Background bgColor="#f9fcfa" patternColor="#d8e6de" gap={24} />
         <MiniMap pannable zoomable />
         <Controls />
       </SvelteFlow>
+      {#if isFullscreen}
+        <button
+          type="button"
+          class="exit-fullscreen-float"
+          aria-label={t("退出全屏", "Exit fullscreen")}
+          title={t("退出全屏", "Exit fullscreen")}
+          onclick={() => {
+            void toggleFullscreen();
+          }}
+        >
+          <span class="material-symbols-outlined icon" aria-hidden="true">
+            fullscreen_exit
+          </span>
+        </button>
+      {/if}
     </div>
   {/if}
 </section>
@@ -162,6 +172,7 @@
   }
 
   .flow-wrap {
+    position: relative;
     border: 1px solid var(--line);
     border-radius: var(--radius-md);
     height: clamp(380px, 52vh, 720px);
@@ -188,6 +199,30 @@
     background: color-mix(in srgb, var(--surface-soft) 60%, var(--accent-soft));
   }
 
+  .exit-fullscreen-float {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 10;
+    border: 1px solid color-mix(in srgb, var(--line) 90%, #b7cec2);
+    border-radius: var(--radius-sm);
+    width: var(--control-size);
+    height: var(--control-size);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface-soft);
+    color: inherit;
+    padding: 0;
+    cursor: pointer;
+    line-height: 1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .exit-fullscreen-float:hover {
+    background: color-mix(in srgb, var(--surface-soft) 60%, var(--accent-soft));
+  }
+
   .icon {
     font-size: 20px;
     line-height: 1;
@@ -200,22 +235,11 @@
     color: var(--muted-text);
   }
 
-  .graph-panel:fullscreen,
-  .graph-panel:-webkit-full-screen,
-  .graph-panel.is-fullscreen {
+  .flow-wrap:fullscreen,
+  .flow-wrap:-webkit-full-screen {
     width: 100%;
     height: 100%;
-    box-sizing: border-box;
-    padding: clamp(12px, 2vw, 24px);
-    background: var(--panel);
-    grid-template-rows: auto minmax(0, 1fr);
-  }
-
-  .graph-panel:fullscreen .flow-wrap,
-  .graph-panel:-webkit-full-screen .flow-wrap,
-  .graph-panel.is-fullscreen .flow-wrap {
-    min-height: 0;
-    height: 100%;
+    border-radius: 0;
   }
 
   @media (max-width: 760px) {
