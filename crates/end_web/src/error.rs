@@ -2,16 +2,16 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum Error {
-    #[error("Catalog load failed: {0}")]
+    #[error("Catalog load failed")]
     Catalog(#[source] end_io::Error),
 
-    #[error("Default aic generation failed: {0}")]
+    #[error("Default aic generation failed")]
     DefaultAic(#[source] end_io::Error),
 
-    #[error("Aic parse failed: {0}")]
+    #[error("Aic parse failed")]
     Aic(#[source] end_io::Error),
 
-    #[error("Optimization failed: {0}")]
+    #[error("Optimization failed")]
     Optimize(#[source] end_opt::Error),
 
     #[error("Missing outpost id {0:?}")]

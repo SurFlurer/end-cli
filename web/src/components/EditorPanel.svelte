@@ -1,4 +1,5 @@
 <script lang="ts">
+  import FieldHint from "./FieldHint.svelte";
   import SelectField, { type SelectOption } from "./SelectField.svelte";
   import type { EditorPanelProps } from "../lib/editor-actions";
   import type { OutpostDraft } from "../lib/types";
@@ -21,6 +22,10 @@
       label: t(item.zh, item.en),
     })),
   );
+  const regionOptions = $derived<SelectOption[]>([
+    { value: "fourth_valley", label: t("四号谷地", "Fourth Valley") },
+    { value: "wuling", label: t("武陵", "Wuling") },
+  ]);
 
   function t(zh: string, en: string): string {
     return lang === "zh" ? zh : en;
@@ -78,8 +83,38 @@
   </div>
 
   <div class="field-row">
-    <label for="external-power">{t("基地内外额外耗电 (W)", "External Power (W)")}</label
-    >
+    <div class="label-with-hint">
+      <label for="scenario-region">{t("地区", "Region")}</label>
+      <FieldHint
+        text={t(
+          "地区不会改变据点信息；主要影响部分带地区限制的机器是否可用。",
+          "Region does not change outpost data; it mainly controls availability for machines with region locks.",
+        )}
+      />
+    </div>
+    <SelectField
+      value={draft.region}
+      options={regionOptions}
+      ariaLabel={t("选择地区", "Select region")}
+      searchPlaceholder={t("搜索地区...", "Search regions...")}
+      emptyText={t("无匹配地区", "No matching regions")}
+      onChange={(nextValue) =>
+        actions.setRegion(nextValue as "fourth_valley" | "wuling")}
+    />
+  </div>
+
+  <div class="field-row">
+    <div class="label-with-hint">
+      <label for="external-power"
+        >{t("基地内外额外耗电 (W)", "External Power (W)")}</label
+      >
+      <FieldHint
+        text={t(
+          "用于建模矿点、滑索、作战设备，以及基地内未被程序显式建模的其他生产线耗电；使用这个数字和外部供给、外部消耗一起描述系统外影响。",
+          "Models power used by mining points, ziplines, combat devices, and other in-base lines not explicitly modeled; together with external supply/consumption, this captures off-model effects.",
+        )}
+      />
+    </div>
     <input
       id="external-power"
       type="number"
@@ -95,7 +130,15 @@
 
   <article class="sub-panel">
     <div class="sub-header">
-      <h3>{t("外部供给 / min", "External Supply / min")}</h3>
+      <div class="heading-with-hint">
+        <h3>{t("外部供给 / min", "External Supply / min")}</h3>
+        <FieldHint
+          text={t(
+            "通常用于表示矿点持续开采带来的矿物供给。",
+            "Typically used for minerals continuously supplied by mining points.",
+          )}
+        />
+      </div>
       <button
         class="tiny"
         onclick={actions.supply.add}
@@ -150,7 +193,15 @@
 
   <article class="sub-panel">
     <div class="sub-header">
-      <h3>{t("外部消耗 / min", "External Consumption / min")}</h3>
+      <div class="heading-with-hint">
+        <h3>{t("外部消耗 / min", "External Consumption / min")}</h3>
+        <FieldHint
+          text={t(
+            "通常用于表示日用品和快递货物等外部需求，你需要将需求转换成每分钟的平均数据。",
+            "Typically used for stable external demand such as daily supplies and delivery cargo, converted to per-minute averages.",
+          )}
+        />
+      </div>
       <button
         class="tiny"
         onclick={actions.consumption.add}
@@ -206,7 +257,15 @@
 
   <article class="sub-panel">
     <div class="sub-header">
-      <h3>{t("据点与收购价", "Outposts & Buy Prices")}</h3>
+      <div class="heading-with-hint">
+        <h3>{t("据点与收购价", "Outposts & Buy Prices")}</h3>
+        <FieldHint
+          text={t(
+            "此列表可以留空；填入后求解器会根据收购价和供需情况自动计算生产什么产品来交易以最大化利润。",
+            "This section can be left empty for the solver to ignore outposts; when filled, the solver automatically calculates which products to produce for trading based on their prices and supply/demand to maximize profit.",
+          )}
+        />
+      </div>
       <button
         class="tiny"
         onclick={actions.outposts.add}
@@ -233,7 +292,8 @@
               onclick={() => actions.outposts.select(outpostIndex)}
             >
               <p class="outpost-pick-title">
-                {t(outpost.zh, outpost.en) ||
+                {outpost.name ||
+                  outpost.key ||
                   `${t("据点", "Outpost")} ${outpostIndex + 1}`}
               </p>
               <p class="outpost-pick-meta">
@@ -250,7 +310,8 @@
           <article class="outpost-card">
             <div class="outpost-head">
               <h4>
-                {t(selectedOutpost.zh, selectedOutpost.en) ||
+                {selectedOutpost.name ||
+                  selectedOutpost.key ||
                   `${t("据点", "Outpost")} ${(selectedOutpostIndex >= 0 ? selectedOutpostIndex : 0) + 1}`}
               </h4>
               <button
@@ -267,20 +328,29 @@
 
             <div class="row-grid two">
               <label>
-                {t("键", "Key")}
+                {t("名称", "Name (Optional)")}
                 <input
                   type="text"
-                  value={selectedOutpost.key}
+                  value={selectedOutpost.name}
                   oninput={(event) =>
                     actions.outposts.setField(
                       selectedOutpostIndex,
-                      "key",
+                      "name",
                       (event.currentTarget as HTMLInputElement).value,
                     )}
                 />
               </label>
+
               <label>
-                {t("每小时交易上限", "Money Cap / h")}
+                <span class="label-with-hint compact">
+                  <span>{t("每小时交易上限", "Money Cap / h")}</span>
+                  <FieldHint
+                    text={t(
+                      "据点每小时可用于交易的金额上限。",
+                      "Maximum amount of money this outpost can trade per hour.",
+                    )}
+                  />
+                </span>
                 <input
                   type="number"
                   min="0"
@@ -293,38 +363,18 @@
                     )}
                 />
               </label>
-
-              <label>
-                {t("英文显示名", "En Disp Name")}
-                <input
-                  type="text"
-                  value={selectedOutpost.en}
-                  oninput={(event) =>
-                    actions.outposts.setField(
-                      selectedOutpostIndex,
-                      "en",
-                      (event.currentTarget as HTMLInputElement).value,
-                    )}
-                />
-              </label>
-
-              <label>
-                {t("中文显示名", "Zh Disp Name")}
-                <input
-                  type="text"
-                  value={selectedOutpost.zh}
-                  oninput={(event) =>
-                    actions.outposts.setField(
-                      selectedOutpostIndex,
-                      "zh",
-                      (event.currentTarget as HTMLInputElement).value,
-                    )}
-                />
-              </label>
             </div>
 
             <div class="sub-header mini">
-              <h5>{t("收购价", "Buy Prices")}</h5>
+              <div class="heading-with-hint">
+                <h5>{t("收购价", "Buy Prices")}</h5>
+                <FieldHint
+                  text={t(
+                    "除按价格表填写外，可手动删去低价且容易爆仓的条目来收缩优化范围。本程序使用稳态模型，不会主动考虑爆仓风险。",
+                    "Besides filling from price table, you can remove low-value, overflow-prone rows to narrow optimization scope. This program uses a steady-state model and does not actively consider overflow risk.",
+                  )}
+                />
+              </div>
               <button
                 class="tiny"
                 onclick={() => actions.prices.add(selectedOutpostIndex)}
@@ -416,6 +466,22 @@
     align-items: center;
   }
 
+  .label-with-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .label-with-hint.compact {
+    width: fit-content;
+  }
+
+  .heading-with-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
   .row-grid {
     display: grid;
     gap: var(--space-2);
@@ -495,6 +561,8 @@
     padding: 8px 12px;
     background: var(--panel-strong);
     color: inherit;
+    font: inherit;
+    line-height: 1.2;
   }
 
   button,

@@ -33,11 +33,14 @@ function parseStoredDraft(text: string): AicDraft | null {
     }
 
     const parsed = root as Record<string, unknown>;
+    const regionRaw = asString(parsed.region).trim();
+    const region = regionRaw === 'fourth_valley' ? 'fourth_valley' : 'wuling';
     const supplyRows = Array.isArray(parsed.supply) ? parsed.supply : [];
     const consumptionRows = Array.isArray(parsed.consumption) ? parsed.consumption : [];
     const outpostRows = Array.isArray(parsed.outposts) ? parsed.outposts : [];
 
     return {
+      region,
       externalPowerConsumptionW: asInt(parsed.externalPowerConsumptionW),
       supply: supplyRows.map((row) => {
         const record = asRecord(row);
@@ -56,10 +59,12 @@ function parseStoredDraft(text: string): AicDraft | null {
       outposts: outpostRows.map((row) => {
         const record = asRecord(row);
         const priceRows = Array.isArray(record.prices) ? record.prices : [];
+        const zh = asString(record.zh).trim();
+        const en = asString(record.en).trim();
+        const name = asString(record.name).trim();
         return {
           key: asString(record.key),
-          en: asString(record.en),
-          zh: asString(record.zh),
+          name: name || zh || en,
           moneyCapPerHour: asInt(record.moneyCapPerHour),
           prices: priceRows.map((priceRow) => {
             const priceRecord = asRecord(priceRow);

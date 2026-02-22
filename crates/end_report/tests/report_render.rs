@@ -1,7 +1,8 @@
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use end_model::{
-    AicInputs, Catalog, DisplayName, FacilityDef, ItemDef, Key, OutpostInput, Stack, ThermalBankDef,
+    AicInputs, Catalog, DisplayName, FacilityDef, FacilityRegions, ItemDef, Key, OutpostInput,
+    Stack, ThermalBankDef,
 };
 use end_opt::run_two_stage;
 use end_report::{Lang, build_report};
@@ -52,6 +53,7 @@ fn sample_catalog_and_inputs<'cid, 'sid, 'rid>(
             power_w: nz(10),
             en: name("Smelter"),
             zh: name("Smelter_zh"),
+            regions: FacilityRegions::All,
         })
         .expect("add machine");
     let mut b = b

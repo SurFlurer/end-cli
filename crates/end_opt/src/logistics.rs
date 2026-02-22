@@ -821,6 +821,7 @@ mod tests {
                 power_w: nz(10),
                 en: name("Smelter"),
                 zh: name("Smelter_zh"),
+                regions: end_model::FacilityRegions::All,
             })
             .expect("add smelter");
         let assembler = b
@@ -829,6 +830,7 @@ mod tests {
                 power_w: nz(20),
                 en: name("Assembler"),
                 zh: name("Assembler_zh"),
+                regions: end_model::FacilityRegions::All,
             })
             .expect("add assembler");
         let mut b = b

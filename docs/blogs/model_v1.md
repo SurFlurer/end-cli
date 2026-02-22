@@ -45,6 +45,11 @@
 - $Y_{t,r} \in \mathbb{Z}_{\ge 0}\quad \forall t\in T,\ \forall r\in R_t$：类型 $t$ 中专门分配给配方 $r$ 的机器台数
 - $Z_b \in \mathbb{Z}_{\ge 0}$：**持续**喂入电池 $b$ 的热容池台数
 
+### 3.3 Stage 2 slack 变量（连续）
+- $s^{P}\ge 0$：电力富余（瓦）
+- $\tilde q_{o,i}\ge 0$：超出 outpost 预算上限的每分钟虚拟销量
+- $s^{\$}\ge 0$：每分钟虚拟成交额
+
 ## 4. 目标（Two-stage Objective）
 
 ### Stage 1：最大化每分钟收入
@@ -52,16 +57,40 @@ $$
 R^* = \max \ \text{Rev} \;=\; \max \ \sum_{o \in O}\sum_{i \in I} p_{o,i}\, q_{o,i}
 $$
 
-### Stage 2：在 Stage 1 最优解集合中，最小化机器数量
-收入约束：
+### Stage 2：在 Stage 1 最优解集合中，按用户选择优化目标
+
+真实收入不退化约束（只统计真实销量 $q$）：
 $$
-\sum_{o,i} p_{o,i} q_{o,i} \;\ge\; R^*
+\sum_{o\in O}\sum_{i\in I} p_{o,i}\, q_{o,i} \;\ge\; R^*
 $$
 
-最小化机器数量，消除闲置耗电机器：
+可选目标（由前端/CLI 选择其一）：
+
+- `min_machines`：最小化机器数量
 $$
-\min \ \sum_{t \in T} M_t \;+\; \sum_{b \in B} Z_b
+\min\ N^{mach} \;=\; \min\ \left(\sum_{t \in T} M_t \;+\; \sum_{b \in B} Z_b\right)
 $$
+
+- `max_power_slack`：最大化电力富余
+$$
+\max\ s^{P}
+$$
+
+- `max_money_slack`：去除预算上限，最大化每分钟虚拟成交额，仍保持真实收入不退化
+$$
+\max\ s^{\$} \;=\; \max\ \sum_{o\in O}\sum_{i\in I} p_{o,i}\, \tilde q_{o,i}
+$$
+
+- `weighted`：加权目标
+$$
+\min\ \alpha\,N^{mach} \;-\; \beta\,\hat s^{P} \;-\; \gamma\,\hat s^{\$}
+$$
+其中
+$$
+\hat s^{P}=\frac{s^{P}}{S^{P}_{\max}+\epsilon},\qquad
+\hat s^{\$}=\frac{s^{\$}}{S^{\$}_{\max}+\epsilon}
+$$
+$S^{P}_{\max}$ 可由 `max_power_slack` 的 Stage 2 最优值给出，$S^{\$}_{\max}$ 可由 `max_money_slack` 的 Stage 2 最优值给出，$\epsilon>0$ 为数值稳定用的小常数。
 
 ## 5. 约束（Constraints）
 
@@ -69,15 +98,15 @@ $$
 
 - 对所有 $i \in I \setminus B$：
 $$
-s_i \;+\; \sum_{r \in R} a_{r,i}\, x_r \;-\; c_i \;-\; \sum_{o \in O} q_{o,i} \;\ge\; 0
+s_i \;+\; \sum_{r \in R} a_{r,i}\, x_r \;-\; c_i \;-\; \sum_{o \in O} \left(q_{o,i}+\tilde q_{o,i}\right) \;\ge\; 0
 $$
 
 - 对所有 $b \in B$：
 $$
-s_b \;+\; \sum_{r \in R} a_{r,b}\, x_r \;-\; c_b \;-\; \sum_{o \in O} q_{o,b} \;-\; \frac{60}{D_b}\, Z_b \;\ge\; 0
+s_b \;+\; \sum_{r \in R} a_{r,b}\, x_r \;-\; c_b \;-\; \sum_{o \in O} \left(q_{o,b}+\tilde q_{o,b}\right) \;-\; \frac{60}{D_b}\, Z_b \;\ge\; 0
 $$
 
-### 5.2 outpost 每小时交易额上限
+### 5.2 outpost 每小时交易额上限（只约束真实销量 $q$）
 对所有 $o \in O$：
 $$
 \sum_{i \in I} p_{o,i}\, q_{o,i} \;\le\; \frac{C_o}{60}
@@ -110,4 +139,21 @@ $$
 电力不短缺：
 $$
 P^{gen} \;\ge\; P^{use}
+$$
+
+电力 slack 定义（两种写法选一种）：
+
+- 等式定义：
+$$
+s^{P} \;=\; P^{gen} \;-\; P^{use}
+$$
+
+- 或者不等式定义（避免等式；在最大化 $s^{P}$ 时会自动取等）：
+$$
+s^{P} \;\le\; P^{gen} \;-\; P^{use},\qquad s^{P}\ge 0
+$$
+
+### 5.6 每分钟虚拟成交额定义
+$$
+s^{\$} \;=\; \sum_{o\in O}\sum_{i\in I} p_{o,i}\, \tilde q_{o,i}
 $$

@@ -18,6 +18,7 @@ import {
 import type { AicDraft } from './types';
 
 const EMPTY_DRAFT: AicDraft = {
+  region: 'wuling',
   externalPowerConsumptionW: 0,
   supply: [],
   consumption: [],
@@ -43,6 +44,8 @@ describe('draft actions', () => {
 
     expect(added2.draft.outposts).toHaveLength(2);
     expect(added2.selectedOutpostIndex).toBe(1);
+    expect(added2.draft.outposts[0]?.key).toBe('outpost_1');
+    expect(added2.draft.outposts[1]?.key).toBe('outpost_2');
 
     const removed = removeOutpost(added2.draft, added2.selectedOutpostIndex, 1);
     expect(removed.draft.outposts).toHaveLength(1);
@@ -52,11 +55,12 @@ describe('draft actions', () => {
   it('updates outpost fields and price rows immutably', () => {
     const added = addOutpost(EMPTY_DRAFT, -1);
 
-    let draft = setOutpostField(added.draft, 0, 'key', 'TradeHub');
+    let draft = setOutpostField(added.draft, 0, 'name', 'TradeHub');
     draft = addPriceRow(draft, 0, 'Circuit');
     draft = setPriceValue(draft, 0, 0, 12.6);
 
-    expect(draft.outposts[0]?.key).toBe('TradeHub');
+    expect(draft.outposts[0]?.name).toBe('TradeHub');
+    expect(draft.outposts[0]?.key).toBe('outpost_1');
     expect(draft.outposts[0]?.prices[0]?.price).toBe(13);
 
     const afterRemovePrice = removePriceRow(draft, 0, 0);

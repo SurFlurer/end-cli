@@ -101,7 +101,11 @@ function callJsonApi<T>(module: EndWebModule, fnName: string, stringArgs: string
       const envelope = JSON.parse(raw) as ApiEnvelope<T>;
       
       if (envelope.status === 'err') {
-        throw new Error(envelope.error.message);
+        const sourceText = envelope.error.source?.trim();
+        const message = sourceText
+          ? `${envelope.error.message}: ${sourceText}`
+          : envelope.error.message;
+        throw new Error(message);
       }
       
       return envelope.data;

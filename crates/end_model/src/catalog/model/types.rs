@@ -2,7 +2,7 @@ use std::num::NonZeroU32;
 
 use generativity::Id;
 
-use crate::{DisplayName, Key};
+use crate::{DisplayName, Key, ScenarioRegion};
 
 /// Stable identifier for an item in [`Catalog`](super::Catalog).
 ///
@@ -151,12 +151,32 @@ pub struct ItemDef {
 }
 
 /// Machine facility metadata and display texts.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FacilityRegions {
+    All,
+    FourthValleyOnly,
+    WulingOnly,
+}
+
+impl FacilityRegions {
+    pub fn supports(self, region: ScenarioRegion) -> bool {
+        matches!(
+            (self, region),
+            (Self::All, _)
+                | (Self::FourthValleyOnly, ScenarioRegion::FourthValley)
+                | (Self::WulingOnly, ScenarioRegion::Wuling)
+        )
+    }
+}
+
+/// Machine facility metadata and display texts.
 #[derive(Debug, Clone)]
 pub struct FacilityDef {
     pub key: Key,
     pub power_w: NonZeroU32,
     pub en: DisplayName,
     pub zh: DisplayName,
+    pub regions: FacilityRegions,
 }
 
 /// Thermal bank metadata and display texts.

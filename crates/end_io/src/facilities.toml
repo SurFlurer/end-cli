@@ -15,6 +15,7 @@ key = "Forge of the Sky"
 power_w = 50
 en = "Forge of the Sky"
 zh = "天有洪炉"
+regions = ["wuling"]
 
 [[machines]]
 key = "Gearing Unit"
@@ -51,6 +52,7 @@ key = "Reactor Crucible"
 power_w = 50
 en = "Reactor Crucible"
 zh = "反应池"
+regions = ["wuling"]
 
 [[machines]]
 key = "Refining Unit"
@@ -69,6 +71,7 @@ key = "Separating Unit"
 power_w = 20
 en = "Separating Unit"
 zh = "拆解机"
+regions = ["wuling"]
 
 [[machines]]
 key = "Shredding Unit"
@@ -81,6 +84,7 @@ key = "Fluid Pump"
 power_w = 10
 en = "Fluid Pump"
 zh = "水泵"
+regions = ["wuling"]
 
 [thermal_bank]
 key = "Thermal Bank"

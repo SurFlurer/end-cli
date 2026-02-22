@@ -86,6 +86,7 @@ fn solve_stage<'cid, 'sid>(
 
     let recipe_vars = catalog
         .recipes_with_id()
+        .filter(|(_, recipe)| catalog.facility_available_in_region(recipe.facility, aic.region()))
         .map(|(recipe_index, recipe)| {
             let facility = catalog.facility(recipe.facility);
             let x = vars.add(variable().min(0.0));

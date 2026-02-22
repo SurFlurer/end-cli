@@ -6,9 +6,11 @@ mod text;
 
 pub use aic_input::{
     AicBuildError, AicInputs, ItemNonZeroU32Map, ItemU32Map, OutpostId, OutpostInput,
+    ScenarioRegion,
 };
 pub use catalog::{
-    Catalog, CatalogBuildError, CatalogBuilder, FacilityDef, FacilityId, ItemDef, ItemId,
+    Catalog, CatalogBuildError, CatalogBuilder, FacilityDef, FacilityId, FacilityRegions, ItemDef,
+    ItemId,
     PowerRecipe, PowerRecipeId, Recipe, RecipeId, Stack, ThermalBankDef,
 };
 pub use item_vec::ItemVec;

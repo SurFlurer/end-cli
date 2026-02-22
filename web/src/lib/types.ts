@@ -1,4 +1,5 @@
 export type LangTag = 'zh' | 'en';
+export type ScenarioRegion = 'fourth_valley' | 'wuling';
 
 export interface CatalogItemDto {
   key: string;
@@ -106,6 +107,7 @@ export interface ApiErrorEnvelope {
   status: 'err';
   error: {
     message: string;
+    source?: string;
   };
 }
 
@@ -133,13 +135,13 @@ export interface DraftPriceRow {
 
 export interface OutpostDraft {
   key: string;
-  en: string;
-  zh: string;
+  name: string;
   moneyCapPerHour: number;
   prices: DraftPriceRow[];
 }
 
 export interface AicDraft {
+  region: ScenarioRegion;
   externalPowerConsumptionW: number;
   supply: DraftSupplyRow[];
   consumption: DraftConsumptionRow[];
@@ -147,6 +149,7 @@ export interface AicDraft {
 }
 
 export const EMPTY_DRAFT: AicDraft = {
+  region: 'wuling',
   externalPowerConsumptionW: 0,
   supply: [],
   consumption: [],

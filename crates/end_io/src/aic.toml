@@ -5,6 +5,8 @@
 # - item flows: units per minute
 # - money cap: per hour
 
+region = "fourth_valley"
+
 # External power consumed by non-production systems.
 external_power_consumption_w = 300
 

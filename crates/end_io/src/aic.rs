@@ -65,6 +65,7 @@ fn resolve_aic<'cid, 'sid>(
     catalog: &Catalog<'cid>,
     guard: Guard<'sid>,
 ) -> Result<AicInputs<'cid, 'sid>> {
+    let region = raw.region;
     let external_power_consumption_w = raw.external_power_consumption_w;
 
     let supply_per_min_span = raw.supply_per_min.span();
@@ -137,8 +138,9 @@ fn resolve_aic<'cid, 'sid>(
         });
     }
 
-    AicInputs::parse(
+    AicInputs::parse_with_region(
         guard,
+        region,
         external_power_consumption_w,
         supply_per_min,
         external_consumption_per_min,

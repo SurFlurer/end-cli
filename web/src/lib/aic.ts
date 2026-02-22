@@ -3,8 +3,17 @@ import { asInt, asRecord, asString } from './coercions';
 import type {
   AicDraft,
   DraftPriceRow,
-  OutpostDraft
+  OutpostDraft,
+  ScenarioRegion
 } from './types';
+
+function parseRegion(value: unknown): ScenarioRegion {
+  const raw = typeof value === 'string' ? value.trim() : '';
+  if (raw === 'fourth_valley' || raw === 'wuling') {
+    return raw;
+  }
+  return 'wuling';
+}
 
 function parseItemFlowRows(map: Record<string, unknown>): { itemKey: string; value: number }[] {
   return Object.entries(map)
@@ -28,10 +37,12 @@ function parsePrices(map: Record<string, unknown>): DraftPriceRow[] {
 
 function parseOutpost(raw: unknown): OutpostDraft {
   const record = asRecord(raw);
+  const zh = asString(record.zh).trim();
+  const en = asString(record.en).trim();
+  const name = asString(record.name).trim();
   return {
     key: asString(record.key),
-    en: asString(record.en),
-    zh: asString(record.zh),
+    name: name || zh || en,
     moneyCapPerHour: asInt(record.money_cap_per_hour),
     prices: parsePrices(asRecord(record.prices))
   };
@@ -39,6 +50,7 @@ function parseOutpost(raw: unknown): OutpostDraft {
 
 function cleanDraft(draft: AicDraft): AicDraft {
   return {
+    region: draft.region === 'fourth_valley' ? 'fourth_valley' : 'wuling',
     externalPowerConsumptionW: asInt(draft.externalPowerConsumptionW),
     supply: draft.supply
       .filter((row) => row.itemKey.trim().length > 0)
@@ -50,8 +62,7 @@ function cleanDraft(draft: AicDraft): AicDraft {
       .filter((outpost) => outpost.key.trim().length > 0)
       .map((outpost) => ({
         key: outpost.key.trim(),
-        en: outpost.en.trim(),
-        zh: outpost.zh.trim(),
+        name: outpost.name.trim(),
         moneyCapPerHour: asInt(outpost.moneyCapPerHour),
         prices: outpost.prices
           .filter((row) => row.itemKey.trim().length > 0)
@@ -63,6 +74,7 @@ function cleanDraft(draft: AicDraft): AicDraft {
 export function parseAicToml(tomlText: string): AicDraft {
   const parsed = parseToml(tomlText) as Record<string, unknown>;
   return cleanDraft({
+    region: parseRegion(parsed.region),
     externalPowerConsumptionW: asInt(parsed.external_power_consumption_w),
     supply: parseItemFlowRows(asRecord(parsed.supply_per_min)),
     consumption: parseItemFlowRows(asRecord(parsed.external_consumption_per_min)),
@@ -93,17 +105,15 @@ export function buildAicToml(draft: AicDraft): string {
       prices
     };
 
-    if (outpost.en.length > 0) {
-      base.en = outpost.en;
-    }
-    if (outpost.zh.length > 0) {
-      base.zh = outpost.zh;
+    if (outpost.name.length > 0) {
+      base.zh = outpost.name;
     }
 
     return base;
   });
 
   return stringifyToml({
+    region: cleaned.region,
     external_power_consumption_w: asInt(cleaned.externalPowerConsumptionW),
     supply_per_min: supplyPerMin,
     external_consumption_per_min: externalConsumptionPerMin,

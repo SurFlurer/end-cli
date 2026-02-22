@@ -1,7 +1,8 @@
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use end_model::{
-    AicInputs, Catalog, DisplayName, FacilityDef, ItemDef, Key, OutpostInput, Stack, ThermalBankDef,
+    AicInputs, Catalog, DisplayName, FacilityDef, FacilityRegions, ItemDef, Key, OutpostInput,
+    ScenarioRegion, Stack, ThermalBankDef,
 };
 use end_opt::{Error, NEAR_INT_EPS, run_two_stage};
 use generativity::Guard;
@@ -46,6 +47,7 @@ fn sample_catalog<'id>(
             power_w: nz(10),
             en: name("Smelter"),
             zh: name("Smelter_zh"),
+            regions: FacilityRegions::All,
         })
         .expect("add machine");
     let mut b = b
@@ -76,6 +78,101 @@ fn sample_catalog<'id>(
 
     let catalog = b.build();
     (catalog, ore, ingot)
+}
+
+#[test]
+fn run_two_stage_applies_region_facility_restrictions() {
+    make_guard!(guard);
+    let mut b = Catalog::builder(guard);
+    let ore = b
+        .add_item(ItemDef {
+            key: key("Ore"),
+            en: name("Ore"),
+            zh: name("Ore_zh"),
+        })
+        .expect("add ore");
+    let ingot = b
+        .add_item(ItemDef {
+            key: key("Ingot"),
+            en: name("Ingot"),
+            zh: name("Ingot_zh"),
+        })
+        .expect("add ingot");
+
+    let valley_machine = b
+        .add_facility(FacilityDef {
+            key: key("ValleySmelter"),
+            power_w: nz(10),
+            en: name("ValleySmelter"),
+            zh: name("ValleySmelter_zh"),
+            regions: FacilityRegions::FourthValleyOnly,
+        })
+        .expect("add valley machine");
+    let _wuling_machine = b
+        .add_facility(FacilityDef {
+            key: key("WulingSmelter"),
+            power_w: nz(10),
+            en: name("WulingSmelter"),
+            zh: name("WulingSmelter_zh"),
+            regions: FacilityRegions::WulingOnly,
+        })
+        .expect("add wuling machine");
+
+    let mut b = b
+        .add_thermal_bank(ThermalBankDef {
+            key: key("Thermal Bank"),
+            en: name("Thermal Bank"),
+            zh: name("Thermal_Bank_zh"),
+        })
+        .expect("add thermal bank");
+
+    let valley_recipe = b
+        .push_recipe(
+            valley_machine,
+            nz(60),
+            vec![Stack {
+                item: ore,
+                count: nz(1),
+            }]
+            .into(),
+            vec![Stack {
+                item: ingot,
+                count: nz(1),
+            }]
+            .into(),
+        )
+        .expect("add valley recipe");
+
+    let catalog = b.build();
+
+    make_guard!(aic_guard);
+    let aic = AicInputs::parse_with_region(
+        aic_guard,
+        ScenarioRegion::FourthValley,
+        0,
+        vec![(ore, nz(10))].into(),
+        Default::default(),
+        vec![OutpostInput {
+            key: key("Camp"),
+            en: Some(name("Camp")),
+            zh: Some(name("Camp_zh")),
+            money_cap_per_hour: 600,
+            prices: vec![(ingot, 5)].into(),
+        }],
+    )
+    .expect("valid aic inputs");
+
+    make_guard!(result_guard);
+    let result = run_two_stage(&catalog, &aic, result_guard).expect("solve sample model");
+
+    assert!(
+        result
+            .stage2
+            .recipes_used
+            .iter()
+            .all(|usage| usage.recipe_index == valley_recipe),
+        "only valley recipe should be used under fourth_valley region"
+    );
 }
 
 fn sample_catalog_and_aic<'cid, 'sid>(

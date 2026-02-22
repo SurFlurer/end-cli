@@ -3,15 +3,15 @@ mod types;
 
 pub use builder::CatalogBuilder;
 pub use types::{
-    FacilityDef, FacilityId, ItemDef, ItemId, PowerRecipe, PowerRecipeId, Recipe, RecipeId, Stack,
-    ThermalBankDef,
+    FacilityDef, FacilityId, FacilityRegions, ItemDef, ItemId, PowerRecipe, PowerRecipeId,
+    Recipe, RecipeId, Stack, ThermalBankDef,
 };
 
 use std::collections::HashMap;
 
 use generativity::{Guard, Id};
 
-use crate::Key;
+use crate::{Key, ScenarioRegion};
 
 /// Canonical in-memory model resolved from TOML inputs.
 ///
@@ -115,6 +115,15 @@ impl<'id> Catalog<'id> {
     /// Returns all facilities in id order.
     pub fn facilities(&self) -> &[FacilityDef] {
         &self.facilities
+    }
+
+    /// Returns whether a facility can be used in the specified scenario region.
+    pub fn facility_available_in_region(
+        &self,
+        facility: FacilityId<'id>,
+        region: ScenarioRegion,
+    ) -> bool {
+        self.facility(facility).regions.supports(region)
     }
 
     /// Returns all production recipes.

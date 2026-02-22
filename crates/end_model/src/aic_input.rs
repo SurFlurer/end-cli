@@ -7,6 +7,22 @@ use crate::{DisplayName, ItemId, Key};
 use generativity::{Guard, Id};
 use thiserror::Error;
 
+/// Scenario region used for facility availability constraints.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ScenarioRegion {
+    FourthValley,
+    Wuling,
+}
+
+impl ScenarioRegion {
+    pub fn as_key(self) -> &'static str {
+        match self {
+            Self::FourthValley => "fourth_valley",
+            Self::Wuling => "wuling",
+        }
+    }
+}
+
 /// Stable identifier for an outpost in [`AicInputs`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct OutpostId<'sid> {
@@ -193,6 +209,7 @@ pub struct OutpostInput<'id> {
 /// Full scenario inputs consumed by optimization.
 #[derive(Debug, Clone)]
 pub struct AicInputs<'cid, 'sid> {
+    region: ScenarioRegion,
     supply_per_min: ItemNonZeroU32Map<'cid>,
     external_consumption_per_min: ItemNonZeroU32Map<'cid>,
     outposts: Box<[OutpostInput<'cid>]>,
@@ -214,6 +231,24 @@ impl<'cid, 'sid> AicInputs<'cid, 'sid> {
         external_consumption_per_min: ItemNonZeroU32Map<'cid>,
         outposts: Vec<OutpostInput<'cid>>,
     ) -> Result<Self, AicBuildError> {
+        Self::parse_with_region(
+            guard,
+            ScenarioRegion::Wuling,
+            external_power_consumption_w,
+            supply_per_min,
+            external_consumption_per_min,
+            outposts,
+        )
+    }
+
+    pub fn parse_with_region(
+        guard: Guard<'sid>,
+        region: ScenarioRegion,
+        external_power_consumption_w: u32,
+        supply_per_min: ItemNonZeroU32Map<'cid>,
+        external_consumption_per_min: ItemNonZeroU32Map<'cid>,
+        outposts: Vec<OutpostInput<'cid>>,
+    ) -> Result<Self, AicBuildError> {
         let mut seen = HashSet::with_capacity(outposts.len());
         for outpost in &outposts {
             if !seen.insert(outpost.key.as_str()) {
@@ -224,6 +259,7 @@ impl<'cid, 'sid> AicInputs<'cid, 'sid> {
         }
 
         Ok(Self {
+            region,
             supply_per_min,
             external_consumption_per_min,
             outposts: outposts.into_boxed_slice(),
@@ -234,6 +270,10 @@ impl<'cid, 'sid> AicInputs<'cid, 'sid> {
 
     pub fn external_power_consumption_w(&self) -> u32 {
         self.external_power_consumption_w
+    }
+
+    pub fn region(&self) -> ScenarioRegion {
+        self.region
     }
 
     pub fn supply_per_min(&self) -> &ItemNonZeroU32Map<'cid> {

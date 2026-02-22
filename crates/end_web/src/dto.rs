@@ -1,4 +1,5 @@
 use serde::Serialize;
+use std::error::Error as _;
 
 use crate::Result;
 
@@ -135,6 +136,24 @@ pub(crate) enum ApiEnvelope<T> {
 #[derive(Debug, Serialize)]
 pub(crate) struct ApiErrorDto {
     message: Box<str>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    source: Option<Box<str>>,
+}
+
+fn error_source_chain(err: &crate::Error) -> Option<Box<str>> {
+    let mut source = err.source();
+    let mut chain = Vec::<String>::new();
+
+    while let Some(next) = source {
+        chain.push(next.to_string());
+        source = next.source();
+    }
+
+    if chain.is_empty() {
+        None
+    } else {
+        Some(chain.join(": ").into_boxed_str())
+    }
 }
 
 pub(crate) fn envelope_json<T: Serialize>(result: Result<T>) -> String {
@@ -143,6 +162,7 @@ pub(crate) fn envelope_json<T: Serialize>(result: Result<T>) -> String {
         Err(err) => ApiEnvelope::Err {
             error: ApiErrorDto {
                 message: err.to_string().into_boxed_str(),
+                source: error_source_chain(&err),
             },
         },
     };

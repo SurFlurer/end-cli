@@ -49,6 +49,7 @@ fn sample_builder<'id>(
             power_w: nz(10),
             en: name("M1"),
             zh: name("M1"),
+            regions: FacilityRegions::All,
         })
         .expect("add machine");
     (builder, a, b, machine)
@@ -138,6 +139,7 @@ fn add_facility_rejects_duplicate_key() {
             power_w: nz(10),
             en: name("M2"),
             zh: name("M2"),
+            regions: FacilityRegions::All,
         })
         .expect("first facility should be accepted");
     let err = builder
@@ -146,6 +148,7 @@ fn add_facility_rejects_duplicate_key() {
             power_w: nz(20),
             en: name("M2-dupe"),
             zh: name("M2-dupe"),
+            regions: FacilityRegions::All,
         })
         .expect_err("duplicate facility key should fail");
 
@@ -165,6 +168,7 @@ fn add_thermal_bank_rejects_duplicate_machine_key() {
             power_w: nz(10),
             en: name("M2"),
             zh: name("M2"),
+            regions: FacilityRegions::All,
         })
         .expect("machine should be accepted");
     let err = builder

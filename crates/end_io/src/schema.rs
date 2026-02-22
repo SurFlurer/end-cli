@@ -1,4 +1,4 @@
-use end_model::{DisplayName, Key};
+use end_model::{DisplayName, Key, ScenarioRegion};
 use serde::Deserialize;
 use serde::de::Error as _;
 use std::collections::BTreeMap;
@@ -45,6 +45,8 @@ pub(crate) struct MachineToml {
     pub(crate) en: DisplayName,
     #[serde(deserialize_with = "deserialize_display_name")]
     pub(crate) zh: DisplayName,
+    #[serde(default)]
+    pub(crate) regions: Box<[ScenarioRegionToml]>,
 }
 
 /// Thermal bank facility entry from `facilities.toml`.
@@ -106,6 +108,11 @@ pub(crate) struct PowerRecipeToml {
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct AicToml {
+    #[serde(
+        default = "default_scenario_region",
+        deserialize_with = "deserialize_scenario_region"
+    )]
+    pub(crate) region: ScenarioRegion,
     #[serde(deserialize_with = "deserialize_non_negative_u32")]
     pub(crate) external_power_consumption_w: u32,
     #[serde(default = "default_empty_spanned_item_positive_u32_map")]
@@ -129,6 +136,27 @@ pub(crate) struct OutpostToml {
     #[serde(default, deserialize_with = "deserialize_optional_display_name")]
     pub(crate) zh: Option<DisplayName>,
     pub(crate) prices: Spanned<BTreeMap<KeyToml, NonNegativeU32Toml>>,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct ScenarioRegionToml(ScenarioRegion);
+
+impl ScenarioRegionToml {
+    pub(crate) fn into_inner(self) -> ScenarioRegion {
+        self.0
+    }
+}
+
+impl<'de> Deserialize<'de> for ScenarioRegionToml {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let raw = String::deserialize(deserializer)?;
+        parse_scenario_region(raw.as_str())
+            .map(Self)
+            .map_err(D::Error::custom)
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
@@ -233,6 +261,28 @@ where
     let raw = Option::<String>::deserialize(deserializer)?;
     raw.map(|text| DisplayName::try_from(text).map_err(D::Error::custom))
         .transpose()
+}
+
+fn parse_scenario_region(value: &str) -> Result<ScenarioRegion, String> {
+    match value {
+        "fourth_valley" => Ok(ScenarioRegion::FourthValley),
+        "wuling" => Ok(ScenarioRegion::Wuling),
+        other => Err(format!(
+            "invalid region `{other}`, expected one of: fourth_valley, wuling"
+        )),
+    }
+}
+
+fn default_scenario_region() -> ScenarioRegion {
+    ScenarioRegion::Wuling
+}
+
+fn deserialize_scenario_region<'de, D>(deserializer: D) -> Result<ScenarioRegion, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let raw = String::deserialize(deserializer)?;
+    parse_scenario_region(raw.as_str()).map_err(D::Error::custom)
 }
 
 fn parse_positive_u32(value: i64) -> Result<NonZeroU32, String> {

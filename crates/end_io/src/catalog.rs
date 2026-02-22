@@ -4,7 +4,10 @@ use crate::error::{
 };
 use crate::schema::{FacilitiesToml, ItemsToml, RecipesToml, StackToml};
 use crate::{Error, Result};
-use end_model::{Catalog, FacilityDef, ItemDef, ItemId, PowerRecipe, Stack, ThermalBankDef};
+use end_model::{
+    Catalog, FacilityDef, FacilityRegions, ItemDef, ItemId, PowerRecipe, ScenarioRegion, Stack,
+    ThermalBankDef,
+};
 use generativity::Guard;
 use serde::de::DeserializeOwned;
 use std::path::{Path, PathBuf};
@@ -109,6 +112,7 @@ pub fn load_catalog<'id>(data_dir: Option<&Path>, guard: Guard<'id>) -> Result<C
                 power_w: machine.power_w,
                 en: machine.en,
                 zh: machine.zh,
+                regions: facility_regions_from_machine_regions(&machine.regions),
             })
             .map_err(|source| {
                 map_machine_build_error(&fac_path, &fac_src, i, Some(span), source)
@@ -199,6 +203,23 @@ pub fn load_catalog<'id>(data_dir: Option<&Path>, guard: Guard<'id>) -> Result<C
 
     // build the catalog
     Ok(builder.build())
+}
+
+fn facility_regions_from_machine_regions(regions: &[crate::schema::ScenarioRegionToml]) -> FacilityRegions {
+    let mut has_fourth_valley = false;
+    let mut has_wuling = false;
+    for region in regions {
+        match region.into_inner() {
+            ScenarioRegion::FourthValley => has_fourth_valley = true,
+            ScenarioRegion::Wuling => has_wuling = true,
+        }
+    }
+
+    match (has_fourth_valley, has_wuling) {
+        (true, true) | (false, false) => FacilityRegions::All,
+        (true, false) => FacilityRegions::FourthValleyOnly,
+        (false, true) => FacilityRegions::WulingOnly,
+    }
 }
 
 /// Resolve a list of already-validated stack entries against catalog item ids.

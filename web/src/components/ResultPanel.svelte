@@ -284,55 +284,59 @@
     </article>
   </div>
 
-  <div class="table-wrap">
-    <h3>{t("据点收益", "Outpost Revenue")}</h3>
-    <div class="table-scroll">
-      <table>
-        <thead>
-          <tr>
-            <th>{t("据点", "Outpost")}</th>
-            <th>{t("收益/min", "Value/min")}</th>
-            <th>{t("上限/min", "Cap/min")}</th>
-            <th>{t("占比", "Ratio")}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {#each result.summary.outposts as outpost}
+  {#if result.summary.outposts.length > 0}
+    <div class="table-wrap">
+      <h3>{t("据点收益", "Outpost Revenue")}</h3>
+      <div class="table-scroll">
+        <table>
+          <thead>
             <tr>
-              <td>{outpost.name}</td>
-              <td>{outpost.valuePerMin.toFixed(2)}</td>
-              <td>{outpost.capPerMin.toFixed(2)}</td>
-              <td>{(outpost.ratio * 100).toFixed(1)}%</td>
+              <th>{t("据点", "Outpost")}</th>
+              <th>{t("收益/min", "Value/min")}</th>
+              <th>{t("上限/min", "Cap/min")}</th>
+              <th>{t("占比", "Ratio")}</th>
             </tr>
-          {/each}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {#each result.summary.outposts as outpost}
+              <tr>
+                <td>{outpost.name}</td>
+                <td>{outpost.valuePerMin.toFixed(2)}</td>
+                <td>{outpost.capPerMin.toFixed(2)}</td>
+                <td>{(outpost.ratio * 100).toFixed(1)}%</td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
+  {/if}
 
-  <div class="table-wrap">
-    <h3>{t("销售物品", "Sold Items")}</h3>
-    <div class="table-scroll">
-      <table>
-        <thead>
-          <tr>
-            <th>{t("物品", "Item")}</th>
-            <th>{t("据点", "Outpost")}</th>
-            <th>{t("收益/min", "Value/min")}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {#each result.summary.topSales as sale}
+  {#if result.summary.topSales.length > 0}
+    <div class="table-wrap">
+      <h3>{t("销售物品", "Sold Items")}</h3>
+      <div class="table-scroll">
+        <table>
+          <thead>
             <tr>
-              <td>{sale.itemName}</td>
-              <td>{sale.outpostName}</td>
-              <td>{sale.valuePerMin.toFixed(2)}</td>
+              <th>{t("物品", "Item")}</th>
+              <th>{t("据点", "Outpost")}</th>
+              <th>{t("收益/min", "Value/min")}</th>
             </tr>
-          {/each}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {#each result.summary.topSales as sale}
+              <tr>
+                <td>{sale.itemName}</td>
+                <td>{sale.outpostName}</td>
+                <td>{sale.valuePerMin.toFixed(2)}</td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
+  {/if}
 
   {#if result.summary.facilities.length > 0}
     <div class="table-wrap">

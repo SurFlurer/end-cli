@@ -1,11 +1,12 @@
 import type { AicDraft, CatalogItemDto } from './types';
 
-export type OutpostField = 'key' | 'en' | 'zh' | 'moneyCapPerHour';
+export type OutpostField = 'name' | 'moneyCapPerHour';
 
 export interface EditorActions {
   resetToDefault: () => void;
   importFromFile: (event: Event) => void | Promise<void>;
   exportToml: () => void;
+  setRegion: (region: 'fourth_valley' | 'wuling') => void;
   setExternalPower: (value: number) => void;
   supply: {
     add: () => void;

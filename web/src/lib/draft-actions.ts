@@ -8,11 +8,19 @@ function asNonNegativeInt(value: number): number {
 function cloneOutpost(outpost: OutpostDraft): OutpostDraft {
   return {
     key: outpost.key,
-    en: outpost.en,
-    zh: outpost.zh,
+    name: outpost.name,
     moneyCapPerHour: outpost.moneyCapPerHour,
     prices: outpost.prices.map((price) => ({ ...price }))
   };
+}
+
+function nextOutpostKey(draft: AicDraft): string {
+  const used = new Set(draft.outposts.map((outpost) => outpost.key.trim().toLowerCase()));
+  let index = 1;
+  while (used.has(`outpost_${index}`)) {
+    index += 1;
+  }
+  return `outpost_${index}`;
 }
 
 function withOutpost(draft: AicDraft, index: number, updater: (outpost: OutpostDraft) => OutpostDraft): AicDraft {
@@ -28,6 +36,13 @@ export function setExternalPower(draft: AicDraft, value: number): AicDraft {
   return {
     ...draft,
     externalPowerConsumptionW: asNonNegativeInt(value)
+  };
+}
+
+export function setRegion(draft: AicDraft, region: 'fourth_valley' | 'wuling'): AicDraft {
+  return {
+    ...draft,
+    region
   };
 }
 
@@ -115,11 +130,10 @@ export function removeConsumptionRow(draft: AicDraft, index: number): AicDraft {
   };
 }
 
-export function createOutpost(seedIndex: number): OutpostDraft {
+export function createOutpost(key: string): OutpostDraft {
   return {
-    key: `Outpost_${seedIndex + 1}`,
-    en: '',
-    zh: '',
+    key,
+    name: '',
     moneyCapPerHour: 0,
     prices: []
   };
@@ -129,7 +143,7 @@ export function addOutpost(
   draft: AicDraft,
   selectedOutpostIndex: number
 ): { draft: AicDraft; selectedOutpostIndex: number } {
-  const outposts = [...draft.outposts, createOutpost(draft.outposts.length)];
+  const outposts = [...draft.outposts, createOutpost(nextOutpostKey(draft))];
   return {
     draft: {
       ...draft,
@@ -180,7 +194,7 @@ export function setOutpostField(
 
     return {
       ...outpost,
-      [field]: String(value)
+      name: String(value)
     };
   });
 }

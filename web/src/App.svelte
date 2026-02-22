@@ -18,6 +18,7 @@
     setConsumptionKey,
     setConsumptionValue,
     setExternalPower,
+    setRegion,
     setOutpostField,
     setPriceKey,
     setPriceValue,
@@ -346,6 +347,9 @@
     resetToDefault: requestResetToDefault,
     importFromFile,
     exportToml,
+    setRegion: (region) => {
+      draft = setRegion(draft, region);
+    },
     setExternalPower: (value) => {
       draft = setExternalPower(draft, value);
     },
