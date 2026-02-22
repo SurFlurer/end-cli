@@ -6,21 +6,23 @@ use crate::types::{
     StageSolution, SupplyNode, SupplyNodeId, SupplySite,
 };
 use end_model::{AicInputs, Catalog, ItemId, Recipe};
+use generativity::{Guard, Id};
 use std::collections::{BTreeMap, btree_map::Entry};
 
 #[derive(Debug, Default)]
-struct ItemAccumulator<'id> {
-    supplies: Vec<(SupplySite<'id>, PosF64)>,
-    demands: Vec<(DemandSite<'id>, PosF64)>,
+struct ItemAccumulator<'cid, 'sid> {
+    supplies: Vec<(SupplySite<'cid>, PosF64)>,
+    demands: Vec<(DemandSite<'cid, 'sid>, PosF64)>,
 }
 
 /// Build per-item flow subproblems from stage-2 closure data.
-pub fn build_item_subproblems<'id>(
-    catalog: &Catalog<'id>,
-    inputs: &AicInputs<'id>,
-    stage: &StageSolution<'id>,
-) -> Result<Vec<ItemSubproblem<'id>>> {
-    let mut per_item = BTreeMap::<ItemId<'id>, ItemAccumulator<'id>>::new();
+pub fn build_item_subproblems<'cid, 'sid, 'rid>(
+    catalog: &Catalog<'cid>,
+    inputs: &AicInputs<'cid, 'sid>,
+    stage: &StageSolution<'cid, 'sid>,
+    rid: Id<'rid>,
+) -> Result<Vec<ItemSubproblem<'cid, 'sid, 'rid>>> {
+    let mut per_item = BTreeMap::<ItemId<'cid>, ItemAccumulator<'cid, 'sid>>::new();
 
     let mut external_supply = inputs.supply_per_min().iter().collect::<Vec<_>>();
     external_supply.sort_by_key(|(item, _)| item.as_u32());
@@ -68,7 +70,8 @@ pub fn build_item_subproblems<'id>(
                     run.recipe_index.as_u32(),
                     run.executions_per_min,
                     machine_capacity,
-                ).into_boxed_str(),
+                )
+                .into_boxed_str(),
             });
         }
 
@@ -141,7 +144,7 @@ pub fn build_item_subproblems<'id>(
                 .into_iter()
                 .enumerate()
                 .map(|(index, (site, capacity_per_min))| SupplyNode {
-                    id: SupplyNodeId::from_index(index),
+                    id: SupplyNodeId::from_index(index, rid),
                     site,
                     capacity_per_min,
                 })
@@ -152,7 +155,7 @@ pub fn build_item_subproblems<'id>(
                 .into_iter()
                 .enumerate()
                 .map(|(index, (site, demand_per_min))| DemandNode {
-                    id: DemandNodeId::from_index(index),
+                    id: DemandNodeId::from_index(index, rid),
                     site,
                     demand_per_min,
                 })
@@ -167,7 +170,9 @@ pub fn build_item_subproblems<'id>(
 }
 
 /// Solve one item flow assignment with deterministic Best-Fit.
-pub fn solve_item_best_fit<'id>(subproblem: &ItemSubproblem<'id>) -> Result<ItemFlowPlan<'id>> {
+pub fn solve_item_best_fit<'cid, 'sid, 'rid>(
+    subproblem: &ItemSubproblem<'cid, 'sid, 'rid>,
+) -> Result<ItemFlowPlan<'cid, 'rid>> {
     let mut remaining_supply = subproblem
         .supplies()
         .iter()
@@ -188,7 +193,7 @@ pub fn solve_item_best_fit<'id>(subproblem: &ItemSubproblem<'id>) -> Result<Item
             .then_with(|| lhs_id.cmp(rhs_id))
     });
 
-    let mut edge_flow = BTreeMap::<(SupplyNodeId, DemandNodeId), f64>::new();
+    let mut edge_flow = BTreeMap::<(SupplyNodeId<'rid>, DemandNodeId<'rid>), f64>::new();
 
     for (demand_id, demand_per_min) in demand_order {
         let mut remaining_demand = demand_per_min;
@@ -215,7 +220,8 @@ pub fn solve_item_best_fit<'id>(subproblem: &ItemSubproblem<'id>) -> Result<Item
                         "selected supply index {} out of bounds for item {}",
                         supply_index,
                         subproblem.item().as_u32()
-                    ).into_boxed_str(),
+                    )
+                    .into_boxed_str(),
                 })?;
             let supply_id = supply.id;
             let available = supply.remaining;
@@ -258,7 +264,8 @@ pub fn solve_item_best_fit<'id>(subproblem: &ItemSubproblem<'id>) -> Result<Item
                     subproblem.item().as_u32(),
                     from.as_u32(),
                     to.as_u32()
-                ).into_boxed_str(),
+                )
+                .into_boxed_str(),
                 value: flow_per_min,
             })?;
             Ok(ItemFlowEdge {
@@ -278,34 +285,37 @@ pub fn solve_item_best_fit<'id>(subproblem: &ItemSubproblem<'id>) -> Result<Item
 }
 
 /// Build the full logistics plan by solving Best-Fit subproblems per item.
-pub fn build_logistics_plan<'id>(
-    catalog: &Catalog<'id>,
-    inputs: &AicInputs<'id>,
-    stage: &StageSolution<'id>,
-) -> Result<LogisticsPlan<'id>> {
-    let subproblems = build_item_subproblems(catalog, inputs, stage)?;
+pub fn build_logistics_plan<'cid, 'sid, 'rid>(
+    catalog: &Catalog<'cid>,
+    inputs: &AicInputs<'cid, 'sid>,
+    stage: &StageSolution<'cid, 'sid>,
+    guard: Guard<'rid>,
+) -> Result<LogisticsPlan<'cid, 'sid, 'rid>> {
+    let rid = guard.into();
+    let subproblems = build_item_subproblems(catalog, inputs, stage, rid)?;
     let per_item = subproblems
         .iter()
         .map(solve_item_best_fit)
         .collect::<Result<Vec<_>>>()?;
 
-    let mut node_index = BTreeMap::<LogisticsNodeKey<'id>, LogisticsNodeId>::new();
-    let mut nodes = Vec::<LogisticsNode<'id>>::new();
-    let mut edge_flow = BTreeMap::<(ItemId<'id>, LogisticsNodeId, LogisticsNodeId), f64>::new();
+    let mut node_index = BTreeMap::<LogisticsNodeKey<'cid, 'sid>, LogisticsNodeId<'rid>>::new();
+    let mut nodes = Vec::<LogisticsNode<'cid, 'sid, 'rid>>::new();
+    let mut edge_flow =
+        BTreeMap::<(ItemId<'cid>, LogisticsNodeId<'rid>, LogisticsNodeId<'rid>), f64>::new();
 
     for (subproblem, item_plan) in subproblems.iter().zip(&per_item) {
-        let mut supply_nodes = DenseNodeMap::new(subproblem.supplies().len());
-        let mut demand_nodes = DenseNodeMap::new(subproblem.demands().len());
+        let mut supply_nodes = DenseNodeMap::new(subproblem.supplies().len(), rid);
+        let mut demand_nodes = DenseNodeMap::new(subproblem.demands().len(), rid);
 
         for supply in subproblem.supplies() {
             let key = supply_site_key(&supply.site);
-            let node_id = allocate_logistics_node(&mut node_index, &mut nodes, key);
+            let node_id = allocate_logistics_node(&mut node_index, &mut nodes, key, rid);
             supply_nodes.insert(supply.id.as_u32(), node_id);
         }
 
         for demand in subproblem.demands() {
             let key = demand_site_key(&demand.site);
-            let node_id = allocate_logistics_node(&mut node_index, &mut nodes, key);
+            let node_id = allocate_logistics_node(&mut node_index, &mut nodes, key, rid);
             demand_nodes.insert(demand.id.as_u32(), node_id);
         }
 
@@ -325,7 +335,8 @@ pub fn build_logistics_plan<'id>(
                     item.as_u32(),
                     from.as_u32(),
                     to.as_u32()
-                ).into_boxed_str(),
+                )
+                .into_boxed_str(),
                 value: flow_per_min,
             })?;
             Ok(LogisticsEdge {
@@ -345,35 +356,36 @@ pub fn build_logistics_plan<'id>(
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-enum LogisticsNodeKey<'id> {
+enum LogisticsNodeKey<'cid, 'sid> {
     ExternalSupply {
-        item: ItemId<'id>,
+        item: ItemId<'cid>,
     },
     ExternalConsumption {
-        item: ItemId<'id>,
+        item: ItemId<'cid>,
     },
     RecipeGroup {
-        recipe_index: end_model::RecipeId<'id>,
+        recipe_index: end_model::RecipeId<'cid>,
     },
     OutpostSale {
-        outpost_index: end_model::OutpostId,
-        item: ItemId<'id>,
+        outpost_index: end_model::OutpostId<'sid>,
+        item: ItemId<'cid>,
     },
     ThermalBankGroup {
-        power_recipe_index: end_model::PowerRecipeId<'id>,
-        item: ItemId<'id>,
+        power_recipe_index: end_model::PowerRecipeId<'cid>,
+        item: ItemId<'cid>,
     },
 }
 
-fn allocate_logistics_node<'id>(
-    node_index: &mut BTreeMap<LogisticsNodeKey<'id>, LogisticsNodeId>,
-    nodes: &mut Vec<LogisticsNode<'id>>,
-    key: LogisticsNodeKey<'id>,
-) -> LogisticsNodeId {
+fn allocate_logistics_node<'cid, 'sid, 'rid>(
+    node_index: &mut BTreeMap<LogisticsNodeKey<'cid, 'sid>, LogisticsNodeId<'rid>>,
+    nodes: &mut Vec<LogisticsNode<'cid, 'sid, 'rid>>,
+    key: LogisticsNodeKey<'cid, 'sid>,
+    rid: Id<'rid>,
+) -> LogisticsNodeId<'rid> {
     match node_index.entry(key) {
         Entry::Occupied(entry) => *entry.get(),
         Entry::Vacant(entry) => {
-            let id = LogisticsNodeId::from_index(nodes.len());
+            let id = LogisticsNodeId::from_index(nodes.len(), rid);
             let site = key_to_site(*entry.key());
             entry.insert(id);
             nodes.push(LogisticsNode { id, site });
@@ -382,7 +394,7 @@ fn allocate_logistics_node<'id>(
     }
 }
 
-fn supply_site_key<'id>(site: &SupplySite<'id>) -> LogisticsNodeKey<'id> {
+fn supply_site_key<'cid, 'sid>(site: &SupplySite<'cid>) -> LogisticsNodeKey<'cid, 'sid> {
     match *site {
         SupplySite::ExternalSupply { item } => LogisticsNodeKey::ExternalSupply { item },
         SupplySite::RecipeOutput {
@@ -392,7 +404,7 @@ fn supply_site_key<'id>(site: &SupplySite<'id>) -> LogisticsNodeKey<'id> {
     }
 }
 
-fn demand_site_key<'id>(site: &DemandSite<'id>) -> LogisticsNodeKey<'id> {
+fn demand_site_key<'cid, 'sid>(site: &DemandSite<'cid, 'sid>) -> LogisticsNodeKey<'cid, 'sid> {
     match *site {
         DemandSite::RecipeInput {
             recipe_index,
@@ -416,7 +428,7 @@ fn demand_site_key<'id>(site: &DemandSite<'id>) -> LogisticsNodeKey<'id> {
     }
 }
 
-fn key_to_site<'id>(key: LogisticsNodeKey<'id>) -> LogisticsNodeSite<'id> {
+fn key_to_site<'cid, 'sid>(key: LogisticsNodeKey<'cid, 'sid>) -> LogisticsNodeSite<'cid, 'sid> {
     match key {
         LogisticsNodeKey::ExternalSupply { item } => LogisticsNodeSite::ExternalSupply { item },
         LogisticsNodeKey::ExternalConsumption { item } => {
@@ -442,8 +454,8 @@ fn key_to_site<'id>(key: LogisticsNodeKey<'id>) -> LogisticsNodeSite<'id> {
     }
 }
 
-fn recipe_net_deltas<'id>(recipe: &Recipe<'id>) -> Vec<(ItemId<'id>, f64)> {
-    let mut net = BTreeMap::<ItemId<'id>, f64>::new();
+fn recipe_net_deltas<'cid>(recipe: &Recipe<'cid>) -> Vec<(ItemId<'cid>, f64)> {
+    let mut net = BTreeMap::<ItemId<'cid>, f64>::new();
     for ingredient in &recipe.ingredients {
         *net.entry(ingredient.item).or_insert(0.0) -= ingredient.count.get() as f64;
     }
@@ -453,10 +465,10 @@ fn recipe_net_deltas<'id>(recipe: &Recipe<'id>) -> Vec<(ItemId<'id>, f64)> {
     net.into_iter().collect()
 }
 
-fn push_supply<'id>(
-    per_item: &mut BTreeMap<ItemId<'id>, ItemAccumulator<'id>>,
-    item: ItemId<'id>,
-    site: SupplySite<'id>,
+fn push_supply<'cid, 'sid>(
+    per_item: &mut BTreeMap<ItemId<'cid>, ItemAccumulator<'cid, 'sid>>,
+    item: ItemId<'cid>,
+    site: SupplySite<'cid>,
     qty_per_min: f64,
     context: &'static str,
 ) -> Result<()> {
@@ -471,10 +483,10 @@ fn push_supply<'id>(
     Ok(())
 }
 
-fn push_demand<'id>(
-    per_item: &mut BTreeMap<ItemId<'id>, ItemAccumulator<'id>>,
-    item: ItemId<'id>,
-    site: DemandSite<'id>,
+fn push_demand<'cid, 'sid>(
+    per_item: &mut BTreeMap<ItemId<'cid>, ItemAccumulator<'cid, 'sid>>,
+    item: ItemId<'cid>,
+    site: DemandSite<'cid, 'sid>,
     qty_per_min: f64,
     context: &'static str,
 ) -> Result<()> {
@@ -501,40 +513,50 @@ fn pos_with_eps(value: f64, context: &'static str) -> Result<Option<PosF64>> {
 }
 
 #[derive(Debug, Clone)]
-struct DenseNodeMap {
-    values: Vec<LogisticsNodeId>,
+struct DenseNodeMap<'rid> {
+    values: Vec<LogisticsNodeId<'rid>>,
 }
 
-impl DenseNodeMap {
-    fn new(len: usize) -> Self {
+impl<'rid> DenseNodeMap<'rid> {
+    fn new(len: usize, rid: Id<'rid>) -> Self {
         Self {
-            values: vec![LogisticsNodeId::from_index(0); len],
+            values: vec![LogisticsNodeId::from_index(0, rid); len],
         }
     }
 
-    fn insert(&mut self, dense_index: u32, node_id: LogisticsNodeId) {
-        let slot = self
-            .values
-            .get_mut(dense_index as usize)
-            .expect("dense node index must be in bounds");
-        *slot = node_id;
+    fn insert(&mut self, dense_index: u32, node_id: LogisticsNodeId<'rid>) {
+        let index = dense_index as usize;
+        debug_assert!(
+            index < self.values.len(),
+            "dense node index {} out of bounds {}",
+            index,
+            self.values.len()
+        );
+        unsafe { *self.values.get_unchecked_mut(index) = node_id };
     }
 
-    fn get(&self, dense_index: u32) -> LogisticsNodeId {
-        self.values
-            .get(dense_index as usize)
-            .copied()
-            .expect("dense node index must be in bounds")
+    fn get(&self, dense_index: u32) -> LogisticsNodeId<'rid> {
+        let index = dense_index as usize;
+        debug_assert!(
+            index < self.values.len(),
+            "dense node index {} out of bounds {}",
+            index,
+            self.values.len()
+        );
+        unsafe { *self.values.get_unchecked(index) }
     }
 }
 
 #[derive(Debug, Clone, Copy)]
-struct SupplyState {
-    id: SupplyNodeId,
+struct SupplyState<'rid> {
+    id: SupplyNodeId<'rid>,
     remaining: f64,
 }
 
-fn find_best_fit_supply(remaining_supply: &[SupplyState], demand: f64) -> Option<usize> {
+fn find_best_fit_supply<'rid>(
+    remaining_supply: &[SupplyState<'rid>],
+    demand: f64,
+) -> Option<usize> {
     remaining_supply
         .iter()
         .enumerate()
@@ -548,7 +570,7 @@ fn find_best_fit_supply(remaining_supply: &[SupplyState], demand: f64) -> Option
         .map(|(index, _)| index)
 }
 
-fn find_largest_non_empty_supply(remaining_supply: &[SupplyState]) -> Option<usize> {
+fn find_largest_non_empty_supply<'rid>(remaining_supply: &[SupplyState<'rid>]) -> Option<usize> {
     remaining_supply
         .iter()
         .enumerate()
@@ -597,17 +619,37 @@ mod tests {
     fn best_fit_fully_satisfies_each_demand() {
         make_guard!(guard);
         let (_, item) = sample_catalog(guard);
-        let outpost_index = sample_outpost_id();
+        make_guard!(sid_guard);
+        let outpost_index = AicInputs::parse(
+            sid_guard,
+            0,
+            Default::default(),
+            Default::default(),
+            vec![OutpostInput {
+                key: key("camp"),
+                en: Some(name("camp")),
+                zh: Some(name("camp")),
+                money_cap_per_hour: 1,
+                prices: vec![(item, 1)].into(),
+            }],
+        )
+        .expect("valid aic")
+        .outposts_with_id()
+        .next()
+        .expect("one outpost")
+        .0;
+        make_guard!(rid_guard);
+        let rid = rid_guard.into();
         let subproblem = ItemSubproblem::new(
             item,
             vec![
                 SupplyNode {
-                    id: SupplyNodeId::from_index(0),
+                    id: SupplyNodeId::from_index(0, rid),
                     site: SupplySite::ExternalSupply { item },
                     capacity_per_min: PosF64::new(8.0).expect("positive"),
                 },
                 SupplyNode {
-                    id: SupplyNodeId::from_index(1),
+                    id: SupplyNodeId::from_index(1, rid),
                     site: SupplySite::ExternalSupply { item },
                     capacity_per_min: PosF64::new(5.0).expect("positive"),
                 },
@@ -615,7 +657,7 @@ mod tests {
             .into_boxed_slice(),
             vec![
                 DemandNode {
-                    id: DemandNodeId::from_index(0),
+                    id: DemandNodeId::from_index(0, rid),
                     site: DemandSite::OutpostSale {
                         outpost_index,
                         item,
@@ -623,7 +665,7 @@ mod tests {
                     demand_per_min: PosF64::new(6.0).expect("positive"),
                 },
                 DemandNode {
-                    id: DemandNodeId::from_index(1),
+                    id: DemandNodeId::from_index(1, rid),
                     site: DemandSite::OutpostSale {
                         outpost_index,
                         item,
@@ -631,7 +673,7 @@ mod tests {
                     demand_per_min: PosF64::new(3.0).expect("positive"),
                 },
                 DemandNode {
-                    id: DemandNodeId::from_index(2),
+                    id: DemandNodeId::from_index(2, rid),
                     site: DemandSite::OutpostSale {
                         outpost_index,
                         item,
@@ -755,7 +797,9 @@ mod tests {
 
         let catalog = b.build();
 
+        make_guard!(aic_guard);
         let aic = AicInputs::parse(
+            aic_guard,
             0,
             vec![(ore, nz(20))].into(),
             Default::default(),
@@ -769,15 +813,28 @@ mod tests {
         )
         .expect("valid aic");
 
-        let solved = run_two_stage(&catalog, &aic).expect("solve scenario");
+        make_guard!(result_guard);
+        let solved = run_two_stage(&catalog, &aic, result_guard).expect("solve scenario");
 
-        let plan_a = build_logistics_plan(&catalog, &aic, &solved.stage2)
+        make_guard!(plan_guard);
+        let plan_a = build_logistics_plan(&catalog, &aic, &solved.stage2, plan_guard)
             .expect("logistics plan should build");
-        let plan_b = build_logistics_plan(&catalog, &aic, &solved.stage2)
-            .expect("logistics plan should be reproducible");
-
+        let canonical_edges = |plan: &crate::types::LogisticsPlan<'_, '_, '_>| {
+            plan.edges
+                .iter()
+                .map(|edge| {
+                    (
+                        edge.item.as_u32(),
+                        edge.from.as_u32(),
+                        edge.to.as_u32(),
+                        edge.flow_per_min.get(),
+                    )
+                })
+                .collect::<Vec<_>>()
+        };
         assert_eq!(
-            plan_a, plan_b,
+            canonical_edges(&plan_a),
+            canonical_edges(&solved.logistics),
             "same inputs should produce identical flow edges"
         );
 
@@ -825,7 +882,9 @@ mod tests {
     fn logistics_plan_contains_external_consumption_demands() {
         make_guard!(guard);
         let (catalog, item) = sample_catalog(guard);
+        make_guard!(aic_guard);
         let aic = AicInputs::parse(
+            aic_guard,
             0,
             vec![(item, nz(10))].into(),
             vec![(item, nz(4))].into(),
@@ -839,7 +898,8 @@ mod tests {
         )
         .expect("valid aic");
 
-        let solved = run_two_stage(&catalog, &aic).expect("solve scenario");
+        make_guard!(result_guard);
+        let solved = run_two_stage(&catalog, &aic, result_guard).expect("solve scenario");
         let external_consumption_node =
             solved
                 .logistics
@@ -887,22 +947,5 @@ mod tests {
             })
             .expect("add thermal bank");
         (b.build(), item)
-    }
-
-    fn sample_outpost_id() -> end_model::OutpostId {
-        let aic = AicInputs::parse(
-            0,
-            Default::default(),
-            Default::default(),
-            vec![OutpostInput {
-                key: key("camp"),
-                en: Some(name("camp")),
-                zh: Some(name("camp")),
-                money_cap_per_hour: 1,
-                prices: Default::default(),
-            }],
-        )
-        .expect("valid aic");
-        aic.outposts_with_id().next().expect("one outpost").0
     }
 }

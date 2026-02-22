@@ -3,25 +3,32 @@ use std::iter::FromIterator;
 use std::num::NonZeroU32;
 use vector_map::VecMap;
 
+use generativity::{Guard, Id};
 use crate::{DisplayName, ItemId, Key};
 use thiserror::Error;
 
 /// Stable identifier for an outpost in [`AicInputs`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct OutpostId(u32);
+pub struct OutpostId<'sid> {
+    raw: u32,
+    brand: Id<'sid>,
+}
 
-impl OutpostId {
+impl<'sid> OutpostId<'sid> {
     /// Returns the underlying numeric representation.
     pub fn as_u32(self) -> u32 {
-        self.0
+        self.raw
     }
 
-    fn from_index(index: usize) -> Self {
-        Self(index as u32)
+    fn from_index(index: usize, brand: Id<'sid>) -> Self {
+        Self {
+            raw: index as u32,
+            brand,
+        }
     }
 
     pub fn index(self) -> usize {
-        self.0 as usize
+        self.raw as usize
     }
 }
 
@@ -185,11 +192,12 @@ pub struct OutpostInput<'id> {
 
 /// Full scenario inputs consumed by optimization.
 #[derive(Debug, Clone)]
-pub struct AicInputs<'id> {
+pub struct AicInputs<'cid, 'sid> {
+    supply_per_min: ItemNonZeroU32Map<'cid>,
+    external_consumption_per_min: ItemNonZeroU32Map<'cid>,
+    outposts: Box<[OutpostInput<'cid>]>,
     external_power_consumption_w: u32,
-    supply_per_min: ItemNonZeroU32Map<'id>,
-    external_consumption_per_min: ItemNonZeroU32Map<'id>,
-    outposts: Box<[OutpostInput<'id>]>,
+    scenario_brand: Id<'sid>,
 }
 
 #[derive(Debug, Clone, Error, PartialEq, Eq)]
@@ -198,12 +206,13 @@ pub enum AicBuildError {
     DuplicateOutpostKey { key: Key },
 }
 
-impl<'id> AicInputs<'id> {
+impl<'cid, 'sid> AicInputs<'cid, 'sid> {
     pub fn parse(
+        guard: Guard<'sid>,
         external_power_consumption_w: u32,
-        supply_per_min: ItemNonZeroU32Map<'id>,
-        external_consumption_per_min: ItemNonZeroU32Map<'id>,
-        outposts: Vec<OutpostInput<'id>>,
+        supply_per_min: ItemNonZeroU32Map<'cid>,
+        external_consumption_per_min: ItemNonZeroU32Map<'cid>,
+        outposts: Vec<OutpostInput<'cid>>,
     ) -> Result<Self, AicBuildError> {
         let mut seen = HashSet::with_capacity(outposts.len());
         for outpost in &outposts {
@@ -215,10 +224,11 @@ impl<'id> AicInputs<'id> {
         }
 
         Ok(Self {
-            external_power_consumption_w,
             supply_per_min,
             external_consumption_per_min,
             outposts: outposts.into_boxed_slice(),
+            external_power_consumption_w,
+            scenario_brand: guard.into(),
         })
     }
 
@@ -226,29 +236,32 @@ impl<'id> AicInputs<'id> {
         self.external_power_consumption_w
     }
 
-    pub fn supply_per_min(&self) -> &ItemNonZeroU32Map<'id> {
+    pub fn supply_per_min(&self) -> &ItemNonZeroU32Map<'cid> {
         &self.supply_per_min
     }
 
-    pub fn external_consumption_per_min(&self) -> &ItemNonZeroU32Map<'id> {
+    pub fn external_consumption_per_min(&self) -> &ItemNonZeroU32Map<'cid> {
         &self.external_consumption_per_min
     }
 
-    pub fn outposts(&self) -> &[OutpostInput<'id>] {
+    pub fn outposts(&self) -> &[OutpostInput<'cid>] {
         &self.outposts
     }
 
     /// Returns an outpost by id.
-    pub fn outpost(&self, id: OutpostId) -> Option<&OutpostInput<'id>> {
+    pub fn outpost(&self, id: OutpostId<'sid>) -> Option<&OutpostInput<'cid>> {
         self.outposts.get(id.index())
     }
 
     /// Returns all outposts paired with their stable ids.
-    pub fn outposts_with_id(&self) -> impl Iterator<Item = (OutpostId, &OutpostInput<'id>)> + '_ {
+    pub fn outposts_with_id(
+        &self,
+    ) -> impl Iterator<Item = (OutpostId<'sid>, &OutpostInput<'cid>)> + '_ {
+        let brand = self.scenario_brand;
         self.outposts
             .iter()
             .enumerate()
-            .map(|(index, outpost)| (OutpostId::from_index(index), outpost))
+            .map(move |(index, outpost)| (OutpostId::from_index(index, brand), outpost))
     }
 }
 
@@ -341,10 +354,12 @@ mod tests {
 
     #[test]
     fn aic_parse_rejects_duplicate_outpost_keys() {
-        make_guard!(guard);
-        let (_, _, b) = sample_catalog(guard);
+        make_guard!(catalog_guard);
+        let (_, _, b) = sample_catalog(catalog_guard);
+        make_guard!(aic_guard);
         let camp = key("Camp");
         let err = crate::AicInputs::parse(
+            aic_guard,
             0,
             vec![(b, NonZeroU32::new(1).expect("non-zero"))].into(),
             Default::default(),

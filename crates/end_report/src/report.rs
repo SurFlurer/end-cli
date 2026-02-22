@@ -8,18 +8,18 @@ use end_opt::{LogisticsEdge, LogisticsNodeSite, OptimizationResult};
 use std::collections::{BTreeMap, BTreeSet};
 
 #[derive(Debug, Clone, Copy)]
-struct ReportSaleValue<'id> {
-    outpost_index: OutpostId,
-    item: ItemId<'id>,
+struct ReportSaleValue<'cid, 'sid> {
+    outpost_index: OutpostId<'sid>,
+    item: ItemId<'cid>,
     value_per_min: f64,
 }
 
 /// Render a human-readable optimization report from solved results.
-pub fn build_report<'id>(
+pub fn build_report<'cid, 'sid, 'rid>(
     lang: Lang,
-    catalog: &Catalog<'id>,
-    inputs: &AicInputs<'id>,
-    result: &OptimizationResult<'id>,
+    catalog: &Catalog<'cid>,
+    inputs: &AicInputs<'cid, 'sid>,
+    result: &OptimizationResult<'cid, 'sid, 'rid>,
 ) -> Result<String> {
     let stage1 = &result.stage1;
     let stage2 = &result.stage2;
@@ -73,7 +73,7 @@ pub fn build_report<'id>(
     for ov in &stage2.outpost_values {
         let outpost = inputs
             .outpost(ov.outpost_index)
-            .ok_or(Error::MissingOutpost(ov.outpost_index))?;
+            .ok_or(Error::MissingOutpost(ov.outpost_index.as_u32()))?;
         let name = outpost_display_name(lang, outpost);
         let at_cap = ov.cap_per_min > 0.0 && ov.ratio >= 0.9999;
         let tag = if at_cap {
@@ -117,7 +117,7 @@ pub fn build_report<'id>(
         for sale in top_sales {
             let outpost = inputs
                 .outpost(sale.outpost_index)
-                .ok_or(Error::MissingOutpost(sale.outpost_index))?;
+                .ok_or(Error::MissingOutpost(sale.outpost_index.as_u32()))?;
             let item = item_display_name(lang, catalog, sale.item)?;
             out.push_str(&format!(
                 "- {} @ {}: {:.2}/min\n",
@@ -264,7 +264,7 @@ pub fn build_report<'id>(
             any = true;
             let outpost = inputs
                 .outpost(ov.outpost_index)
-                .ok_or(Error::MissingOutpost(ov.outpost_index))?;
+                .ok_or(Error::MissingOutpost(ov.outpost_index.as_u32()))?;
             out.push_str(&format!(
                 "- {}\n",
                 match lang {
@@ -355,7 +355,9 @@ pub fn build_report<'id>(
     Ok(out)
 }
 
-fn top_sales_by_value<'id>(lines: &[end_opt::OutpostSaleQty<'id>]) -> Vec<ReportSaleValue<'id>> {
+fn top_sales_by_value<'cid, 'sid>(
+    lines: &[end_opt::OutpostSaleQty<'cid, 'sid>],
+) -> Vec<ReportSaleValue<'cid, 'sid>> {
     let mut sales = lines
         .iter()
         .map(|line| ReportSaleValue {
@@ -368,11 +370,11 @@ fn top_sales_by_value<'id>(lines: &[end_opt::OutpostSaleQty<'id>]) -> Vec<Report
     sales
 }
 
-fn render_logistics<'id>(
+fn render_logistics<'cid, 'sid, 'rid>(
     lang: Lang,
-    catalog: &Catalog<'id>,
-    inputs: &AicInputs<'id>,
-    result: &OptimizationResult<'id>,
+    catalog: &Catalog<'cid>,
+    inputs: &AicInputs<'cid, 'sid>,
+    result: &OptimizationResult<'cid, 'sid, 'rid>,
     out: &mut String,
 ) -> Result<()> {
     let node_by_id = result
@@ -381,7 +383,8 @@ fn render_logistics<'id>(
         .iter()
         .map(|node| (node.id, node))
         .collect::<BTreeMap<_, _>>();
-    let mut edges_by_item = BTreeMap::<end_model::ItemId<'id>, Vec<&LogisticsEdge<'id>>>::new();
+    let mut edges_by_item =
+        BTreeMap::<end_model::ItemId<'cid>, Vec<&LogisticsEdge<'cid, 'rid>>>::new();
     for edge in &result.logistics.edges {
         edges_by_item.entry(edge.item).or_default().push(edge);
     }
@@ -444,14 +447,14 @@ fn render_logistics<'id>(
                     .copied()
                     .ok_or(Error::MissingLogisticsNode {
                         item: item.as_u32(),
-                        node: edge.from,
+                        node: edge.from.as_u32(),
                     })?;
             let to_node = node_by_id
                 .get(&edge.to)
                 .copied()
                 .ok_or(Error::MissingLogisticsNode {
                     item: item.as_u32(),
-                    node: edge.to,
+                    node: edge.to.as_u32(),
                 })?;
             let from = describe_logistics_site(lang, inputs, catalog, &from_node.site)?;
             let to = describe_logistics_site(lang, inputs, catalog, &to_node.site)?;
@@ -510,11 +513,11 @@ fn render_logistics<'id>(
     Ok(())
 }
 
-fn describe_logistics_site<'id>(
+fn describe_logistics_site<'cid, 'sid>(
     lang: Lang,
-    inputs: &AicInputs<'id>,
-    catalog: &Catalog<'id>,
-    site: &LogisticsNodeSite<'id>,
+    inputs: &AicInputs<'cid, 'sid>,
+    catalog: &Catalog<'cid>,
+    site: &LogisticsNodeSite<'cid, 'sid>,
 ) -> Result<Box<str>> {
     let rendered: Box<str> = match site {
         LogisticsNodeSite::ExternalSupply { item } => {
@@ -545,7 +548,7 @@ fn describe_logistics_site<'id>(
         } => {
             let outpost = inputs
                 .outpost(*outpost_index)
-                .ok_or(Error::MissingOutpost(*outpost_index))?;
+                .ok_or(Error::MissingOutpost(outpost_index.as_u32()))?;
             let item = item_display_name(lang, catalog, *item)?;
             match lang {
                 Lang::Zh => format!("{} 出售({item})", outpost_display_name(lang, outpost)).into_boxed_str(),

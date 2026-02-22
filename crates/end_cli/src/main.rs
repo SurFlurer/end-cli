@@ -102,12 +102,13 @@ fn solve(lang: Lang, data_dir: Option<PathBuf>, aic_path: PathBuf) -> Result<()>
     }
 
     make_guard!(guard);
+    make_guard!(aic_guard);
+    make_guard!(result_guard);
+
     let catalog = load_catalog(data_dir.as_deref(), guard).context("Loading catalog")?;
-
-    let aic =
-        load_aic(&aic_path, &catalog).with_context(|| format!("Loading {}", aic_path.display()))?;
-
-    let solution = run_two_stage(&catalog, &aic).context("Running optimization")?;
+    let aic = load_aic(&aic_path, &catalog, aic_guard)
+        .with_context(|| format!("Loading {}", aic_path.display()))?;
+    let solution = run_two_stage(&catalog, &aic, result_guard).context("Running optimization")?;
     let report = build_report(lang, &catalog, &aic, &solution).context("Building report")?;
 
     println!("{}", report);

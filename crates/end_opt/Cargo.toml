@@ -5,12 +5,14 @@ edition = "2024"
 
 [dependencies]
 end-model = { path = "../end_model" }
+generativity = { workspace = true }
 good_lp = { workspace = true }
 smallvec = { workspace = true }
 thiserror = { workspace = true }
 
 [dev-dependencies]
 generativity = { workspace = true }
+trybuild = "1"
 
 [lints.rust]
 unsafe_code = "warn"

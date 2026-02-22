@@ -1,0 +1,33 @@
+error: lifetime may not live long enough
+  --> tests/ui/cross_result_node_id.rs:13:5
+   |
+ 9 | fn cross_mix_result_node<'cid, 'sid, 'rid1, 'rid2>(
+   |                                      -----  ----- lifetime `'rid2` defined here
+   |                                      |
+   |                                      lifetime `'rid1` defined here
+...
+13 |     use_result_node(result_2, node_1);
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ argument requires that `'rid1` must outlive `'rid2`
+   |
+   = help: consider adding the following bound: `'rid1: 'rid2`
+   = note: requirement occurs because of the type `OptimizationResult<'_, '_, '_>`, which makes the generic argument `'_` invariant
+   = note: the struct `OptimizationResult<'cid, 'sid, 'rid>` is invariant over the parameter `'cid`
+   = help: see <https://doc.rust-lang.org/nomicon/subtyping.html> for more information about variance
+
+error: lifetime may not live long enough
+  --> tests/ui/cross_result_node_id.rs:13:5
+   |
+ 9 | fn cross_mix_result_node<'cid, 'sid, 'rid1, 'rid2>(
+   |                                      -----  ----- lifetime `'rid2` defined here
+   |                                      |
+   |                                      lifetime `'rid1` defined here
+...
+13 |     use_result_node(result_2, node_1);
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ argument requires that `'rid2` must outlive `'rid1`
+   |
+   = help: consider adding the following bound: `'rid2: 'rid1`
+   = note: requirement occurs because of the type `LogisticsNodeId<'_>`, which makes the generic argument `'_` invariant
+   = note: the struct `LogisticsNodeId<'rid>` is invariant over the parameter `'rid`
+   = help: see <https://doc.rust-lang.org/nomicon/subtyping.html> for more information about variance
+
+help: `'rid1` and `'rid2` must be the same: replace one with the other

@@ -8,6 +8,7 @@ use crate::types::{
 use end_model::{
     AicInputs, Catalog, FacilityId, ItemId, ItemVec, OutpostId, PowerRecipeId, RecipeId,
 };
+use generativity::Guard;
 use good_lp::{
     Expression, Solution, SolverModel, Variable, constraint, default_solver, variable, variables,
 };
@@ -25,10 +26,10 @@ enum StageObjective {
 }
 
 #[derive(Debug, Clone)]
-struct OutpostVars<'id> {
-    outpost_index: OutpostId,
+struct OutpostVars<'cid, 'sid> {
+    outpost_index: OutpostId<'sid>,
     money_cap_per_hour: u32,
-    sell_lines: Vec<(ItemId<'id>, u32, Variable)>,
+    sell_lines: Vec<(ItemId<'cid>, u32, Variable)>,
 }
 
 #[derive(Debug, Clone)]
@@ -53,10 +54,11 @@ struct PowerVars<'id> {
 
 /// Run the two-stage optimizer:
 /// 1) maximize revenue, 2) minimize machines under a near-optimal revenue floor.
-pub fn run_two_stage<'id>(
-    catalog: &Catalog<'id>,
-    aic: &AicInputs<'id>,
-) -> Result<OptimizationResult<'id>> {
+pub fn run_two_stage<'cid, 'sid, 'rid>(
+    catalog: &Catalog<'cid>,
+    aic: &AicInputs<'cid, 'sid>,
+    guard: Guard<'rid>,
+) -> Result<OptimizationResult<'cid, 'sid, 'rid>> {
     let stage1 = solve_stage(catalog, aic, StageObjective::MaxRevenue)?;
 
     let rel_eps = NEAR_INT_EPS * stage1.revenue_per_min.max(1.0);
@@ -68,7 +70,7 @@ pub fn run_two_stage<'id>(
             revenue_floor_per_min,
         },
     )?;
-    let logistics = build_logistics_plan(catalog, aic, &stage2)?;
+    let logistics = build_logistics_plan(catalog, aic, &stage2, guard)?;
 
     Ok(OptimizationResult {
         stage1,
@@ -77,11 +79,11 @@ pub fn run_two_stage<'id>(
     })
 }
 
-fn solve_stage<'id>(
-    catalog: &Catalog<'id>,
-    aic: &AicInputs<'id>,
+fn solve_stage<'cid, 'sid>(
+    catalog: &Catalog<'cid>,
+    aic: &AicInputs<'cid, 'sid>,
     objective: StageObjective,
-) -> Result<StageSolution<'id>> {
+) -> Result<StageSolution<'cid, 'sid>> {
     let mut vars = variables!();
 
     let recipe_vars = catalog
@@ -312,7 +314,7 @@ fn solve_stage<'id>(
 
     let (machines_by_facility_map, mut recipes_used) = recipe_vars.iter().try_fold(
         (
-            HashMap::<FacilityId<'id>, u32>::new(),
+            HashMap::<FacilityId<'cid>, u32>::new(),
             Vec::with_capacity(recipe_vars.len()),
         ),
         |(mut machines_by_facility_map, mut recipes_used), rv| -> Result<_> {

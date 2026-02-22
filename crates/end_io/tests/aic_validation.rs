@@ -6,11 +6,15 @@ use generativity::make_guard;
 use std::fs;
 use tempfile::TempDir;
 
-fn load_aic_from_str<'id>(src: &str, catalog: &Catalog<'id>) -> Result<AicInputs<'id>, Error> {
+fn load_aic_from_str<'cid, 'sid>(
+    src: &str,
+    catalog: &Catalog<'cid>,
+    guard: generativity::Guard<'sid>,
+) -> Result<AicInputs<'cid, 'sid>, Error> {
     let dir = TempDir::new().expect("create temp dir");
     let aic_path = dir.path().join("aic.toml");
     fs::write(&aic_path, src).expect("write aic.toml");
-    load_aic(&aic_path, catalog)
+    load_aic(&aic_path, catalog, guard)
 }
 
 fn first_two_item_keys<'a, 'id>(catalog: &'a Catalog<'id>) -> (&'a str, &'a str) {
@@ -48,8 +52,9 @@ fn assert_toml_parse_with_span(
 
 #[test]
 fn load_aic_rejects_unknown_supply_item() {
-    make_guard!(guard);
-    let catalog = load_catalog(None, guard).expect("load builtin catalog");
+    make_guard!(catalog_guard);
+    let catalog = load_catalog(None, catalog_guard).expect("load builtin catalog");
+    make_guard!(aic_guard);
     let err = load_aic_from_str(
         r#"
 external_power_consumption_w = 0
@@ -58,6 +63,7 @@ external_power_consumption_w = 0
 "Unknown Item" = 1
 "#,
         &catalog,
+        aic_guard,
     )
     .expect_err("unknown item should fail");
     assert!(
@@ -75,8 +81,9 @@ external_power_consumption_w = 0
 
 #[test]
 fn load_aic_rejects_unknown_external_consumption_item() {
-    make_guard!(guard);
-    let catalog = load_catalog(None, guard).expect("load builtin catalog");
+    make_guard!(catalog_guard);
+    let catalog = load_catalog(None, catalog_guard).expect("load builtin catalog");
+    make_guard!(aic_guard);
     let err = load_aic_from_str(
         r#"
 external_power_consumption_w = 0
@@ -85,6 +92,7 @@ external_power_consumption_w = 0
 "Unknown Item" = 1
 "#,
         &catalog,
+        aic_guard,
     )
     .expect_err("unknown item should fail");
     assert!(
@@ -102,8 +110,9 @@ external_power_consumption_w = 0
 
 #[test]
 fn load_aic_rejects_duplicate_outpost_keys() {
-    make_guard!(guard);
-    let catalog = load_catalog(None, guard).expect("load builtin catalog");
+    make_guard!(catalog_guard);
+    let catalog = load_catalog(None, catalog_guard).expect("load builtin catalog");
+    make_guard!(aic_guard);
     let (_, price_item) = first_two_item_keys(&catalog);
     let src = format!(
         r#"
@@ -121,7 +130,8 @@ prices = {{ "{price_item}" = 2 }}
 "#
     );
 
-    let err = load_aic_from_str(&src, &catalog).expect_err("duplicate outpost key should fail");
+    let err = load_aic_from_str(&src, &catalog, aic_guard)
+        .expect_err("duplicate outpost key should fail");
     assert!(
         matches!(
             err,
@@ -138,8 +148,9 @@ prices = {{ "{price_item}" = 2 }}
 
 #[test]
 fn load_aic_rejects_zero_supply_value() {
-    make_guard!(guard);
-    let catalog = load_catalog(None, guard).expect("load builtin catalog");
+    make_guard!(catalog_guard);
+    let catalog = load_catalog(None, catalog_guard).expect("load builtin catalog");
+    make_guard!(aic_guard);
     let (supply_item, _) = first_two_item_keys(&catalog);
     let src = format!(
         r#"
@@ -150,14 +161,16 @@ external_power_consumption_w = 0
 "#
     );
 
-    let err = load_aic_from_str(&src, &catalog).expect_err("zero supply should fail");
+    let err =
+        load_aic_from_str(&src, &catalog, aic_guard).expect_err("zero supply should fail");
     assert_toml_parse_with_span(&err, "aic.toml", "must be >= 1, got 0");
 }
 
 #[test]
 fn load_aic_rejects_zero_external_consumption_value() {
-    make_guard!(guard);
-    let catalog = load_catalog(None, guard).expect("load builtin catalog");
+    make_guard!(catalog_guard);
+    let catalog = load_catalog(None, catalog_guard).expect("load builtin catalog");
+    make_guard!(aic_guard);
     let (consume_item, _) = first_two_item_keys(&catalog);
     let src = format!(
         r#"
@@ -168,26 +181,30 @@ external_power_consumption_w = 0
 "#
     );
 
-    let err = load_aic_from_str(&src, &catalog).expect_err("zero consumption should fail");
+    let err = load_aic_from_str(&src, &catalog, aic_guard)
+        .expect_err("zero consumption should fail");
     assert_toml_parse_with_span(&err, "aic.toml", "must be >= 1, got 0");
 }
 
 #[test]
 fn load_aic_rejects_negative_external_power() {
-    make_guard!(guard);
-    let catalog = load_catalog(None, guard).expect("load builtin catalog");
+    make_guard!(catalog_guard);
+    let catalog = load_catalog(None, catalog_guard).expect("load builtin catalog");
+    make_guard!(aic_guard);
     let src = r#"
 external_power_consumption_w = -1
 "#;
 
-    let err = load_aic_from_str(src, &catalog).expect_err("negative external power should fail");
+    let err = load_aic_from_str(src, &catalog, aic_guard)
+        .expect_err("negative external power should fail");
     assert_toml_parse_with_span(&err, "aic.toml", "must be >= 0, got -1");
 }
 
 #[test]
 fn load_aic_rejects_negative_outpost_price() {
-    make_guard!(guard);
-    let catalog = load_catalog(None, guard).expect("load builtin catalog");
+    make_guard!(catalog_guard);
+    let catalog = load_catalog(None, catalog_guard).expect("load builtin catalog");
+    make_guard!(aic_guard);
     let (_, price_item) = first_two_item_keys(&catalog);
     let src = format!(
         r#"
@@ -200,14 +217,16 @@ prices = {{ "{price_item}" = -1 }}
 "#
     );
 
-    let err = load_aic_from_str(&src, &catalog).expect_err("negative price should fail");
+    let err =
+        load_aic_from_str(&src, &catalog, aic_guard).expect_err("negative price should fail");
     assert_toml_parse_with_span(&err, "aic.toml", "must be >= 0, got -1");
 }
 
 #[test]
 fn load_aic_rejects_outpost_key_with_spaces() {
-    make_guard!(guard);
-    let catalog = load_catalog(None, guard).expect("load builtin catalog");
+    make_guard!(catalog_guard);
+    let catalog = load_catalog(None, catalog_guard).expect("load builtin catalog");
+    make_guard!(aic_guard);
     let (_, price_item) = first_two_item_keys(&catalog);
     let src = format!(
         r#"
@@ -220,7 +239,8 @@ prices = {{ "{price_item}" = 1 }}
 "#
     );
 
-    let err = load_aic_from_str(&src, &catalog).expect_err("spaced outpost key should fail");
+    let err =
+        load_aic_from_str(&src, &catalog, aic_guard).expect_err("spaced outpost key should fail");
     assert_toml_parse_with_span(
         &err,
         "aic.toml",
@@ -230,8 +250,9 @@ prices = {{ "{price_item}" = 1 }}
 
 #[test]
 fn load_aic_accepts_zero_external_power_when_other_fields_valid() {
-    make_guard!(guard);
-    let catalog = load_catalog(None, guard).expect("load builtin catalog");
+    make_guard!(catalog_guard);
+    let catalog = load_catalog(None, catalog_guard).expect("load builtin catalog");
+    make_guard!(aic_guard);
     let (supply_item, price_item) = first_two_item_keys(&catalog);
     let src = format!(
         r#"
@@ -250,7 +271,7 @@ prices = {{ "{price_item}" = 1 }}
 "#
     );
 
-    let aic = load_aic_from_str(&src, &catalog).expect("valid aic should load");
+    let aic = load_aic_from_str(&src, &catalog, aic_guard).expect("valid aic should load");
     assert_eq!(aic.external_power_consumption_w(), 0);
     assert_eq!(aic.external_consumption_per_min().len(), 1);
     assert_eq!(aic.outposts().len(), 1);
@@ -258,10 +279,12 @@ prices = {{ "{price_item}" = 1 }}
 
 #[test]
 fn default_aic_toml_roundtrip_is_loadable() {
-    make_guard!(guard);
-    let catalog = load_catalog(None, guard).expect("load builtin catalog");
+    make_guard!(catalog_guard);
+    let catalog = load_catalog(None, catalog_guard).expect("load builtin catalog");
     let src = default_aic_toml(&catalog).expect("build default aic toml");
-    let loaded = load_aic_from_str(&src, &catalog).expect("default aic toml should load");
+    make_guard!(aic_guard);
+    let loaded =
+        load_aic_from_str(&src, &catalog, aic_guard).expect("default aic toml should load");
 
     assert!(
         !loaded.outposts().is_empty(),

@@ -21,12 +21,14 @@ fn nz(value: u32) -> NonZeroU32 {
     NonZeroU32::new(value).expect("non-zero")
 }
 
-fn sample_catalog_and_inputs<'id>(
-    guard: Guard<'id>,
+fn sample_catalog_and_inputs<'cid, 'sid, 'rid>(
+    guard: Guard<'cid>,
+    aic_guard: Guard<'sid>,
+    result_guard: Guard<'rid>,
 ) -> (
-    Catalog<'id>,
-    AicInputs<'id>,
-    end_opt::OptimizationResult<'id>,
+    Catalog<'cid>,
+    AicInputs<'cid, 'sid>,
+    end_opt::OptimizationResult<'cid, 'sid, 'rid>,
 ) {
     let mut b = Catalog::builder(guard);
     let ore = b
@@ -79,6 +81,7 @@ fn sample_catalog_and_inputs<'id>(
     let catalog = b.build();
 
     let aic = AicInputs::parse(
+        aic_guard,
         0,
         vec![(ore, nz(10))].into(),
         vec![(ore, nz(1))].into(),
@@ -92,7 +95,7 @@ fn sample_catalog_and_inputs<'id>(
     )
     .expect("valid aic inputs");
 
-    let result = run_two_stage(&catalog, &aic).expect("solve sample model");
+    let result = run_two_stage(&catalog, &aic, result_guard).expect("solve sample model");
 
     (catalog, aic, result)
 }
@@ -100,7 +103,9 @@ fn sample_catalog_and_inputs<'id>(
 #[test]
 fn build_report_contains_key_sections_in_both_languages() {
     make_guard!(guard);
-    let (catalog, aic, result) = sample_catalog_and_inputs(guard);
+    make_guard!(aic_guard);
+    make_guard!(result_guard);
+    let (catalog, aic, result) = sample_catalog_and_inputs(guard, aic_guard, result_guard);
 
     let zh = build_report(Lang::Zh, &catalog, &aic, &result).expect("render zh report");
     assert!(zh.contains("结论"));

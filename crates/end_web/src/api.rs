@@ -13,9 +13,9 @@ use crate::dto::{
 use crate::{Error, Lang, Result};
 
 #[derive(Debug, Clone, Copy)]
-struct ComputedSaleValue<'id> {
-    outpost_index: OutpostId,
-    item: ItemId<'id>,
+struct ComputedSaleValue<'cid, 'sid> {
+    outpost_index: OutpostId<'sid>,
+    item: ItemId<'cid>,
     value_per_min: f64,
 }
 
@@ -48,11 +48,13 @@ pub fn bootstrap(lang: Lang) -> Result<BootstrapPayload> {
 }
 
 pub fn solve_from_aic_toml(lang: Lang, aic_toml: &str) -> Result<SolvePayload> {
-    make_guard!(guard);
-    let catalog = load_catalog(None, guard).map_err(Error::Catalog)?;
-    let aic = load_aic_from_str(aic_toml, &catalog).map_err(Error::Aic)?;
+    make_guard!(catalog_guard);
+    let catalog = load_catalog(None, catalog_guard).map_err(Error::Catalog)?;
+    make_guard!(aic_guard);
+    let aic = load_aic_from_str(aic_toml, &catalog, aic_guard).map_err(Error::Aic)?;
 
-    let solved = run_two_stage(&catalog, &aic).map_err(Error::Optimize)?;
+    make_guard!(result_guard);
+    let solved = run_two_stage(&catalog, &aic, result_guard).map_err(Error::Optimize)?;
     // TODO remove this.
     let report_text = build_report_text(&catalog, &aic, &solved)?;
 
@@ -63,20 +65,20 @@ pub fn solve_from_aic_toml(lang: Lang, aic_toml: &str) -> Result<SolvePayload> {
     })
 }
 
-fn build_report_text<'id>(
-    _catalog: &Catalog<'id>,
-    _inputs: &AicInputs<'id>,
-    _solved: &OptimizationResult<'id>,
+fn build_report_text<'cid, 'sid, 'rid>(
+    _catalog: &Catalog<'cid>,
+    _inputs: &AicInputs<'cid, 'sid>,
+    _solved: &OptimizationResult<'cid, 'sid, 'rid>,
 ) -> Result<String> {
     // payload keeps the same shape, but report rendering is trimmed out.
     Ok(String::new())
 }
 
-fn build_summary<'id>(
+fn build_summary<'cid, 'sid, 'rid>(
     lang: Lang,
-    catalog: &Catalog<'id>,
-    inputs: &AicInputs<'id>,
-    solved: &OptimizationResult<'id>,
+    catalog: &Catalog<'cid>,
+    inputs: &AicInputs<'cid, 'sid>,
+    solved: &OptimizationResult<'cid, 'sid, 'rid>,
 ) -> Result<SummaryDto> {
     let stage1 = &solved.stage1;
     let stage2 = &solved.stage2;
@@ -87,7 +89,7 @@ fn build_summary<'id>(
         .map(|value| {
             let outpost = inputs
                 .outpost(value.outpost_index)
-                .ok_or(Error::MissingOutpost(value.outpost_index))?;
+                .ok_or(Error::MissingOutpost(value.outpost_index.as_u32()))?;
             Ok::<_, Error>(OutpostValueDto {
                 key: outpost.key.as_str().into(),
                 name: outpost_name(lang, outpost).into(),
@@ -103,7 +105,7 @@ fn build_summary<'id>(
         .map(|sale| {
             let outpost = inputs
                 .outpost(sale.outpost_index)
-                .ok_or(Error::MissingOutpost(sale.outpost_index))?;
+                .ok_or(Error::MissingOutpost(sale.outpost_index.as_u32()))?;
             Ok::<_, Error>(SaleValueDto {
                 outpost_key: outpost.key.as_str().into(),
                 outpost_name: outpost_name(lang, outpost).into(),
@@ -159,7 +161,9 @@ fn build_summary<'id>(
     })
 }
 
-fn top_sales_by_value<'id>(lines: &[OutpostSaleQty<'id>]) -> Vec<ComputedSaleValue<'id>> {
+fn top_sales_by_value<'cid, 'sid>(
+    lines: &[OutpostSaleQty<'cid, 'sid>],
+) -> Vec<ComputedSaleValue<'cid, 'sid>> {
     let mut sales = lines
         .iter()
         .map(|line| ComputedSaleValue {
@@ -172,21 +176,21 @@ fn top_sales_by_value<'id>(lines: &[OutpostSaleQty<'id>]) -> Vec<ComputedSaleVal
     sales
 }
 
-fn build_logistics_graph<'id>(
+fn build_logistics_graph<'cid, 'sid, 'rid>(
     lang: Lang,
-    catalog: &Catalog<'id>,
-    inputs: &AicInputs<'id>,
-    solved: &OptimizationResult<'id>,
+    catalog: &Catalog<'cid>,
+    inputs: &AicInputs<'cid, 'sid>,
+    solved: &OptimizationResult<'cid, 'sid, 'rid>,
 ) -> Result<LogisticsGraphDto> {
     // 构建配方机器数查找表
-    let recipe_machines: BTreeMap<RecipeId<'id>, u32> = solved
+    let recipe_machines: BTreeMap<RecipeId<'cid>, u32> = solved
         .stage2
         .recipes_used
         .iter()
         .map(|r| (r.recipe_index, r.machines.get()))
         .collect();
     // 构建热容池数量查找表
-    let thermal_banks: BTreeMap<PowerRecipeId<'id>, u32> = solved
+    let thermal_banks: BTreeMap<PowerRecipeId<'cid>, u32> = solved
         .stage2
         .thermal_banks_used
         .iter()
@@ -223,7 +227,7 @@ fn build_logistics_graph<'id>(
     nodes.sort_by(|lhs, rhs| lhs.id.cmp(&rhs.id));
 
     let mut edges = Vec::<LogisticsEdgeDto>::new();
-    let mut item_summary = BTreeMap::<ItemId<'id>, ItemGraphStats>::new();
+    let mut item_summary = BTreeMap::<ItemId<'cid>, ItemGraphStats>::new();
 
     for edge in &solved.logistics.edges {
         let item = edge.item;
@@ -233,13 +237,13 @@ fn build_logistics_graph<'id>(
         if !node_by_id.contains_key(&edge.from) {
             return Err(Error::MissingLogisticsNode {
                 item: item.as_u32(),
-                node: edge.from,
+                node: edge.from.as_u32(),
             });
         }
         if !node_by_id.contains_key(&edge.to) {
             return Err(Error::MissingLogisticsNode {
                 item: item.as_u32(),
-                node: edge.to,
+                node: edge.to.as_u32(),
             });
         }
 
@@ -287,13 +291,13 @@ struct ItemGraphStats {
     total_flow_per_min: f64,
 }
 
-fn describe_logistics_site<'id>(
+fn describe_logistics_site<'cid, 'sid>(
     lang: Lang,
-    catalog: &Catalog<'id>,
-    inputs: &AicInputs<'id>,
-    site: &LogisticsNodeSite<'id>,
-    recipe_machines: &BTreeMap<RecipeId<'id>, u32>,
-    thermal_banks: &BTreeMap<PowerRecipeId<'id>, u32>,
+    catalog: &Catalog<'cid>,
+    inputs: &AicInputs<'cid, 'sid>,
+    site: &LogisticsNodeSite<'cid, 'sid>,
+    recipe_machines: &BTreeMap<RecipeId<'cid>, u32>,
+    thermal_banks: &BTreeMap<PowerRecipeId<'cid>, u32>,
 ) -> Result<(Box<str>, Box<str>)> {
     match site {
         LogisticsNodeSite::ExternalSupply { item } => Ok((
@@ -331,7 +335,7 @@ fn describe_logistics_site<'id>(
         } => {
             let outpost = inputs
                 .outpost(*outpost_index)
-                .ok_or(Error::MissingOutpost(*outpost_index))?;
+                .ok_or(Error::MissingOutpost(outpost_index.as_u32()))?;
             Ok((
                 "outpost_sale".into(),
                 match lang {
@@ -403,6 +407,6 @@ fn facility_name<'a, 'id>(
     })
 }
 
-fn logistics_node_id(node: end_opt::LogisticsNodeId) -> Box<str> {
+fn logistics_node_id(node: end_opt::LogisticsNodeId<'_>) -> Box<str> {
     format!("n{}", node.as_u32()).into_boxed_str()
 }

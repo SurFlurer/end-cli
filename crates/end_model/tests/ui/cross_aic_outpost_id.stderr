@@ -1,0 +1,31 @@
+error: lifetime may not live long enough
+ --> tests/ui/cross_aic_outpost_id.rs:4:13
+  |
+3 | fn cross_mix_outpost<'cid, 'sid1, 'sid2>(aic_1: &AicInputs<'cid, 'sid1>, outpost_2: OutpostId<'sid2>) {
+  |                            -----  ----- lifetime `'sid2` defined here
+  |                            |
+  |                            lifetime `'sid1` defined here
+4 |     let _ = aic_1.outpost(outpost_2);
+  |             ^^^^^^^^^^^^^^^^^^^^^^^^ argument requires that `'sid1` must outlive `'sid2`
+  |
+  = help: consider adding the following bound: `'sid1: 'sid2`
+  = note: requirement occurs because of the type `OutpostId<'_>`, which makes the generic argument `'_` invariant
+  = note: the struct `OutpostId<'sid>` is invariant over the parameter `'sid`
+  = help: see <https://doc.rust-lang.org/nomicon/subtyping.html> for more information about variance
+
+error: lifetime may not live long enough
+ --> tests/ui/cross_aic_outpost_id.rs:4:13
+  |
+3 | fn cross_mix_outpost<'cid, 'sid1, 'sid2>(aic_1: &AicInputs<'cid, 'sid1>, outpost_2: OutpostId<'sid2>) {
+  |                            -----  ----- lifetime `'sid2` defined here
+  |                            |
+  |                            lifetime `'sid1` defined here
+4 |     let _ = aic_1.outpost(outpost_2);
+  |             ^^^^^^^^^^^^^^^^^^^^^^^^ argument requires that `'sid2` must outlive `'sid1`
+  |
+  = help: consider adding the following bound: `'sid2: 'sid1`
+  = note: requirement occurs because of the type `AicInputs<'_, '_>`, which makes the generic argument `'_` invariant
+  = note: the struct `AicInputs<'cid, 'sid>` is invariant over the parameter `'cid`
+  = help: see <https://doc.rust-lang.org/nomicon/subtyping.html> for more information about variance
+
+help: `'sid1` and `'sid2` must be the same: replace one with the other

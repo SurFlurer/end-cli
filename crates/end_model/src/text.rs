@@ -25,6 +25,12 @@ impl Key {
     }
 }
 
+impl From<Key> for Box<str> {
+    fn from(key: Key) -> Self {
+        key.0
+    }
+}
+
 impl TryFrom<String> for Key {
     type Error = KeyValidationError;
 

@@ -7,7 +7,8 @@ fn run_one_scenario<'cid, 'sid>(
     aic: &AicInputs<'cid, 'sid>,
 ) {
     use_item_with_aic(catalog, aic, item);
-    let solved = run_two_stage(catalog, aic).expect("scenario should solve");
+    make_guard!(result_guard);
+    let solved = run_two_stage(catalog, aic, result_guard).expect("scenario should solve");
     let report = build_report(catalog, aic, &solved).expect("report should render");
     let _ = report;
 }

@@ -4,6 +4,7 @@
 
 - `Catalog<'cid>` / `ItemId<'cid>`：catalog 维度
 - `AicInputs<'cid, 'sid>` / `OutpostId<'sid>`：scenario 维度
+- `OptimizationResult<'cid, 'sid, 'rid>` / `LogisticsNodeId<'rid>`：result 维度
 
 示例代码使用普通函数 + `Guard<'id>` 参数，不用 `impl for` / HRTB。
 
@@ -23,6 +24,8 @@
    - 例子：`examples/cross_aic_report_misuse.rs`
 7. 跨 catalog 混用 item id 应编译失败
    - 例子：`examples/cross_catalog_item_misuse.rs`
+8. 跨 result 混用 logistics node id 应编译失败
+   - 例子：`examples/cross_result_node_misuse.rs`
 
 ## 运行
 
@@ -48,4 +51,10 @@ cargo check --example cross_aic_report_misuse
 
 ```bash
 cargo check --example cross_catalog_item_misuse
+```
+
+5. 故意误用 4（应编译失败）：
+
+```bash
+cargo check --example cross_result_node_misuse
 ```

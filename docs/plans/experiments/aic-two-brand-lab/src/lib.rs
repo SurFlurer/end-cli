@@ -125,20 +125,42 @@ pub struct OutpostSaleQty<'cid, 'sid> {
     pub item: ItemId<'cid>,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct LogisticsNodeId<'rid> {
+    raw: u32,
+    brand: Id<'rid>,
+}
+
+impl<'rid> LogisticsNodeId<'rid> {
+    pub fn as_u32(self) -> u32 {
+        self.raw
+    }
+
+    fn from_index(index: usize, brand: Id<'rid>) -> Self {
+        Self {
+            raw: index as u32,
+            brand,
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct StageSolution<'cid, 'sid> {
     pub outpost_sales_qty: Box<[OutpostSaleQty<'cid, 'sid>]>,
 }
 
 #[derive(Debug, Clone)]
-pub struct OptimizationResult<'cid, 'sid> {
+pub struct OptimizationResult<'cid, 'sid, 'rid> {
     pub stage2: StageSolution<'cid, 'sid>,
+    pub logistics_nodes: Box<[LogisticsNodeId<'rid>]>,
 }
 
-pub fn run_two_stage<'cid, 'sid>(
+pub fn run_two_stage<'cid, 'sid, 'rid>(
     _catalog: &Catalog<'cid>,
     aic: &AicInputs<'cid, 'sid>,
-) -> Result<OptimizationResult<'cid, 'sid>, SolveError> {
+    guard: Guard<'rid>,
+) -> Result<OptimizationResult<'cid, 'sid, 'rid>, SolveError> {
+    let rid = guard.into();
     let (outpost_index, outpost) = aic.outposts_with_id().next().ok_or(SolveError::NoOutpost)?;
     let line = OutpostSaleQty {
         outpost_index,
@@ -149,13 +171,14 @@ pub fn run_two_stage<'cid, 'sid>(
         stage2: StageSolution {
             outpost_sales_qty: vec![line].into_boxed_slice(),
         },
+        logistics_nodes: vec![LogisticsNodeId::from_index(0, rid)].into_boxed_slice(),
     })
 }
 
 pub fn build_report<'cid, 'sid>(
     catalog: &Catalog<'cid>,
     aic: &AicInputs<'cid, 'sid>,
-    result: &OptimizationResult<'cid, 'sid>,
+    result: &OptimizationResult<'cid, 'sid, '_>,
 ) -> Result<Box<str>, ReportError> {
     let first_sale = result
         .stage2
@@ -170,6 +193,13 @@ pub fn build_report<'cid, 'sid>(
         .ok_or(ReportError::MissingItem(outpost.sale_item.as_u32()))?;
 
     Ok(format!("report item={item_key}").into_boxed_str())
+}
+
+pub fn use_result_node<'cid, 'sid, 'rid>(
+    _aic: &AicInputs<'cid, 'sid>,
+    _result: &OptimizationResult<'cid, 'sid, 'rid>,
+    _node: LogisticsNodeId<'rid>,
+) {
 }
 
 pub fn use_item_with_aic<'cid, 'sid>(

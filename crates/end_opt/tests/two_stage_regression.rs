@@ -78,13 +78,15 @@ fn sample_catalog<'id>(
     (catalog, ore, ingot)
 }
 
-fn sample_catalog_and_aic<'id>(
-    guard: Guard<'id>,
+fn sample_catalog_and_aic<'cid, 'sid>(
+    guard: Guard<'cid>,
+    aic_guard: Guard<'sid>,
     with_recipes: bool,
-) -> (Catalog<'id>, AicInputs<'id>) {
+) -> (Catalog<'cid>, AicInputs<'cid, 'sid>) {
     let (catalog, ore, ingot) = sample_catalog(guard, with_recipes);
 
     let aic = AicInputs::parse(
+        aic_guard,
         0,
         vec![(ore, nz(10))].into(),
         Default::default(),
@@ -105,7 +107,9 @@ fn sample_catalog_and_aic<'id>(
 fn run_two_stage_allows_empty_recipes_with_direct_external_sales() {
     make_guard!(guard);
     let (catalog, ore, _ingot) = sample_catalog(guard, false);
+    make_guard!(aic_guard);
     let aic = AicInputs::parse(
+        aic_guard,
         0,
         vec![(ore, nz(10))].into(),
         Default::default(),
@@ -119,8 +123,9 @@ fn run_two_stage_allows_empty_recipes_with_direct_external_sales() {
     )
     .expect("valid aic inputs");
 
-    let result =
-        run_two_stage(&catalog, &aic).expect("empty recipes with direct sales should solve");
+    make_guard!(result_guard);
+    let result = run_two_stage(&catalog, &aic, result_guard)
+        .expect("empty recipes with direct sales should solve");
 
     assert!(
         (result.stage1.revenue_per_min - 10.0).abs() <= 1e-9,
@@ -161,8 +166,10 @@ fn run_two_stage_allows_empty_recipes_with_direct_external_sales() {
 #[test]
 fn stage2_respects_revenue_floor_and_basic_invariants() {
     make_guard!(guard);
-    let (catalog, aic) = sample_catalog_and_aic(guard, true);
-    let result = run_two_stage(&catalog, &aic).expect("solve sample model");
+    make_guard!(aic_guard);
+    let (catalog, aic) = sample_catalog_and_aic(guard, aic_guard, true);
+    make_guard!(result_guard);
+    let result = run_two_stage(&catalog, &aic, result_guard).expect("solve sample model");
 
     let floor = (result.stage1.revenue_per_min
         - NEAR_INT_EPS * result.stage1.revenue_per_min.max(1.0))
@@ -200,7 +207,9 @@ fn stage2_respects_revenue_floor_and_basic_invariants() {
 fn run_two_stage_rejects_infeasible_external_consumption() {
     make_guard!(guard);
     let (catalog, ore, _ingot) = sample_catalog(guard, false);
+    make_guard!(aic_guard);
     let aic = AicInputs::parse(
+        aic_guard,
         0,
         vec![(ore, nz(10))].into(),
         vec![(ore, nz(11))].into(),
@@ -208,7 +217,9 @@ fn run_two_stage_rejects_infeasible_external_consumption() {
     )
     .expect("valid aic inputs");
 
-    let err = run_two_stage(&catalog, &aic).expect_err("infeasible scenario should fail");
+    make_guard!(result_guard);
+    let err =
+        run_two_stage(&catalog, &aic, result_guard).expect_err("infeasible scenario should fail");
     assert!(
         matches!(err, Error::Solver { .. }),
         "unexpected error: {err:?}"

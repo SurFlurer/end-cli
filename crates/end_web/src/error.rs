@@ -1,4 +1,3 @@
-use end_model::OutpostId;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -16,12 +15,12 @@ pub enum Error {
     Optimize(#[source] end_opt::Error),
 
     #[error("Missing outpost id {0:?}")]
-    MissingOutpost(OutpostId),
+    MissingOutpost(u32),
 
     #[error("Missing logistics node {node:?} for item {item:?}")]
     MissingLogisticsNode {
         item: u32,
-        node: end_opt::LogisticsNodeId,
+        node: u32,
     },
 
     #[error("Unknown lang `{value}` (expected `zh` or `en`)")]
