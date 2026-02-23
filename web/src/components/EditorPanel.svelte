@@ -88,59 +88,61 @@
     </div>
   </div>
 
-  <div class="field-row">
-    <div class="label-with-hint">
-      <label for="scenario-region">{t("地区", "Region")}</label>
-      <FieldHint
-        text={t(
-          "地区不会改变据点信息；主要影响部分带地区限制的机器是否可用。",
-          "Region does not change outpost data; it mainly controls availability for machines with region locks.",
-        )}
-      />
-    </div>
-    <SelectField
-      value={draft.region}
-      options={regionOptions}
-      ariaLabel={t("选择地区", "Select region")}
-      searchable={false}
-      onChange={(nextValue) =>
-        actions.setRegion(nextValue as "fourth_valley" | "wuling")}
-    />
-  </div>
-
-  <div class="field-row">
-    <div class="label-with-hint">
-      <label for="external-power"
-        >{t("基地内外额外耗电 (W)", "External Power (W)")}</label
-      >
-      <FieldHint
-        text={t(
-          "用于建模矿点、滑索、作战设备，以及基地内未被程序显式建模的其他生产线耗电；使用这个数字和外部供给、外部消耗一起描述系统外影响。",
-          "Models power used by mining points, ziplines, combat devices, and other in-base lines not explicitly modeled; together with external supply/consumption, this captures off-model effects.",
-        )}
-      />
-    </div>
-    <input
-      id="external-power"
-      type="number"
-      min="0"
-      value={draft.externalPowerConsumptionW}
-      oninput={(event) => {
-        actions.setExternalPower(
-          Number((event.currentTarget as HTMLInputElement).value),
-        );
-      }}
-    />
-  </div>
-
-  <article class="sub-panel">
-    <div class="sub-header">
-      <div class="heading-with-hint">
-        <h3>{t("Stage2 目标", "Stage2 Objective")}</h3>
+  <section>
+    <div class="field-row">
+      <div class="label-with-hint">
+        <label for="scenario-region">{t("地区", "Region")}</label>
         <FieldHint
           text={t(
-            "Stage1 固定为最大收益，Stage2 在收益不退化下按这里选择的目标做二次优化。",
-            "Stage1 always maximizes revenue. Stage2 then optimizes the selected target under non-degraded real revenue.",
+            "地区不会改变据点信息；主要影响部分带地区限制的机器是否可用。",
+            "Region does not change outpost data; it mainly controls availability for machines with region locks.",
+          )}
+        />
+      </div>
+      <SelectField
+        value={draft.region}
+        options={regionOptions}
+        ariaLabel={t("选择地区", "Select region")}
+        searchable={false}
+        onChange={(nextValue) =>
+          actions.setRegion(nextValue as "fourth_valley" | "wuling")}
+      />
+    </div>
+
+    <div class="field-row">
+      <div class="label-with-hint">
+        <label for="external-power"
+          >{t("基地内外额外耗电 (W)", "External Power (W)")}</label
+        >
+        <FieldHint
+          text={t(
+            "用于建模矿点、滑索、作战设备，以及基地内未被程序显式建模的其他生产线耗电；使用这个数字和外部供给、外部消耗一起描述系统外影响。",
+            "Models power used by mining points, ziplines, combat devices, and other in-base lines not explicitly modeled; together with external supply/consumption, this captures off-model effects.",
+          )}
+        />
+      </div>
+      <input
+        id="external-power"
+        type="number"
+        min="0"
+        value={draft.externalPowerConsumptionW}
+        oninput={(event) => {
+          actions.setExternalPower(
+            Number((event.currentTarget as HTMLInputElement).value),
+          );
+        }}
+      />
+    </div>
+  </section>
+
+  <section>
+    <div class="sub-header">
+      <div class="heading-with-hint">
+        <h3>{t("次级目标", "Secondary Objective")}</h3>
+        <FieldHint
+          text={t(
+            "求解器首先会尝试最大化收益，然后在达到最大收益的前提下优化这里设置的目标",
+            "The solver first maximizes profit, then optimizes the objective set here as a tiebreaker among equally profitable solutions.",
           )}
         />
       </div>
@@ -167,7 +169,7 @@
     {#if draft.stage2.objective === "weighted"}
       <div class="row-grid three">
         <label>
-          α
+          <span class="weight-label">α</span>
           <input
             type="number"
             min="0"
@@ -181,7 +183,7 @@
           />
         </label>
         <label>
-          β
+          <span class="weight-label">β</span>
           <input
             type="number"
             min="0"
@@ -195,7 +197,7 @@
           />
         </label>
         <label>
-          γ
+          <span class="weight-label">γ</span>
           <input
             type="number"
             min="0"
@@ -210,9 +212,9 @@
         </label>
       </div>
     {/if}
-  </article>
+  </section>
 
-  <article class="sub-panel">
+  <section>
     <div class="sub-header">
       <div class="heading-with-hint">
         <h3>{t("外部供给 / min", "External Supply / min")}</h3>
@@ -273,9 +275,9 @@
         </button>
       </div>
     {/each}
-  </article>
+  </section>
 
-  <article class="sub-panel">
+  <section>
     <div class="sub-header">
       <div class="heading-with-hint">
         <h3>{t("外部消耗 / min", "External Consumption / min")}</h3>
@@ -337,9 +339,9 @@
         </button>
       </div>
     {/each}
-  </article>
+  </section>
 
-  <article class="sub-panel">
+  <section>
     <div class="sub-header">
       <div class="heading-with-hint">
         <h3>{t("据点与收购价", "Outposts & Buy Prices")}</h3>
@@ -521,7 +523,7 @@
         {/if}
       </div>
     {/if}
-  </article>
+  </section>
 </section>
 
 <style>
@@ -530,13 +532,14 @@
     gap: var(--space-3);
   }
 
-  .sub-panel {
-    border: 1px solid var(--line);
-    border-radius: var(--radius-md);
-    padding: var(--space-3);
+  .editor-shell > section {
     display: grid;
     gap: var(--space-2);
-    background: color-mix(in srgb, var(--panel-strong) 92%, #eef7f2);
+  }
+
+  .editor-shell h3 {
+    margin: 0;
+    line-height: 1.2;
   }
 
   .sub-header.mini {
@@ -652,11 +655,17 @@
   input {
     border: 1px solid color-mix(in srgb, var(--line) 90%, #b6cec2);
     border-radius: var(--radius-sm);
-    padding: 8px 12px;
+    height: var(--control-size);
+    padding: 0 12px;
     background: var(--panel-strong);
     color: inherit;
     font: inherit;
     line-height: 1.2;
+  }
+
+  input:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-soft) 75%, #d8efe5);
   }
 
   button,
@@ -729,14 +738,13 @@
 
   .danger {
     color: var(--danger);
-    border-color: color-mix(in srgb, var(--danger) 38%, #d7b0bc);
-    background: color-mix(in srgb, var(--danger) 8%, #fff);
+    border: none;
   }
 
-  .hint {
-    margin: 0;
-    color: var(--muted-text);
-    font-size: 13px;
+  @media (hover: hover) and (pointer: fine) {
+    .danger:hover {
+      background: color-mix(in srgb, var(--danger) 12%, #fff);
+    }
   }
 
   @media (max-width: 1200px) {

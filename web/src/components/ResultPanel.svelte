@@ -465,13 +465,13 @@
   .error-message {
     margin: 0;
     color: var(--danger);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
   }
 
   .kpi-grid {
     display: grid;
-    gap: var(--space-2);
+    gap: var(--space-3);
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
@@ -480,6 +480,16 @@
     background: var(--panel-strong);
     border: 1px solid var(--line);
     padding: var(--space-3);
+    transition:
+      background-color 140ms ease,
+      border-color 140ms ease,
+      transform 140ms ease;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .kpi-grid article:hover {
+      background: var(--surface-soft);
+    }
   }
 
   .kpi-grid h3 {
@@ -518,7 +528,7 @@
     width: max-content;
     min-width: 100%;
     border-collapse: collapse;
-    font-size: 13px;
+    font-size: 14px;
   }
 
   th,
@@ -527,6 +537,20 @@
     text-align: left;
     padding: 8px 6px;
     overflow-wrap: anywhere;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  tbody tr {
+    transition: background-color 140ms ease;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    tbody tr:hover td {
+      background: var(--surface-soft);
+    }
   }
 
   th {

@@ -193,11 +193,12 @@
 
   .trigger {
     width: 100%;
+    height: var(--control-size);
     min-height: var(--control-size);
     border: 1px solid color-mix(in srgb, var(--line) 88%, #8cb6a4);
     border-radius: var(--radius-sm);
-    padding: 8px 12px;
-    background: linear-gradient(180deg, #ffffff 0%, #f3f9f5 100%);
+    padding: 0 12px;
+    background: #ffffff;
     color: inherit;
     font: inherit;
     display: flex;
@@ -208,7 +209,6 @@
     transition:
       border-color 120ms ease,
       box-shadow 120ms ease,
-      background 120ms ease;
   }
 
   .trigger-label {
@@ -225,7 +225,7 @@
     border-right: 2px solid color-mix(in srgb, var(--ink) 70%, #6f8f83);
     border-bottom: 2px solid color-mix(in srgb, var(--ink) 70%, #6f8f83);
     transform: rotate(45deg);
-    transition: transform 120ms ease;
+    transition: transform 240ms ease;
     flex: 0 0 auto;
     margin-top: -2px;
   }
@@ -237,12 +237,10 @@
 
   .trigger:hover {
     border-color: color-mix(in srgb, var(--accent) 45%, #7aaf9b);
-    background: linear-gradient(180deg, #ffffff 0%, #edf8f1 100%);
   }
 
   .trigger:focus-visible {
     outline: none;
-    border-color: color-mix(in srgb, var(--accent) 58%, #5f9c85);
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-soft) 75%, #d8efe5);
   }
 
@@ -278,7 +276,6 @@
 
   .search:focus-visible {
     outline: none;
-    border-color: color-mix(in srgb, var(--accent) 58%, #5f9c85);
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-soft) 75%, #d8efe5);
   }
 
@@ -287,7 +284,7 @@
     overflow: auto;
     padding-right: 2px;
     display: grid;
-    gap: 4px;
+    gap: 6px;
   }
 
   .option {
@@ -298,7 +295,7 @@
     color: inherit;
     text-align: left;
     font: inherit;
-    padding: 7px 10px;
+    padding: 6px 10px;
     cursor: pointer;
   }
 

@@ -3,6 +3,7 @@
   import EditorPanel from "./components/EditorPanel.svelte";
   import GraphPanel from "./components/GraphPanel.svelte";
   import ResultPanel from "./components/ResultPanel.svelte";
+  import Splitter from "./components/Splitter.svelte";
   import "./styles/app-shell.css";
   import { buildAicToml, parseAicToml } from "./lib/aic";
   import {
@@ -82,10 +83,6 @@
     return "zh";
   }
 
-  function clamp(value: number, min: number, max: number): number {
-    return Math.min(max, Math.max(min, value));
-  }
-
   let lang = $state<LangTag>(detectBrowserLang());
   let catalogItems = $state<CatalogItemDto[]>([]);
   let draft = $state<AicDraft>(structuredClone(EMPTY_DRAFT));
@@ -103,7 +100,6 @@
   let isNarrowScreen = $state(false);
   let activeTab = $state<"editor" | "result" | "graph">("editor");
   let leftPaneRatio = $state(0.55);
-  let isDraggingSplitter = $state(false);
   let isDragImportActive = $state(false);
   let dragImportDepth = 0;
 
@@ -114,63 +110,6 @@
 
   function t(zh: string, en: string): string {
     return lang === "zh" ? zh : en;
-  }
-
-  function updatePaneRatioByClientX(clientX: number): void {
-    if (!layoutElement) {
-      return;
-    }
-
-    const rect = layoutElement.getBoundingClientRect();
-    const usableWidth = rect.width - SPLITTER_WIDTH_PX;
-    if (usableWidth <= 0) {
-      return;
-    }
-
-    if (usableWidth <= MIN_EDITOR_WIDTH_PX + MIN_RIGHT_WIDTH_PX) {
-      leftPaneRatio = 0.5;
-      return;
-    }
-
-    const minRatio = MIN_EDITOR_WIDTH_PX / usableWidth;
-    const maxRatio = 1 - MIN_RIGHT_WIDTH_PX / usableWidth;
-    const nextRatio = (clientX - rect.left) / usableWidth;
-    leftPaneRatio = clamp(nextRatio, minRatio, maxRatio);
-  }
-
-  function onSplitterPointerMove(event: PointerEvent): void {
-    if (!isDraggingSplitter) {
-      return;
-    }
-    updatePaneRatioByClientX(event.clientX);
-  }
-
-  function stopSplitResize(): void {
-    if (!isDraggingSplitter) {
-      return;
-    }
-
-    isDraggingSplitter = false;
-    document.body.style.cursor = "";
-    document.body.style.userSelect = "";
-    window.removeEventListener("pointermove", onSplitterPointerMove);
-    window.removeEventListener("pointerup", stopSplitResize);
-    window.removeEventListener("pointercancel", stopSplitResize);
-  }
-
-  function startSplitResize(event: PointerEvent): void {
-    if (isNarrowScreen) {
-      return;
-    }
-
-    event.preventDefault();
-    isDraggingSplitter = true;
-    document.body.style.cursor = "col-resize";
-    document.body.style.userSelect = "none";
-    updatePaneRatioByClientX(event.clientX);
-    window.addEventListener("pointermove", onSplitterPointerMove);
-    window.addEventListener("pointerup", stopSplitResize);
-    window.addEventListener("pointercancel", stopSplitResize);
   }
 
   function applyToml(text: string): void {
@@ -471,9 +410,6 @@
       if (!isNarrowScreen) {
         activeTab = "editor";
       }
-      if (isNarrowScreen) {
-        stopSplitResize();
-      }
     };
 
     updateScreenMode();
@@ -491,7 +427,6 @@
       window.removeEventListener("dragleave", onWindowDragLeave);
       window.removeEventListener("drop", onWindowDrop);
       clearDragImportState();
-      stopSplitResize();
       solverController?.dispose();
       solverController = null;
     };
@@ -583,16 +518,17 @@
     </section>
 
     {#if !isNarrowScreen}
-      <div
-        class={`splitter ${isDraggingSplitter ? "dragging" : ""}`}
-        role="separator"
-        aria-label={t("左右栏宽度调节", "Resize left and right columns")}
-        aria-orientation="vertical"
-        aria-valuemin="0"
-        aria-valuemax="100"
-        aria-valuenow={Math.round(leftPaneRatio * 100)}
-        onpointerdown={startSplitResize}
-      ></div>
+      <Splitter
+        {layoutElement}
+        ratio={leftPaneRatio}
+        minLeftPx={MIN_EDITOR_WIDTH_PX}
+        minRightPx={MIN_RIGHT_WIDTH_PX}
+        splitterWidthPx={SPLITTER_WIDTH_PX}
+        ariaLabel={t("左右栏宽度调节", "Resize left and right columns")}
+        onRatioChange={(nextRatio) => {
+          leftPaneRatio = nextRatio;
+        }}
+      />
 
       <div class="right-pane">
         <section class="panel result">

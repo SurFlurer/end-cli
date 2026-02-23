@@ -15,3 +15,8 @@ dependencies = ["clippy", "test"]
 command = "tokei"
 workspace = false
 args = ["crates", "web", "--exclude", "package-lock.json"]
+
+[tasks.archive]
+workspace = false
+command = "git"
+args = ["archive", "--format=zip", "--output", "end2-latest.zip", "HEAD"]

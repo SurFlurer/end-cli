@@ -36,20 +36,6 @@
     scrollbar-gutter: stable;
   }
 
-  .splitter {
-    grid-area: splitter;
-    border-radius: 999px;
-    background: linear-gradient(180deg, #d8e9de 0%, #b7d2c4 100%);
-    border: 1px solid #a6c6b6;
-    cursor: col-resize;
-    touch-action: none;
-  }
-
-  .splitter:hover,
-  .splitter.dragging {
-    background: linear-gradient(180deg, #c1e2d2 0%, #8dbca7 100%);
-  }
-
   .right-pane {
     grid-area: right;
     min-width: 0;

@@ -67,7 +67,7 @@
     onfocus={openHint}
     onblur={closeHint}
   >
-    <span class="material-symbols-outlined icon" aria-hidden="true">help</span>
+    <span class="material-symbols-outlined icon" aria-hidden="true">question_mark</span>
   </button>
   <span
     bind:this={bubbleEl}
@@ -124,7 +124,7 @@
     color: var(--ink-soft);
     box-shadow: var(--shadow-soft);
     padding: 10px 12px;
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.35;
     opacity: 0;
     pointer-events: none;
