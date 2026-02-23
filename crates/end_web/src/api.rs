@@ -192,7 +192,7 @@ fn build_logistics_graph<'cid, 'sid, 'rid>(
         .iter()
         .map(|r| (r.recipe_index, r.machines.get()))
         .collect();
-    // 构建热容池数量查找表
+    // 构建热能池数量查找表
     let thermal_banks: BTreeMap<PowerRecipeId<'cid>, u32> = solved
         .stage2
         .thermal_banks_used
@@ -374,7 +374,7 @@ fn describe_logistics_site<'cid, 'sid>(
             Ok((
                 "thermal_bank_group".into(),
                 match lang {
-                    Lang::Zh => format!("热容池组 x{} (p{})", banks, power_recipe_index.as_u32())
+                    Lang::Zh => format!("热能池组 x{} (p{})", banks, power_recipe_index.as_u32())
                         .into_boxed_str(),
                     Lang::En => format!(
                         "Thermal bank group x{} (p{})",

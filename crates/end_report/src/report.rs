@@ -33,7 +33,7 @@ pub fn build_report<'cid, 'sid, 'rid>(
         "{}\n",
         a.good(&match lang {
             Lang::Zh => format!(
-                "结论：在当前外部供给/外部消耗与 P^ext={}W 下，最优收入约 {:.2}/min（{:.0}/h），对应产线规模：生产机器 {} 台 + 热容池 {} 台；电力余量 {}W。",
+                "结论：在当前外部供给/外部消耗与 P^ext={}W 下，最优收入约 {:.2}/min（{:.0}/h），对应产线规模：生产机器 {} 台 + 热能池 {} 台；电力余量 {}W。",
                 stage2.p_ext_w,
                 stage2.revenue_per_min,
                 stage2.revenue_per_min * 60.0,
@@ -140,7 +140,7 @@ pub fn build_report<'cid, 'sid, 'rid>(
         "- {}\n",
         match lang {
             Lang::Zh => format!(
-                "发电 {}W = P^core {}W + 热容池发电；用电 {}W = P^ext {}W + 生产机器耗电；余量 {}W {}",
+                "发电 {}W = P^core {}W + 热能池发电；用电 {}W = P^ext {}W + 生产机器耗电；余量 {}W {}",
                 stage2.power_gen_w,
                 stage2.p_core_w,
                 stage2.power_use_w,
@@ -163,7 +163,7 @@ pub fn build_report<'cid, 'sid, 'rid>(
     if !stage2.thermal_banks_used.is_empty() {
         out.push_str(&format!(
             "{}\n",
-            a.dim(t(lang, "热容池配置:", "Thermal bank setup:"))
+            a.dim(t(lang, "热能池配置:", "Thermal bank setup:"))
         ));
         for tb in &stage2.thermal_banks_used {
             let item = item_display_name(lang, catalog, tb.ingredient)?;
@@ -288,7 +288,7 @@ pub fn build_report<'cid, 'sid, 'rid>(
             "- {}\n",
             t(
                 lang,
-                "电力接近满载：想扩产需要更多热容池燃料。",
+                "电力接近满载：想扩产需要更多热能池燃料。",
                 "Power is near full load: scaling up needs more thermal-bank fuel.",
             )
         ));
@@ -562,7 +562,7 @@ fn describe_logistics_site<'cid, 'sid>(
         LogisticsNodeSite::ThermalBankGroup {
             power_recipe_index, ..
         } => match lang {
-            Lang::Zh => format!("热容池组 p{}", power_recipe_index.as_u32()).into_boxed_str(),
+            Lang::Zh => format!("热能池组 p{}", power_recipe_index.as_u32()).into_boxed_str(),
             Lang::En => {
                 format!("Thermal bank group p{}", power_recipe_index.as_u32()).into_boxed_str()
             }

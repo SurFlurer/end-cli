@@ -271,7 +271,7 @@
       <p>{result.summary.totalMachines}</p>
     </article>
     <article>
-      <h3>{t("热容池", "Thermal Banks")}</h3>
+      <h3>{t("热能池", "Thermal Banks")}</h3>
       <p>{result.summary.totalThermalBanks}</p>
     </article>
     <article>

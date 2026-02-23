@@ -89,4 +89,4 @@ regions = ["wuling"]
 [thermal_bank]
 key = "Thermal Bank"
 en = "Thermal Bank"
-zh = "热容池"
+zh = "热能池"
