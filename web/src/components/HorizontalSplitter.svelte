@@ -4,8 +4,8 @@
   interface Props {
     layoutElement: HTMLElement | null;
     ratio: number;
-    minLeftPx: number;
-    minRightPx: number;
+    minTopPx: number;
+    minBottomPx: number;
     ariaLabel: string;
     onRatioChange: (nextRatio: number) => void;
   }
@@ -13,54 +13,54 @@
   let {
     layoutElement,
     ratio,
-    minLeftPx,
-    minRightPx,
+    minTopPx,
+    minBottomPx,
     ariaLabel,
     onRatioChange,
   }: Props = $props();
 
+  let splitterElement = $state<HTMLDivElement | null>(null);
   let isDragging = $state(false);
   let dragAnchorPx = $state(0);
-  let splitterElement = $state<HTMLDivElement | null>(null);
 
   function clamp(value: number, min: number, max: number): number {
     return Math.min(max, Math.max(min, value));
   }
 
   function toAnchor(
-    clientX: number,
-    layoutLeft: number,
-    usableWidth: number,
+    clientY: number,
+    layoutTop: number,
+    usableHeight: number,
   ): number {
-    if (usableWidth <= 0) {
+    if (usableHeight <= 0) {
       return 0;
     }
-    return clientX - layoutLeft - ratio * usableWidth;
+    return clientY - layoutTop - ratio * usableHeight;
   }
 
-  function splitterWidth(): number {
-    return splitterElement?.getBoundingClientRect().width ?? 0;
+  function splitterHeight(): number {
+    return splitterElement?.getBoundingClientRect().height ?? 0;
   }
 
-  function updateRatioByClientX(clientX: number): void {
+  function updateRatioByClientY(clientY: number): void {
     if (!layoutElement) {
       return;
     }
 
     const rect = layoutElement.getBoundingClientRect();
-    const usableWidth = rect.width - splitterWidth();
-    if (usableWidth <= 0) {
+    const usableHeight = rect.height - splitterHeight();
+    if (usableHeight <= 0) {
       return;
     }
 
-    if (usableWidth <= minLeftPx + minRightPx) {
+    if (usableHeight <= minTopPx + minBottomPx) {
       onRatioChange(0.5);
       return;
     }
 
-    const minRatio = minLeftPx / usableWidth;
-    const maxRatio = 1 - minRightPx / usableWidth;
-    const nextRatio = (clientX - rect.left - dragAnchorPx) / usableWidth;
+    const minRatio = minTopPx / usableHeight;
+    const maxRatio = 1 - minBottomPx / usableHeight;
+    const nextRatio = (clientY - rect.top - dragAnchorPx) / usableHeight;
     onRatioChange(clamp(nextRatio, minRatio, maxRatio));
   }
 
@@ -68,7 +68,7 @@
     if (!isDragging) {
       return;
     }
-    updateRatioByClientX(event.clientX);
+    updateRatioByClientY(event.clientY);
   }
 
   function stopResize(): void {
@@ -87,18 +87,18 @@
   function startResize(event: PointerEvent): void {
     event.preventDefault();
     isDragging = true;
-    document.body.style.cursor = "col-resize";
+    document.body.style.cursor = "row-resize";
     document.body.style.userSelect = "none";
 
     if (layoutElement) {
       const rect = layoutElement.getBoundingClientRect();
-      const usableWidth = rect.width - splitterWidth();
-      dragAnchorPx = toAnchor(event.clientX, rect.left, usableWidth);
+      const usableHeight = rect.height - splitterHeight();
+      dragAnchorPx = toAnchor(event.clientY, rect.top, usableHeight);
     } else {
       dragAnchorPx = 0;
     }
 
-    updateRatioByClientX(event.clientX);
+    updateRatioByClientY(event.clientY);
     window.addEventListener("pointermove", onPointerMove);
     window.addEventListener("pointerup", stopResize);
     window.addEventListener("pointercancel", stopResize);
@@ -114,7 +114,7 @@
   class={`splitter ${isDragging ? "dragging" : ""}`}
   role="separator"
   aria-label={ariaLabel}
-  aria-orientation="vertical"
+  aria-orientation="horizontal"
   aria-valuemin="0"
   aria-valuemax="100"
   aria-valuenow={Math.round(ratio * 100)}
@@ -123,39 +123,33 @@
 
 <style>
   .splitter {
-    grid-area: splitter;
+    grid-area: splitter-h;
     position: relative;
     background: transparent;
     border: none;
-    cursor: col-resize;
+    cursor: row-resize;
     touch-action: none;
   }
 
   .splitter::after {
     content: "";
     position: absolute;
-    inset-block: 0;
-    left: 50%;
-    width: 2px;
-    transform: translateX(-50%) scaleY(0.6);
+    inset-inline: 0;
+    top: 50%;
+    height: 2px;
+    transform: translateY(-50%) scaleX(0.6);
     border-radius: 999px;
     background: color-mix(in srgb, var(--accent) 58%, #ffffff);
     opacity: 0;
     transition:
-      /* 更快出现，更慢垂直展开 */
       opacity 60ms ease,
       transform 120ms ease;
     pointer-events: none;
   }
 
-  .splitter:hover,
-  .splitter.dragging {
-    background: transparent;
-  }
-
   .splitter:hover::after,
   .splitter.dragging::after {
     opacity: 1;
-    transform: translateX(-50%) scaleY(1);
+    transform: translateY(-50%) scaleX(1);
   }
 </style>

@@ -1,7 +1,9 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import EditorPanel from "./components/EditorPanel.svelte";
+  import DragImportOverlay from "./components/DragImportOverlay.svelte";
   import GraphPanel from "./components/GraphPanel.svelte";
+  import HorizontalSplitter from "./components/HorizontalSplitter.svelte";
   import ResultPanel from "./components/ResultPanel.svelte";
   import Splitter from "./components/Splitter.svelte";
   import "./styles/app-shell.css";
@@ -49,9 +51,10 @@
   import { loadBootstrap, solveScenario, warmupWasmWorker } from "./lib/wasm";
 
   const NARROW_LAYOUT_QUERY = "(max-width: 1160px)";
-  const SPLITTER_WIDTH_PX = 12;
   const MIN_EDITOR_WIDTH_PX = 720;
   const MIN_RIGHT_WIDTH_PX = 420;
+  const MIN_TOP_PANEL_HEIGHT_PX = 80;
+  const MIN_BOTTOM_PANEL_HEIGHT_PX = 80+12;
   const AUTO_SOLVE_DEBOUNCE_MS = 900;
 
   const STORAGE_CONFIG: DraftStorageConfig = {
@@ -97,11 +100,11 @@
   let selectedOutpostIndex = $state(-1);
 
   let layoutElement = $state<HTMLElement | null>(null);
+  let rightPaneElement = $state<HTMLElement | null>(null);
   let isNarrowScreen = $state(false);
   let activeTab = $state<"editor" | "result" | "graph">("editor");
   let leftPaneRatio = $state(0.55);
-  let isDragImportActive = $state(false);
-  let dragImportDepth = 0;
+  let rightPaneRatio = $state(0.5);
 
   let hasHydratedLocalState = $state(false);
   let hasRestoredDraftFromStorage = $state(false);
@@ -139,68 +142,6 @@
     } catch (error) {
       errorMessage = error instanceof Error ? error.message : String(error);
     }
-  }
-
-  function hasFileTransfer(event: DragEvent): boolean {
-    const types = event.dataTransfer?.types;
-    if (!types) {
-      return false;
-    }
-    return Array.from(types).includes("Files");
-  }
-
-  function clearDragImportState(): void {
-    dragImportDepth = 0;
-    isDragImportActive = false;
-  }
-
-  function onWindowDragEnter(event: DragEvent): void {
-    if (!hasFileTransfer(event)) {
-      return;
-    }
-
-    event.preventDefault();
-    dragImportDepth += 1;
-    isDragImportActive = true;
-  }
-
-  function onWindowDragOver(event: DragEvent): void {
-    if (!hasFileTransfer(event)) {
-      return;
-    }
-
-    event.preventDefault();
-    if (event.dataTransfer) {
-      event.dataTransfer.dropEffect = "copy";
-    }
-    isDragImportActive = true;
-  }
-
-  function onWindowDragLeave(event: DragEvent): void {
-    if (!isDragImportActive) {
-      return;
-    }
-
-    event.preventDefault();
-    dragImportDepth = Math.max(0, dragImportDepth - 1);
-    if (dragImportDepth === 0) {
-      isDragImportActive = false;
-    }
-  }
-
-  function onWindowDrop(event: DragEvent): void {
-    if (!hasFileTransfer(event)) {
-      return;
-    }
-
-    event.preventDefault();
-    clearDragImportState();
-    const file = event.dataTransfer?.files.item(0);
-    if (!file) {
-      return;
-    }
-
-    void importTomlFile(file);
   }
 
   async function loadInitialState(): Promise<void> {
@@ -414,19 +355,10 @@
 
     updateScreenMode();
     mediaQuery.addEventListener("change", updateScreenMode);
-    window.addEventListener("dragenter", onWindowDragEnter);
-    window.addEventListener("dragover", onWindowDragOver);
-    window.addEventListener("dragleave", onWindowDragLeave);
-    window.addEventListener("drop", onWindowDrop);
     void loadInitialState();
 
     return () => {
       mediaQuery.removeEventListener("change", updateScreenMode);
-      window.removeEventListener("dragenter", onWindowDragEnter);
-      window.removeEventListener("dragover", onWindowDragOver);
-      window.removeEventListener("dragleave", onWindowDragLeave);
-      window.removeEventListener("drop", onWindowDrop);
-      clearDragImportState();
       solverController?.dispose();
       solverController = null;
     };
@@ -505,7 +437,7 @@
       : `--left-pane-width: ${(leftPaneRatio * 100).toFixed(2)}%`}
   >
     <section
-      class={`panel editor ${isNarrowScreen && activeTab !== "editor" ? "tab-hidden" : ""}`}
+      class={`editor ${isNarrowScreen && activeTab !== "editor" ? "tab-hidden" : ""}`}
     >
       <EditorPanel
         {lang}
@@ -523,32 +455,42 @@
         ratio={leftPaneRatio}
         minLeftPx={MIN_EDITOR_WIDTH_PX}
         minRightPx={MIN_RIGHT_WIDTH_PX}
-        splitterWidthPx={SPLITTER_WIDTH_PX}
         ariaLabel={t("左右栏宽度调节", "Resize left and right columns")}
         onRatioChange={(nextRatio) => {
           leftPaneRatio = nextRatio;
         }}
       />
 
-      <div class="right-pane">
-        <section class="panel result">
-          <ResultPanel
-            {lang}
-            {isBootstrapping}
-            {isSolving}
-            {solveElapsedMs}
-            {result}
-            {errorMessage}
-          />
-        </section>
+      <div
+        class="right-pane"
+        bind:this={rightPaneElement}
+        style={`--right-top-height: ${(rightPaneRatio * 100).toFixed(2)}%; --right-min-top-height: ${MIN_TOP_PANEL_HEIGHT_PX}px; --right-min-bottom-height: ${MIN_BOTTOM_PANEL_HEIGHT_PX}px`}
+      >
+        <ResultPanel
+          {lang}
+          {isBootstrapping}
+          {isSolving}
+          {solveElapsedMs}
+          {result}
+          {errorMessage}
+        />
 
-        <section class="panel graph">
-          <GraphPanel {lang} {result} />
-        </section>
+        <HorizontalSplitter
+          layoutElement={rightPaneElement}
+          ratio={rightPaneRatio}
+          minTopPx={MIN_TOP_PANEL_HEIGHT_PX}
+          minBottomPx={MIN_BOTTOM_PANEL_HEIGHT_PX}
+          ariaLabel={t("上下栏高度调节", "Resize top and bottom panels")}
+          onRatioChange={(nextRatio) => {
+            rightPaneRatio = nextRatio;
+          }}
+        />
+
+        <GraphPanel {lang} {result} />
       </div>
     {:else}
       <section
-        class={`panel result ${activeTab !== "result" ? "tab-hidden" : ""}`}
+        class={`${activeTab !== "result" ? "tab-hidden" : ""}`}
       >
         <ResultPanel
           {lang}
@@ -561,23 +503,12 @@
       </section>
 
       <section
-        class={`panel graph ${activeTab !== "graph" ? "tab-hidden" : ""}`}
+        class={`${activeTab !== "graph" ? "tab-hidden" : ""}`}
       >
         <GraphPanel {lang} {result} />
       </section>
     {/if}
 
-    {#if isDragImportActive}
-      <div class="drag-import-overlay" aria-live="polite">
-        <div class="drag-import-card">
-          <p class="drag-import-title">
-            {t("松开即可导入 aic.toml", "Drop to import aic.toml")}
-          </p>
-          <p class="drag-import-subtitle">
-            {t("支持拖入 .toml 文件。", "Drop any .toml file here.")}
-          </p>
-        </div>
-      </div>
-    {/if}
+    <DragImportOverlay {lang} onImportFile={importTomlFile} />
   </main>
 </div>

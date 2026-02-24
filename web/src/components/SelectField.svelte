@@ -129,15 +129,12 @@
   });
 </script>
 
-<div
-  class={`select-field ${isOpen ? "is-open" : ""}`}
-  bind:this={rootElement}
->
+<div class={`select-field ${isOpen ? "is-open" : ""}`} bind:this={rootElement}>
   <button
     type="button"
     class="trigger"
     onclick={togglePanel}
-    disabled={disabled}
+    {disabled}
     aria-label={ariaLabel}
     aria-expanded={isOpen}
     aria-haspopup="listbox"
@@ -206,9 +203,22 @@
     justify-content: space-between;
     gap: 12px;
     cursor: pointer;
-    transition:
-      border-color 120ms ease,
-      box-shadow 120ms ease,
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .trigger:hover {
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-soft) 75%, #d8efe5);
+    }
+  }
+
+  .trigger:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-soft) 75%, #d8efe5);
+  }
+
+  .trigger:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
   }
 
   .trigger-label {
@@ -235,30 +245,17 @@
     margin-top: 3px;
   }
 
-  .trigger:hover {
-    border-color: color-mix(in srgb, var(--accent) 45%, #7aaf9b);
-  }
-
-  .trigger:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-soft) 75%, #d8efe5);
-  }
-
-  .trigger:disabled {
-    cursor: not-allowed;
-    opacity: 0.65;
-  }
-
   .menu {
     position: absolute;
     left: 0;
     right: 0;
     top: calc(100% + 6px);
     z-index: 25;
-    border: 1px solid color-mix(in srgb, var(--line) 85%, #9dbfb0);
     border-radius: var(--radius-md);
     background: #fbfffc;
-    box-shadow: 0 16px 36px -28px rgba(8, 33, 24, 0.55);
+    box-shadow:
+      0 2px 6px rgba(0, 0, 0, 0.08),
+      0 10px 24px rgba(0, 0, 0, 0.1);
     padding: 8px;
     display: grid;
     gap: 8px;
@@ -291,7 +288,7 @@
     width: 100%;
     border: 1px solid transparent;
     border-radius: var(--radius-sm);
-    background: color-mix(in srgb, var(--surface-soft) 80%, #fff);
+    background: #fff;
     color: inherit;
     text-align: left;
     font: inherit;
@@ -300,15 +297,11 @@
   }
 
   .option:hover {
-    border-color: color-mix(in srgb, var(--accent) 38%, #86c8b0);
     background: color-mix(in srgb, var(--accent-soft) 62%, #f4fcf8);
   }
 
   .option.is-selected {
-    border-color: color-mix(in srgb, var(--accent) 45%, #79bea5);
     background: color-mix(in srgb, var(--accent-soft) 74%, #effaf4);
-    color: color-mix(in srgb, var(--accent) 75%, #083428);
-    font-weight: 600;
   }
 
   .empty {

@@ -1,5 +1,7 @@
 <script lang="ts">
+  import IconActionButton from "./IconActionButton.svelte";
   import { onMount } from "svelte";
+  import Panel from "./Panel.svelte";
   import {
     Background,
     Controls,
@@ -104,133 +106,84 @@
   });
 </script>
 
-<section class="graph-panel">
-  <div class="sub-header">
-    <div>
-      <h2>{t("物流图", "Flow Map")}</h2>
-      <p class="subtitle">
-        {t(
-          "节点是机器和输入输出，线条表示物品流动。",
-          "Nodes represent machines and inputs/outputs, and lines indicate item flow. ",
-        )}
-      </p>
-    </div>
+<Panel contentMode="flush">
+  {#snippet header()}
+    <div class="sub-header">
+      <div>
+        <h2>{t("物流图", "Flow Map")}</h2>
+        <p class="subtitle">
+          {t(
+            "节点是机器和输入输出，线条表示物品流动。",
+            "Nodes represent machines and inputs/outputs, and lines indicate item flow. ",
+          )}
+        </p>
+      </div>
 
-    {#if result}
-      <button
-        type="button"
-        class="fullscreen-toggle"
-        aria-label={t("全屏", "Fullscreen")}
-        title={t("全屏", "Fullscreen")}
-        onclick={() => {
-          void toggleFullscreen();
-        }}
-      >
-        <span class="material-symbols-outlined icon" aria-hidden="true">
-          fullscreen
-        </span>
-      </button>
-    {/if}
-  </div>
-
-  {#if !result}
-    <p class="hint">
-      {t(
-        "先在左侧改一条参数并触发求解，随后这里会显示物流网络。",
-        "Edit a parameter on the left to solve first, then the logistics network will appear here.",
-      )}
-    </p>
-  {:else}
-    <div class="flow-wrap" bind:this={flowElement}>
-      <SvelteFlow nodes={flow.nodes} edges={flow.edges} fitView>
-        <Background bgColor="#f9fcfa" patternColor="#d8e6de" gap={24} />
-        <MiniMap pannable zoomable />
-        <Controls />
-      </SvelteFlow>
-      {#if isFullscreen}
-        <button
-          type="button"
-          class="exit-fullscreen-float"
-          aria-label={t("退出全屏", "Exit fullscreen")}
-          title={t("退出全屏", "Exit fullscreen")}
-          onclick={() => {
+      {#if result}
+        <IconActionButton
+          icon="fullscreen"
+          ariaLabel={t("全屏", "Fullscreen")}
+          title={t("全屏", "Fullscreen")}
+          onClick={() => {
             void toggleFullscreen();
           }}
-        >
-          <span class="material-symbols-outlined icon" aria-hidden="true">
-            fullscreen_exit
-          </span>
-        </button>
+        />
       {/if}
     </div>
-  {/if}
-</section>
+  {/snippet}
+
+    {#if !result}
+      <div class="hint-wrap">
+        <p class="hint">
+          {t(
+            "先在左侧改一条参数并触发求解，随后这里会显示物流网络。",
+            "Edit a parameter on the left to solve first, then the logistics network will appear here.",
+          )}
+        </p>
+      </div>
+    {:else}
+      <div class="flow-wrap" bind:this={flowElement}>
+        <SvelteFlow nodes={flow.nodes} edges={flow.edges} fitView proOptions={{ hideAttribution: true }}>
+          <Background bgColor="#f9fcfa" patternColor="#d8e6de" gap={24} />
+          {#if isFullscreen}
+          <MiniMap pannable zoomable />
+          <Controls />
+          {/if}
+        </SvelteFlow>
+        {#if isFullscreen}
+          <IconActionButton
+            className="exit-fullscreen-float"
+            icon="fullscreen_exit"
+            ariaLabel={t("退出全屏", "Exit fullscreen")}
+            title={t("退出全屏", "Exit fullscreen")}
+            onClick={() => {
+              void toggleFullscreen();
+            }}
+          />
+        {/if}
+      </div>
+    {/if}
+</Panel>
 
 <style>
-  .graph-panel {
-    display: grid;
-    gap: var(--space-3);
-    min-height: 0;
-    align-content: start;
+  .hint-wrap {
+    padding: clamp(12px, 1.6vw, 16px);
   }
 
   .flow-wrap {
     position: relative;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-md);
-    height: clamp(380px, 52vh, 720px);
+    height: 100%;
     overflow: hidden;
     background: var(--panel-strong);
+    --xy-edge-label-background-color: #f9fcfa;
   }
 
-  .fullscreen-toggle {
-    border: 1px solid color-mix(in srgb, var(--line) 90%, #b7cec2);
-    border-radius: var(--radius-sm);
-    width: var(--control-size);
-    height: var(--control-size);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--surface-soft);
-    color: inherit;
-    padding: 0;
-    cursor: pointer;
-    line-height: 1;
-  }
-
-  .fullscreen-toggle:hover {
-    background: color-mix(in srgb, var(--surface-soft) 60%, var(--accent-soft));
-  }
-
-  .exit-fullscreen-float {
+  :global(.exit-fullscreen-float) {
     position: absolute;
     top: 12px;
     right: 12px;
     z-index: 10;
-    border: 1px solid color-mix(in srgb, var(--line) 90%, #b7cec2);
-    border-radius: var(--radius-sm);
-    width: var(--control-size);
-    height: var(--control-size);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--surface-soft);
-    color: inherit;
-    padding: 0;
-    cursor: pointer;
-    line-height: 1;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  }
-
-  .exit-fullscreen-float:hover {
-    background: color-mix(in srgb, var(--surface-soft) 60%, var(--accent-soft));
-  }
-
-  .icon {
-    font-size: 20px;
-    line-height: 1;
-    display: block;
-    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 20;
   }
 
   .hint {
@@ -243,11 +196,5 @@
     width: 100%;
     height: 100%;
     border-radius: 0;
-  }
-
-  @media (max-width: 760px) {
-    .flow-wrap {
-      height: clamp(300px, 56vh, 560px);
-    }
   }
 </style>

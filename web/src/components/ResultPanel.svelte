@@ -1,5 +1,8 @@
 <script lang="ts">
+  import DataTable from "./DataTable.svelte";
+  import IconActionButton from "./IconActionButton.svelte";
   import { onDestroy } from "svelte";
+  import Panel from "./Panel.svelte";
   import type { LangTag, SolvePayload } from "../lib/types";
 
   interface Props {
@@ -193,71 +196,70 @@
   });
 </script>
 
-<div class="panel-head">
-  <div>
-    <div class="panel-title-row">
-      <h2>{t("方案评估", "Plan Summary")}</h2>
+<Panel>
+  {#snippet header()}
+    <div class="panel-head">
+      <div>
+        <div class="panel-title-row">
+          <h2>{t("方案评估", "Plan Summary")}</h2>
+        </div>
+        <p class="subtitle">
+          {t(
+            "每次编辑后自动刷新收益、电力平衡和产线规模。",
+            "After each edit, this panel auto-updates revenue, power balance, and line size.",
+          )}
+        </p>
+      </div>
+
+      <div class="header-controls">
+        <IconActionButton
+          icon={copyState === "copied" ? "check" : "content_copy"}
+          onClick={() => {
+            void copyOutput();
+          }}
+          disabled={solveOutputText.length === 0}
+          ariaLabel={copyButtonLabel}
+          title={copyButtonLabel}
+        />
+
+        <div class="solve-meta" class:danger={showError}>
+          {#if isSolving}
+            <span class="spinner" aria-hidden="true"></span>
+          {:else if errorMessage}
+            <span
+              class="material-symbols-outlined solve-icon danger"
+              aria-hidden="true">error</span
+            >
+          {:else}
+            <span class="material-symbols-outlined solve-icon" aria-hidden="true"
+              >{solveElapsedMs === null ? "schedule" : "check_circle"}</span
+            >
+          {/if}
+          <p class="elapsed" class:danger={showError}>
+            {formatElapsed(headerElapsedMs)}
+          </p>
+        </div>
+      </div>
     </div>
-    <p class="subtitle">
+  {/snippet}
+
+  {#if showError}
+    <p class="error-message">{errorMessage}</p>
+  {/if}
+
+  {#if isBootstrapping}
+    <p class="hint">
+      {t("正在加载 wasm 与基础数据...", "Loading wasm and baseline data...")}
+    </p>
+  {:else if !result}
+    <p class="hint">
       {t(
-        "每次编辑后自动刷新收益、电力平衡和产线规模。",
-        "After each edit, this panel auto-updates revenue, power balance, and line size.",
+        "先在左侧修改任意参数，这里会自动更新结果。",
+        "Edit any parameter on the left, and results will update here automatically.",
       )}
     </p>
-  </div>
-
-  <div class="header-controls">
-    <button
-      type="button"
-      class="copy-btn icon-only"
-      onclick={() => {
-        void copyOutput();
-      }}
-      disabled={solveOutputText.length === 0}
-      aria-label={copyButtonLabel}
-    >
-      <span class="material-symbols-outlined icon" aria-hidden="true">
-        {copyState === "copied" ? "check" : "content_copy"}
-      </span>
-    </button>
-
-    <div class="solve-meta">
-      {#if isSolving}
-        <span class="spinner" aria-hidden="true"></span>
-      {:else if errorMessage}
-        <span
-          class="material-symbols-outlined solve-icon danger"
-          aria-hidden="true">error</span
-        >
-      {:else}
-        <span class="material-symbols-outlined solve-icon" aria-hidden="true"
-          >{solveElapsedMs === null ? "schedule" : "check_circle"}</span
-        >
-      {/if}
-      <p class="elapsed" class:danger={showError}>
-        {formatElapsed(headerElapsedMs)}
-      </p>
-    </div>
-  </div>
-</div>
-
-{#if showError}
-  <p class="error-message">{errorMessage}</p>
-{/if}
-
-{#if isBootstrapping}
-  <p class="hint">
-    {t("正在加载 wasm 与基础数据...", "Loading wasm and baseline data...")}
-  </p>
-{:else if !result}
-  <p class="hint">
-    {t(
-      "先在左侧修改任意参数，这里会自动更新结果。",
-      "Edit any parameter on the left, and results will update here automatically.",
-    )}
-  </p>
-{:else}
-  <div class="kpi-grid">
+  {:else}
+    <div class="kpi-grid">
     <article>
       <h3>{t("收益 / min", "Revenue / min")}</h3>
       <p>{result.summary.stage2RevenuePerMin.toFixed(2)}</p>
@@ -282,90 +284,54 @@
       <h3>{t("电力余量", "Power Margin")}</h3>
       <p>{result.summary.powerMarginW} W</p>
     </article>
-  </div>
-
-  {#if result.summary.outposts.length > 0}
-    <div class="table-wrap">
-      <h3>{t("据点收益", "Outpost Revenue")}</h3>
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>{t("据点", "Outpost")}</th>
-              <th>{t("收益/min", "Value/min")}</th>
-              <th>{t("上限/min", "Cap/min")}</th>
-              <th>{t("占比", "Ratio")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {#each result.summary.outposts as outpost}
-              <tr>
-                <td>{outpost.name}</td>
-                <td>{outpost.valuePerMin.toFixed(2)}</td>
-                <td>{outpost.capPerMin.toFixed(2)}</td>
-                <td>{(outpost.ratio * 100).toFixed(1)}%</td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      </div>
     </div>
-  {/if}
 
-  {#if result.summary.topSales.length > 0}
-    <div class="table-wrap">
-      <h3>{t("销售物品", "Sold Items")}</h3>
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>{t("物品", "Item")}</th>
-              <th>{t("据点", "Outpost")}</th>
-              <th>{t("收益/min", "Value/min")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {#each result.summary.topSales as sale}
-              <tr>
-                <td>{sale.itemName}</td>
-                <td>{sale.outpostName}</td>
-                <td>{sale.valuePerMin.toFixed(2)}</td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  {/if}
+    <DataTable
+      title={t("据点收益", "Outpost Revenue")}
+      headers={[
+        t("据点", "Outpost"),
+        t("收益/min", "Value/min"),
+        t("上限/min", "Cap/min"),
+        t("占比", "Ratio"),
+      ]}
+      rows={result.summary.outposts.map((outpost) => [
+        outpost.name,
+        outpost.valuePerMin.toFixed(2),
+        outpost.capPerMin.toFixed(2),
+        `${(outpost.ratio * 100).toFixed(1)}%`,
+      ])}
+      numericColumns={[1, 2, 3]}
+    />
 
-  {#if result.summary.facilities.length > 0}
-    <div class="table-wrap">
-      <h3>{t("设施负载", "Facility Load")}</h3>
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>{t("设施", "Facility")}</th>
-              <th>{t("机器数", "Machines")}</th>
-              <th>{t("每台耗电", "Power/Unit")}</th>
-              <th>{t("总耗电", "Total Power")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {#each result.summary.facilities.slice(0, 16) as facility}
-              <tr>
-                <td>{facility.name}</td>
-                <td>{facility.machines}</td>
-                <td>{facility.powerW} W</td>
-                <td>{facility.totalPowerW} W</td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <DataTable
+      title={t("销售物品", "Sold Items")}
+      headers={[t("物品", "Item"), t("据点", "Outpost"), t("收益/min", "Value/min")]}
+      rows={result.summary.topSales.map((sale) => [
+        sale.itemName,
+        sale.outpostName,
+        sale.valuePerMin.toFixed(2),
+      ])}
+      numericColumns={[2]}
+    />
+
+    <DataTable
+      title={t("设施负载", "Facility Load")}
+      headers={[
+        t("设施", "Facility"),
+        t("机器数", "Machines"),
+        t("每台耗电", "Power/Unit"),
+        t("总耗电", "Total Power"),
+      ]}
+      rows={result.summary.facilities.slice(0, 16).map((facility) => [
+        facility.name,
+        `${facility.machines}`,
+        `${facility.powerW} W`,
+        `${facility.totalPowerW} W`,
+      ])}
+      numericColumns={[1, 2, 3]}
+    />
   {/if}
-{/if}
+</Panel>
 
 <style>
   .panel-title-row {
@@ -378,11 +344,24 @@
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
-    border: 1px solid var(--line);
     border-radius: 999px;
-    background: var(--surface-soft);
+    background: color-mix(in srgb,var(--surface-soft) 60%,var(--accent-soft));
     padding: 8px 12px;
     min-height: var(--control-size);
+  }
+
+  .solve-meta.danger {
+    background: #ffebe9;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .solve-meta:hover {
+      background: var(--accent-soft);
+    }
+
+    .solve-meta.danger:hover {
+      background: #ffddda;
+    }
   }
 
   .spinner {
@@ -425,43 +404,6 @@
     color: var(--danger);
   }
 
-  .copy-btn {
-    border: 1px solid var(--line);
-    border-radius: var(--radius-sm);
-    padding: 8px 12px;
-    background: var(--panel-strong);
-    color: inherit;
-    font: inherit;
-    line-height: 1;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0;
-  }
-
-  .copy-btn.icon-only {
-    width: var(--control-size);
-    height: var(--control-size);
-    padding: 0;
-  }
-
-  .copy-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
-  .icon {
-    font-size: 18px;
-    line-height: 1;
-    display: block;
-    font-variation-settings:
-      "FILL" 0,
-      "wght" 600,
-      "GRAD" 0,
-      "opsz" 16;
-  }
-
   .error-message {
     margin: 0;
     color: var(--danger);
@@ -480,10 +422,6 @@
     background: var(--panel-strong);
     border: 1px solid var(--line);
     padding: var(--space-3);
-    transition:
-      background-color 140ms ease,
-      border-color 140ms ease,
-      transform 140ms ease;
   }
 
   @media (hover: hover) and (pointer: fine) {
@@ -502,60 +440,6 @@
     font-size: 20px;
     font-weight: 700;
     letter-spacing: -0.01em;
-  }
-
-  .table-wrap {
-    display: grid;
-    gap: var(--space-2);
-    min-height: 0;
-    min-width: 0;
-  }
-
-  .table-scroll {
-    border: 1px solid var(--line);
-    border-radius: var(--radius-md);
-    background: var(--panel-strong);
-    min-width: 0;
-    max-width: 100%;
-  }
-
-  th:first-child,
-  td:first-child {
-    padding-left: 12px;
-  }
-
-  table {
-    width: max-content;
-    min-width: 100%;
-    border-collapse: collapse;
-    font-size: 14px;
-  }
-
-  th,
-  td {
-    border-bottom: 1px solid color-mix(in srgb, var(--line) 78%, #d7e5de);
-    text-align: left;
-    padding: 8px 6px;
-    overflow-wrap: anywhere;
-  }
-
-  tbody tr:last-child td {
-    border-bottom: none;
-  }
-
-  tbody tr {
-    transition: background-color 140ms ease;
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    tbody tr:hover td {
-      background: var(--surface-soft);
-    }
-  }
-
-  th {
-    color: var(--ink-soft);
-    font-weight: 600;
   }
 
   .hint {

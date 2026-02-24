@@ -334,10 +334,8 @@ fn describe_logistics_site<'cid, 'sid>(
             Ok((
                 "recipe_group".into(),
                 match lang {
-                    Lang::Zh => format!("{} x{} (r{})", facility, machines, recipe_index.as_u32())
-                        .into_boxed_str(),
-                    Lang::En => format!("{} x{} (r{})", facility, machines, recipe_index.as_u32())
-                        .into_boxed_str(),
+                    Lang::Zh => format!("{} x{}", facility, machines).into_boxed_str(),
+                    Lang::En => format!("{} x{}", facility, machines).into_boxed_str(),
                 },
             ))
         }
@@ -374,14 +372,8 @@ fn describe_logistics_site<'cid, 'sid>(
             Ok((
                 "thermal_bank_group".into(),
                 match lang {
-                    Lang::Zh => format!("热能池组 x{} (p{})", banks, power_recipe_index.as_u32())
-                        .into_boxed_str(),
-                    Lang::En => format!(
-                        "Thermal bank group x{} (p{})",
-                        banks,
-                        power_recipe_index.as_u32()
-                    )
-                    .into_boxed_str(),
+                    Lang::Zh => format!("热能池 x{}", banks).into_boxed_str(),
+                    Lang::En => format!("Thermal bank x{}", banks).into_boxed_str(),
                 },
             ))
         }

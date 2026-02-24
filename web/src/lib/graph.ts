@@ -461,8 +461,8 @@ export function buildFlowGraph(
       const sccComponent = sccIndex !== undefined ? sccResult.components[sccIndex] : undefined;
       const isInSCC = sccComponent !== undefined && sccComponent.length >= SCC_MIN_SIZE;
 
-      // 输出节点（outpost_sale）只有输入 handle（左边）
-      const isOutputNode = node.kind === 'outpost_sale' || node.kind === 'external_consumption';
+      // 输出节点只有输入 handle（左边）
+      const isOutputNode = node.kind === 'outpost_sale' || node.kind === 'external_consumption' || node.kind === 'thermal_bank_group';
 
       // SCC 节点使用特殊边框样式
       const borderStyle = isInSCC

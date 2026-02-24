@@ -1,5 +1,7 @@
 <script lang="ts">
   import FieldHint from "./FieldHint.svelte";
+  import IconActionButton from "./IconActionButton.svelte";
+  import Panel from "./Panel.svelte";
   import SelectField, { type SelectOption } from "./SelectField.svelte";
   import type { EditorPanelProps } from "../lib/editor-actions";
   import type { OutpostDraft } from "../lib/types";
@@ -38,8 +40,9 @@
   }
 </script>
 
-<section class="editor-shell">
-  <div class="panel-head">
+<Panel>
+  {#snippet header()}
+    <div class="panel-head">
     <div>
       <h2>{t("求解输入", "Solver Inputs")}</h2>
       <p class="subtitle">
@@ -50,45 +53,41 @@
       </p>
     </div>
     <div class="panel-actions">
-      <button
-        class="danger icon-btn"
-        onclick={actions.resetToDefault}
+      <IconActionButton
+        kind="danger"
+        icon="delete"
+        label={t("重置到默认输入", "Reset to Default Input")}
+        onClick={actions.resetToDefault}
         disabled={isResetDisabled}
-        aria-label={t("重置默认配置", "Reset Default")}
-      >
-        <span class="material-symbols-outlined icon" aria-hidden="true"
-          >delete_forever</span
-        >
-      </button>
+        ariaLabel={t("重置默认配置", "Reset Default")}
+        title={t("重置到默认输入", "Reset to Default Input")}
+      />
 
-      <label
-        class="file-btn secondary icon-btn"
-        aria-label={t("导入 aic.toml", "Import aic.toml")}
-      >
-        <span class="material-symbols-outlined icon" aria-hidden="true"
-          >upload</span
-        >
-        <input
-          type="file"
-          accept=".toml,text/plain"
-          onchange={actions.importFromFile}
-        />
-      </label>
+      <IconActionButton
+        kind="secondary"
+        icon="upload"
+        label={t("导入 aic.toml", "Import aic.toml")}
+        ariaLabel={t("导入 aic.toml", "Import aic.toml")}
+        title={t("导入 aic.toml", "Import aic.toml")}
+        fileInput={{
+          accept: ".toml,text/plain",
+          onChange: actions.importFromFile,
+        }}
+      />
 
-      <button
-        class="secondary icon-btn"
-        onclick={actions.exportToml}
-        aria-label={t("导出 aic.toml", "Export aic.toml")}
+      <IconActionButton
+        kind="secondary"
+        icon="download"
+        onClick={actions.exportToml}
+        ariaLabel={t("导出 aic.toml", "Export aic.toml")}
         title={t("导出 aic.toml", "Export aic.toml")}
-      >
-        <span class="material-symbols-outlined icon" aria-hidden="true"
-          >download</span
-        >
-      </button>
+      />
     </div>
-  </div>
+    </div>
+  {/snippet}
 
-  <section>
+  <section class="editor-shell">
+    <section>
     <div class="field-row">
       <div class="label-with-hint">
         <label for="scenario-region">{t("地区", "Region")}</label>
@@ -133,9 +132,9 @@
         }}
       />
     </div>
-  </section>
+    </section>
 
-  <section>
+    <section>
     <div class="sub-header">
       <div class="heading-with-hint">
         <h3>{t("次级目标", "Secondary Objective")}</h3>
@@ -212,9 +211,9 @@
         </label>
       </div>
     {/if}
-  </section>
+    </section>
 
-  <section>
+    <section>
     <div class="sub-header">
       <div class="heading-with-hint">
         <h3>{t("外部供给 / min", "External Supply / min")}</h3>
@@ -225,16 +224,12 @@
           )}
         />
       </div>
-      <button
-        class="tiny"
-        onclick={actions.supply.add}
-        aria-label={t("添加供给条目", "Add supply row")}
+      <IconActionButton
+        icon="add"
+        onClick={actions.supply.add}
+        ariaLabel={t("添加供给条目", "Add supply row")}
         title={t("添加供给条目", "Add supply row")}
-      >
-        <span class="material-symbols-outlined icon" aria-hidden="true"
-          >add</span
-        >
-      </button>
+      />
     </div>
 
     {#if draft.supply.length === 0}
@@ -263,21 +258,19 @@
             )}
         />
 
-        <button
-          class="danger tiny row-action"
-          onclick={() => actions.supply.remove(rowIndex)}
-          aria-label={t("删除供给条目", "Remove supply row")}
+        <IconActionButton
+          kind="danger"
+          icon="horizontal_rule"
+          onClick={() => actions.supply.remove(rowIndex)}
+          ariaLabel={t("删除供给条目", "Remove supply row")}
           title={t("删除供给条目", "Remove supply row")}
-        >
-          <span class="material-symbols-outlined icon" aria-hidden="true"
-            >close</span
-          >
-        </button>
+          fullWidth
+        />
       </div>
     {/each}
-  </section>
+    </section>
 
-  <section>
+    <section>
     <div class="sub-header">
       <div class="heading-with-hint">
         <h3>{t("外部消耗 / min", "External Consumption / min")}</h3>
@@ -288,16 +281,12 @@
           )}
         />
       </div>
-      <button
-        class="tiny"
-        onclick={actions.consumption.add}
-        aria-label={t("添加消耗条目", "Add consumption row")}
+      <IconActionButton
+        icon="add"
+        onClick={actions.consumption.add}
+        ariaLabel={t("添加消耗条目", "Add consumption row")}
         title={t("添加消耗条目", "Add consumption row")}
-      >
-        <span class="material-symbols-outlined icon" aria-hidden="true"
-          >add</span
-        >
-      </button>
+      />
     </div>
 
     {#if draft.consumption.length === 0}
@@ -327,16 +316,14 @@
             )}
         />
 
-        <button
-          class="danger tiny row-action"
-          onclick={() => actions.consumption.remove(rowIndex)}
-          aria-label={t("删除消耗条目", "Remove consumption row")}
+        <IconActionButton
+          kind="danger"
+          icon="horizontal_rule"
+          onClick={() => actions.consumption.remove(rowIndex)}
+          ariaLabel={t("删除消耗条目", "Remove consumption row")}
           title={t("删除消耗条目", "Remove consumption row")}
-        >
-          <span class="material-symbols-outlined icon" aria-hidden="true"
-            >close</span
-          >
-        </button>
+          fullWidth
+        />
       </div>
     {/each}
   </section>
@@ -352,16 +339,12 @@
           )}
         />
       </div>
-      <button
-        class="tiny"
-        onclick={actions.outposts.add}
-        aria-label={t("添加据点", "Add outpost")}
+      <IconActionButton
+        icon="add"
+        onClick={actions.outposts.add}
+        ariaLabel={t("添加据点", "Add outpost")}
         title={t("添加据点", "Add outpost")}
-      >
-        <span class="material-symbols-outlined icon" aria-hidden="true"
-          >add</span
-        >
-      </button>
+      />
     </div>
 
     {#if draft.outposts.length === 0}
@@ -400,16 +383,13 @@
                   selectedOutpost.key ||
                   `${t("据点", "Outpost")} ${(selectedOutpostIndex >= 0 ? selectedOutpostIndex : 0) + 1}`}
               </h4>
-              <button
-                class="danger tiny"
-                onclick={() => actions.outposts.remove(selectedOutpostIndex)}
-                aria-label={t("删除据点", "Remove outpost")}
+              <IconActionButton
+                kind="danger"
+                icon="delete"
+                onClick={() => actions.outposts.remove(selectedOutpostIndex)}
+                ariaLabel={t("删除据点", "Remove outpost")}
                 title={t("删除据点", "Remove outpost")}
-              >
-                <span class="material-symbols-outlined icon" aria-hidden="true"
-                  >close</span
-                >
-              </button>
+              />
             </div>
 
             <div class="row-grid two">
@@ -461,16 +441,12 @@
                   )}
                 />
               </div>
-              <button
-                class="tiny"
-                onclick={() => actions.prices.add(selectedOutpostIndex)}
-                aria-label={t("添加价格条目", "Add price row")}
+              <IconActionButton
+                icon="add"
+                onClick={() => actions.prices.add(selectedOutpostIndex)}
+                ariaLabel={t("添加价格条目", "Add price row")}
                 title={t("添加价格条目", "Add price row")}
-              >
-                <span class="material-symbols-outlined icon" aria-hidden="true"
-                  >add</span
-                >
-              </button>
+              />
             </div>
 
             {#if selectedOutpost.prices.length === 0}
@@ -505,26 +481,24 @@
                     )}
                 />
 
-                <button
-                  class="danger tiny row-action"
-                  onclick={() =>
+                <IconActionButton
+                  kind="danger"
+                  icon="horizontal_rule"
+                  onClick={() =>
                     actions.prices.remove(selectedOutpostIndex, priceIndex)}
-                  aria-label={t("删除价格条目", "Remove price row")}
+                  ariaLabel={t("删除价格条目", "Remove price row")}
                   title={t("删除价格条目", "Remove price row")}
-                >
-                  <span
-                    class="material-symbols-outlined icon"
-                    aria-hidden="true">close</span
-                  >
-                </button>
+                  fullWidth
+                />
               </div>
             {/each}
           </article>
         {/if}
       </div>
     {/if}
+    </section>
   </section>
-</section>
+</Panel>
 
 <style>
   .editor-shell {
@@ -607,8 +581,7 @@
 
   .outpost-pick.active {
     border-color: color-mix(in srgb, var(--accent) 58%, #79c2ab);
-    background: color-mix(in srgb, var(--accent-soft) 62%, #f9fdfb);
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, #cde7dd);
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 35%, #cde7dd);
   }
 
   .outpost-pick-title {
@@ -663,13 +636,18 @@
     line-height: 1.2;
   }
 
+  @media (hover: hover) and (pointer: fine) {
+    input:hover {
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-soft) 75%, #d8efe5);
+    }
+  }
+
   input:focus-visible {
     outline: none;
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-soft) 75%, #d8efe5);
   }
 
-  button,
-  .file-btn {
+  button {
     border: 1px solid color-mix(in srgb, var(--line) 90%, #b6cec2);
     border-radius: var(--radius-sm);
     padding: 8px 12px;
@@ -678,73 +656,6 @@
     font: inherit;
     line-height: 1.2;
     cursor: pointer;
-  }
-
-  button:disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
-  }
-
-  .secondary {
-    background: var(--surface-soft);
-  }
-
-  .file-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: var(--control-size);
-  }
-
-  .icon-btn {
-    width: var(--control-size);
-    height: var(--control-size);
-    padding: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-  }
-
-  .icon {
-    font-size: 20px;
-    line-height: 1;
-    display: block;
-    font-variation-settings:
-      "FILL" 0,
-      "wght" 400,
-      "GRAD" 0,
-      "opsz" 20;
-  }
-
-  .file-btn input {
-    display: none;
-  }
-
-  .tiny {
-    width: var(--control-size);
-    height: var(--control-size);
-    padding: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-    flex: 0 0 auto;
-  }
-
-  .row-action {
-    width: 100%;
-  }
-
-  .danger {
-    color: var(--danger);
-    border: none;
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    .danger:hover {
-      background: color-mix(in srgb, var(--danger) 12%, #fff);
-    }
   }
 
   @media (max-width: 1200px) {

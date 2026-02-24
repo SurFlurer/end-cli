@@ -6,7 +6,7 @@
   --ink-soft: #4d676f;
   --muted-text: var(--ink-soft);
   --line: #c8d9cf;
-  --accent: #0a7c66;
+  --accent: #2c9f75;
   --accent-soft: #dff4eb;
   --warn: #9d6300;
   --danger: #b93458;
@@ -97,4 +97,12 @@ h3 {
   align-items: center;
   gap: var(--space-2);
   flex-wrap: wrap;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--accent) 20%, #fff);
+}
+
+::-moz-selection {
+  background: color-mix(in srgb, var(--accent) 20%, #fff);
 }
