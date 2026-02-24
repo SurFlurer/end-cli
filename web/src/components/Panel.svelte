@@ -23,7 +23,7 @@
   .panel-frame {
     border-radius: var(--radius-md);
     background: var(--panel);
-    box-shadow: var(--shadow-soft);
+    box-shadow:0 4px 12px rgba(0,0,0,0.10);
     min-height: 0;
     height: 100%;
     overflow: hidden;
