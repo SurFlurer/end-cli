@@ -15,8 +15,14 @@
     actions,
   }: EditorPanelProps = $props();
 
+  const selectedIndex = $derived<number | null>(
+    selectedOutpostIndex.kind === "selected" ? selectedOutpostIndex.index : null,
+  );
   const selectedOutpost = $derived<OutpostDraft | null>(
-    draft.outposts[selectedOutpostIndex] ?? null,
+    selectedIndex === null ? null : draft.outposts[selectedIndex] ?? null,
+  );
+  const selectedOutpostOrdinal = $derived(
+    selectedOutpostIndex.kind === "selected" ? selectedOutpostIndex.index + 1 : 1,
   );
   const catalogOptions = $derived<SelectOption[]>(
     catalogItems.map((item) => ({
@@ -56,10 +62,10 @@
       <IconActionButton
         kind="danger"
         icon="delete"
-        label={t("重置为默认输入", "Reset to Default Input")}
+        label={t("重置为示例输入", "Reset to Example Input")}
         onClick={actions.resetToDefault}
         disabled={isResetDisabled}
-        ariaLabel={t("重置默认配置", "Reset Default")}
+        ariaLabel={t("重置示例输入", "Reset Example Input")}
       />
 
       <IconActionButton
@@ -346,7 +352,7 @@
           {#each draft.outposts as outpost, outpostIndex (outpost.key)}
             <button
               type="button"
-              class={`outpost-pick ${outpostIndex === selectedOutpostIndex ? "active" : ""}`}
+              class={`outpost-pick ${selectedOutpostIndex.kind === "selected" && outpostIndex === selectedOutpostIndex.index ? "active" : ""}`}
               onclick={() => actions.outposts.select(outpostIndex)}
             >
               <p class="outpost-pick-title">
@@ -370,11 +376,16 @@
               <h4>
                 {selectedOutpost.name ||
                   selectedOutpost.key ||
-                  `${t("据点", "Outpost")} ${(selectedOutpostIndex >= 0 ? selectedOutpostIndex : 0) + 1}`}
+                  `${t("据点", "Outpost")} ${selectedOutpostOrdinal}`}
               </h4>
               <IconActionButton
                 icon="delete"
-                onClick={() => actions.outposts.remove(selectedOutpostIndex)}
+                onClick={() => {
+                  if (selectedOutpostIndex.kind !== "selected") {
+                    return;
+                  }
+                  actions.outposts.remove(selectedOutpostIndex.index);
+                }}
                 ariaLabel={t("删除据点", "Remove outpost")}
               />
             </div>
@@ -386,11 +397,16 @@
                   type="text"
                   value={selectedOutpost.name}
                   oninput={(event) =>
-                    actions.outposts.setField(
-                      selectedOutpostIndex,
-                      "name",
-                      (event.currentTarget as HTMLInputElement).value,
-                    )}
+                    {
+                      if (selectedOutpostIndex.kind !== "selected") {
+                        return;
+                      }
+                      actions.outposts.setField(
+                        selectedOutpostIndex.index,
+                        "name",
+                        (event.currentTarget as HTMLInputElement).value,
+                      );
+                    }}
                 />
               </label>
 
@@ -409,11 +425,16 @@
                   min="0"
                   value={selectedOutpost.moneyCapPerHour}
                   oninput={(event) =>
-                    actions.outposts.setField(
-                      selectedOutpostIndex,
-                      "moneyCapPerHour",
-                      Number((event.currentTarget as HTMLInputElement).value),
-                    )}
+                    {
+                      if (selectedOutpostIndex.kind !== "selected") {
+                        return;
+                      }
+                      actions.outposts.setField(
+                        selectedOutpostIndex.index,
+                        "moneyCapPerHour",
+                        Number((event.currentTarget as HTMLInputElement).value),
+                      );
+                    }}
                 />
               </label>
             </div>
@@ -430,7 +451,12 @@
               </div>
               <IconActionButton
                 icon="add"
-                onClick={() => actions.prices.add(selectedOutpostIndex)}
+                onClick={() => {
+                  if (selectedOutpostIndex.kind !== "selected") {
+                    return;
+                  }
+                  actions.prices.add(selectedOutpostIndex.index);
+                }}
                 ariaLabel={t("添加价格条目", "Add price row")}
               />
             </div>
@@ -448,11 +474,16 @@
                   searchPlaceholder={t("搜索物品...", "Search items...")}
                   emptyText={t("无匹配物品", "No matching items")}
                   onChange={(nextValue) =>
-                    actions.prices.setKey(
-                      selectedOutpostIndex,
-                      priceIndex,
-                      nextValue,
-                    )}
+                    {
+                      if (selectedOutpostIndex.kind !== "selected") {
+                        return;
+                      }
+                      actions.prices.setKey(
+                        selectedOutpostIndex.index,
+                        priceIndex,
+                        nextValue,
+                      );
+                    }}
                 />
 
                 <input
@@ -460,17 +491,27 @@
                   min="0"
                   value={price.price}
                   oninput={(event) =>
-                    actions.prices.setValue(
-                      selectedOutpostIndex,
-                      priceIndex,
-                      Number((event.currentTarget as HTMLInputElement).value),
-                    )}
+                    {
+                      if (selectedOutpostIndex.kind !== "selected") {
+                        return;
+                      }
+                      actions.prices.setValue(
+                        selectedOutpostIndex.index,
+                        priceIndex,
+                        Number((event.currentTarget as HTMLInputElement).value),
+                      );
+                    }}
                 />
 
                 <IconActionButton
                   icon="horizontal_rule"
                   onClick={() =>
-                    actions.prices.remove(selectedOutpostIndex, priceIndex)}
+                    {
+                      if (selectedOutpostIndex.kind !== "selected") {
+                        return;
+                      }
+                      actions.prices.remove(selectedOutpostIndex.index, priceIndex);
+                    }}
                   ariaLabel={t("删除价格条目", "Remove price row")}
                   fullWidth
                 />

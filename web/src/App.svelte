@@ -11,6 +11,11 @@
   import "./styles/app-shell.css";
   import { buildAicToml, parseAicToml } from "./lib/aic";
   import {
+    isSameOutpostSelection,
+    NO_OUTPOST_SELECTED,
+    type OutpostSelection,
+  } from "./lib/outpost-selection";
+  import {
     addConsumptionRow,
     addOutpost,
     addPriceRow,
@@ -100,7 +105,7 @@
 
   let errorToast = $state<ErrorToastState>({ kind: "closed" });
 
-  let selectedOutpostIndex = $state(-1);
+  let selectedOutpostIndex = $state<OutpostSelection>(NO_OUTPOST_SELECTED);
 
   let layoutElement = $state<HTMLElement | null>(null);
   let rightPaneElement = $state<HTMLElement | null>(null);
@@ -134,7 +139,10 @@
     try {
       const nextDraft = parseAicToml(text);
       draft = nextDraft;
-      selectedOutpostIndex = nextDraft.outposts.length > 0 ? 0 : -1;
+      selectedOutpostIndex =
+        nextDraft.outposts.length > 0
+          ? { kind: "selected", index: 0 }
+          : NO_OUTPOST_SELECTED;
       solverController?.resetSolvedFingerprint();
     } catch (error) {
       showErrorToast(error instanceof Error ? error.message : String(error));
@@ -300,7 +308,7 @@
         selectedOutpostIndex = next.selectedOutpostIndex;
       },
       select: (index) => {
-        selectedOutpostIndex = index;
+        selectedOutpostIndex = { kind: "selected", index };
       },
       setField: (index, field, value) => {
         draft = setOutpostField(draft, index, field, value);
@@ -332,7 +340,10 @@
 
     if (restored.draft) {
       draft = restored.draft;
-      selectedOutpostIndex = restored.draft.outposts.length > 0 ? 0 : -1;
+      selectedOutpostIndex =
+        restored.draft.outposts.length > 0
+          ? { kind: "selected", index: 0 }
+          : NO_OUTPOST_SELECTED;
       hasRestoredDraftFromStorage = true;
     }
 
@@ -395,7 +406,7 @@
       draft,
       selectedOutpostIndex,
     );
-    if (normalized !== selectedOutpostIndex) {
+    if (!isSameOutpostSelection(normalized, selectedOutpostIndex)) {
       selectedOutpostIndex = normalized;
     }
   });
@@ -515,10 +526,10 @@
 <Dialog
   open={isResetDialogOpen}
   kind="danger"
-  title={t("重置为默认输入", "Reset to Default Input")}
+  title={t("重置为示例输入", "Reset to Example Input")}
   description={t(
-    "重置会覆盖当前所有配置并恢复默认值，是否继续？",
-    "Reset will overwrite current configuration and restore defaults. Continue?",
+    "重置会覆盖当前所有配置并恢复示例输入，是否继续？",
+    "Reset will overwrite current configuration and restore example input. Continue?",
   )}
   cancelLabel={t("取消", "Cancel")}
   confirmLabel={t("重置", "Reset")}

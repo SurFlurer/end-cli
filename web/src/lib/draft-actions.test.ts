@@ -51,13 +51,13 @@ describe('draft actions', () => {
     const added2 = addOutpost(added1.draft);
 
     expect(added2.draft.outposts).toHaveLength(2);
-    expect(added2.selectedOutpostIndex).toBe(1);
+    expect(added2.selectedOutpostIndex).toEqual({ kind: 'selected', index: 1 });
     expect(added2.draft.outposts[0]?.key).toBe('outpost_1');
     expect(added2.draft.outposts[1]?.key).toBe('outpost_2');
 
     const removed = removeOutpost(added2.draft, added2.selectedOutpostIndex, 1);
     expect(removed.draft.outposts).toHaveLength(1);
-    expect(removed.selectedOutpostIndex).toBe(0);
+    expect(removed.selectedOutpostIndex).toEqual({ kind: 'selected', index: 0 });
   });
 
   it('updates outpost fields and price rows immutably', () => {
@@ -94,10 +94,10 @@ describe('draft actions', () => {
   });
 
   it('normalizes selected outpost index for empty and invalid states', () => {
-    expect(normalizeSelectedOutpostIndex(EMPTY_DRAFT, 2)).toBe(-1);
+    expect(normalizeSelectedOutpostIndex(EMPTY_DRAFT, { kind: 'selected', index: 2 })).toEqual({ kind: 'none' });
 
     const added = addOutpost(EMPTY_DRAFT);
-    expect(normalizeSelectedOutpostIndex(added.draft, 9)).toBe(0);
+    expect(normalizeSelectedOutpostIndex(added.draft, { kind: 'selected', index: 9 })).toEqual({ kind: 'selected', index: 0 });
   });
 
   it('updates stage2 objective and weighted coefficients', () => {

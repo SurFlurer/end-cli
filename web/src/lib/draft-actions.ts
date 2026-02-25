@@ -1,5 +1,6 @@
 import type { AicDraft, OutpostDraft } from './types';
 import type { OutpostField } from './editor-actions';
+import { NO_OUTPOST_SELECTED, type OutpostSelection } from './outpost-selection';
 
 function asNonNegativeInt(value: number): number {
   return Number.isFinite(value) ? Math.max(0, Math.round(value)) : 0;
@@ -159,31 +160,33 @@ export function createOutpost(key: string): OutpostDraft {
 
 export function addOutpost(
   draft: AicDraft
-): { draft: AicDraft; selectedOutpostIndex: number } {
+): { draft: AicDraft; selectedOutpostIndex: OutpostSelection } {
   const outposts = [...draft.outposts, createOutpost(nextOutpostKey(draft))];
   return {
     draft: {
       ...draft,
       outposts
     },
-    selectedOutpostIndex: outposts.length - 1
+    selectedOutpostIndex: { kind: 'selected', index: outposts.length - 1 }
   };
 }
 
 export function removeOutpost(
   draft: AicDraft,
-  selectedOutpostIndex: number,
+  selectedOutpostIndex: OutpostSelection,
   index: number
-): { draft: AicDraft; selectedOutpostIndex: number } {
+): { draft: AicDraft; selectedOutpostIndex: OutpostSelection } {
   const outposts = draft.outposts.filter((_, outpostIndex) => outpostIndex !== index);
 
   let nextSelectedOutpostIndex = selectedOutpostIndex;
   if (outposts.length === 0) {
-    nextSelectedOutpostIndex = -1;
-  } else if (selectedOutpostIndex > index) {
-    nextSelectedOutpostIndex = selectedOutpostIndex - 1;
-  } else if (selectedOutpostIndex === index) {
-    nextSelectedOutpostIndex = Math.min(index, outposts.length - 1);
+    nextSelectedOutpostIndex = NO_OUTPOST_SELECTED;
+  } else if (selectedOutpostIndex.kind !== 'selected') {
+    nextSelectedOutpostIndex = { kind: 'selected', index: 0 };
+  } else if (selectedOutpostIndex.index > index) {
+    nextSelectedOutpostIndex = { kind: 'selected', index: selectedOutpostIndex.index - 1 };
+  } else if (selectedOutpostIndex.index === index) {
+    nextSelectedOutpostIndex = { kind: 'selected', index: Math.min(index, outposts.length - 1) };
   }
 
   return {
@@ -268,13 +271,20 @@ export function setPriceValue(
   }));
 }
 
-export function normalizeSelectedOutpostIndex(draft: AicDraft, selectedOutpostIndex: number): number {
+export function normalizeSelectedOutpostIndex(
+  draft: AicDraft,
+  selectedOutpostIndex: OutpostSelection
+): OutpostSelection {
   if (draft.outposts.length === 0) {
-    return -1;
+    return NO_OUTPOST_SELECTED;
   }
 
-  if (selectedOutpostIndex < 0 || selectedOutpostIndex >= draft.outposts.length) {
-    return 0;
+  if (selectedOutpostIndex.kind !== 'selected') {
+    return { kind: 'selected', index: 0 };
+  }
+
+  if (selectedOutpostIndex.index < 0 || selectedOutpostIndex.index >= draft.outposts.length) {
+    return { kind: 'selected', index: 0 };
   }
 
   return selectedOutpostIndex;

@@ -1,4 +1,5 @@
 import type { AicDraft, CatalogItemDto } from './types';
+import type { OutpostSelection } from './outpost-selection';
 
 export type OutpostField = 'name' | 'moneyCapPerHour';
 export type Stage2WeightField = 'alpha' | 'beta' | 'gamma';
@@ -41,7 +42,7 @@ export interface EditorPanelProps {
   lang: 'zh' | 'en';
   draft: AicDraft;
   catalogItems: CatalogItemDto[];
-  selectedOutpostIndex: number;
+  selectedOutpostIndex: OutpostSelection;
   isResetDisabled: boolean;
   actions: EditorActions;
 }
