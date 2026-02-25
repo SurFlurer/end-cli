@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Dialog from "./components/Dialog.svelte";
   import { onMount, untrack } from "svelte";
   import EditorPanel from "./components/EditorPanel.svelte";
   import DragImportOverlay from "./components/DragImportOverlay.svelte";
@@ -42,8 +43,6 @@
     type SolverController,
   } from "./lib/solver-controller";
   import {
-    errorMessageOf,
-    isSolveBusy,
     renderedOkState,
     type SolveState,
   } from "./lib/solve-state";
@@ -97,15 +96,9 @@
   let defaultToml = $state("");
 
   let isBootstrapping = $state(true);
-
   let solveState = $state<SolveState>({ status: "idle" });
-  let selectedOutpostIndex = $state(-1);
 
-  let renderedOk = $derived(renderedOkState(solveState));
-  let renderedResult = $derived(renderedOk?.payload ?? null);
-  let errorMessage = $derived(errorMessageOf(solveState));
-  let isSolving = $derived(isSolveBusy(solveState));
-  let solveElapsedMs = $derived(isSolving ? null : renderedOk?.elapsedMs ?? null);
+  let selectedOutpostIndex = $state(-1);
 
   let layoutElement = $state<HTMLElement | null>(null);
   let rightPaneElement = $state<HTMLElement | null>(null);
@@ -201,18 +194,18 @@
   }
 
   function requestResetToDefault(): void {
-    const confirmed = window.confirm(
-      t(
-        "重置会覆盖当前所有配置并恢复默认值，是否继续？",
-        "Reset will overwrite current configuration and restore defaults. Continue?",
-      ),
-    );
+    isResetDialogOpen = true;
+  }
 
-    if (!confirmed) {
-      return;
-    }
+  let isResetDialogOpen = $state(false);
 
-    void resetToDefault();
+  function closeResetDialog(): void {
+    isResetDialogOpen = false;
+  }
+
+  async function confirmResetToDefault(): Promise<void> {
+    closeResetDialog();
+    await resetToDefault();
   }
 
   async function importFromFile(event: Event): Promise<void> {
@@ -555,3 +548,18 @@
     <DragImportOverlay {lang} onImportFile={importTomlFile} />
   </main>
 </div>
+
+<Dialog
+  open={isResetDialogOpen}
+  kind="danger"
+  title={t("重置为默认输入", "Reset to Default Input")}
+  description={t(
+    "重置会覆盖当前所有配置并恢复默认值，是否继续？",
+    "Reset will overwrite current configuration and restore defaults. Continue?",
+  )}
+  cancelLabel={t("取消", "Cancel")}
+  confirmLabel={t("重置", "Reset")}
+  confirmDisabled={isBootstrapping}
+  onCancel={closeResetDialog}
+  onConfirm={confirmResetToDefault}
+/>

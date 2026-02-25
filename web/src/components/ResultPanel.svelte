@@ -1,11 +1,11 @@
 <script lang="ts">
-  import CopyOutputButton from "./CopyOutputButton.svelte";
+  import CopyButton from "./CopyButton.svelte";
   import DataTable from "./DataTable.svelte";
   import { onDestroy } from "svelte";
   import Panel from "./Panel.svelte";
-  import SolveStatusPill, {
+  import StatusPill, {
     type SolveStatusPillState,
-  } from "./SolveStatusPill.svelte";
+  } from "./StatusPill.svelte";
   import type { LogisticsGraphDto } from "../lib/types";
   import type { LangTag } from "../lib/types";
   import {
@@ -21,11 +21,7 @@
     solveState: SolveState;
   }
 
-  let {
-    lang,
-    isBootstrapping,
-    solveState,
-  }: Props = $props();
+  let { lang, isBootstrapping, solveState }: Props = $props();
 
   let liveElapsedMs = $state<number | null>(null);
   let solveTimerId: number | null = null;
@@ -36,11 +32,11 @@
   const errorMessage = $derived(errorMessageOf(solveState));
   const showError = $derived(errorMessage.trim().length > 0);
   const headerElapsedMs = $derived.by((): number | null => {
-    if (solveState.status === 'solving') {
+    if (solveState.status === "solving") {
       return liveElapsedMs;
     }
 
-    if (solveState.status === 'ok') {
+    if (solveState.status === "ok") {
       return solveState.elapsedMs;
     }
 
@@ -79,7 +75,9 @@
     itemKindCount: number;
     totalPerMin: number;
   } {
-    const warehouseNode = graph.nodes.find((n) => n.kind === "warehouse_stockpile");
+    const warehouseNode = graph.nodes.find(
+      (n) => n.kind === "warehouse_stockpile",
+    );
     if (!warehouseNode) {
       return { itemKindCount: 0, totalPerMin: 0 };
     }
@@ -114,7 +112,7 @@
   }
 
   $effect(() => {
-    if (solveState.status !== 'solving') {
+    if (solveState.status !== "solving") {
       stopSolveTimer();
       liveElapsedMs = null;
       return;
@@ -151,9 +149,8 @@
       </div>
 
       <div class="header-controls">
-        <CopyOutputButton lang={lang} text={solveOutputText} />
-
-        <SolveStatusPill lang={lang} state={solveMetaState} />
+        <CopyButton {lang} text={solveOutputText} />
+        <StatusPill {lang} state={solveMetaState} />
       </div>
     </div>
   {/snippet}
@@ -177,30 +174,30 @@
     {@const stockpile = computeStockpileKpi(result.logisticsGraph)}
 
     <div class="kpi-grid">
-    <article>
-      <h3>{t("收益 / min", "Revenue / min")}</h3>
-      <p>{result.summary.stage2RevenuePerMin.toFixed(2)}</p>
-    </article>
-    <article>
-      <h3>{t("收益 / h", "Revenue / h")}</h3>
-      <p>{result.summary.stage2RevenuePerHour.toFixed(0)}</p>
-    </article>
-    <article>
-      <h3>{t("机器/热能池", "Machines/Thermal")}</h3>
-      <p>{result.summary.totalMachines}/{result.summary.totalThermalBanks}</p>
-    </article>
-    <article>
-      <h3>{t("囤货种类/总数/min", "Stockpiled kinds/total/min")}</h3>
-      <p>{stockpile.itemKindCount}/{stockpile.totalPerMin.toFixed(2)}</p>
-    </article>
-    <article>
-      <h3>{t("用电/发电", "Power Use/Gen")}</h3>
-      <p>{result.summary.powerUseW}/{result.summary.powerGenW}</p>
-    </article>
-    <article>
-      <h3>{t("电力余量", "Power Margin")}</h3>
-      <p>{result.summary.powerMarginW} W</p>
-    </article>
+      <article>
+        <h3>{t("收益 / min", "Revenue / min")}</h3>
+        <p>{result.summary.stage2RevenuePerMin.toFixed(2)}</p>
+      </article>
+      <article>
+        <h3>{t("收益 / h", "Revenue / h")}</h3>
+        <p>{result.summary.stage2RevenuePerHour.toFixed(0)}</p>
+      </article>
+      <article>
+        <h3>{t("机器/热能池", "Machines/Thermal")}</h3>
+        <p>{result.summary.totalMachines}/{result.summary.totalThermalBanks}</p>
+      </article>
+      <article>
+        <h3>{t("囤货种类/总数/min", "Stockpiled kinds/total/min")}</h3>
+        <p>{stockpile.itemKindCount}/{stockpile.totalPerMin.toFixed(2)}</p>
+      </article>
+      <article>
+        <h3>{t("用电/发电", "Power Use/Gen")}</h3>
+        <p>{result.summary.powerUseW}/{result.summary.powerGenW}</p>
+      </article>
+      <article>
+        <h3>{t("电力余量", "Power Margin")}</h3>
+        <p>{result.summary.powerMarginW} W</p>
+      </article>
     </div>
 
     <DataTable
@@ -283,12 +280,14 @@
         t("每台耗电", "Power/Unit"),
         t("总耗电", "Total Power"),
       ]}
-      rows={result.summary.facilities.slice(0, 16).map((facility) => [
-        facility.name,
-        `${facility.machines}`,
-        `${facility.powerW} W`,
-        `${facility.totalPowerW} W`,
-      ])}
+      rows={result.summary.facilities
+        .slice(0, 16)
+        .map((facility) => [
+          facility.name,
+          `${facility.machines}`,
+          `${facility.powerW} W`,
+          `${facility.totalPowerW} W`,
+        ])}
       numericColumns={[1, 2, 3]}
     />
   {/if}
@@ -342,11 +341,5 @@
   .hint {
     margin: 0;
     color: var(--muted-text);
-  }
-
-  @media (max-width: 760px) {
-    .kpi-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
   }
 </style>

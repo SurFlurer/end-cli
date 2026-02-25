@@ -139,7 +139,7 @@
     height: 2px;
     transform: translateY(-50%) scaleX(0.6);
     border-radius: 999px;
-    background: color-mix(in srgb, var(--accent) 58%, #ffffff);
+    background: var(--accent);
     opacity: 0;
     transition:
       opacity 60ms ease,

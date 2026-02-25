@@ -114,17 +114,17 @@
     z-index: 40;
     display: grid;
     place-items: center;
-    background: color-mix(in srgb, #0b1612 26%, transparent);
+    background: var(--overlay-backdrop);
     backdrop-filter: blur(2px);
     pointer-events: none;
   }
 
   .drag-import-card {
     width: min(560px, calc(100vw - 36px));
-    border: 2px dashed color-mix(in srgb, var(--accent) 64%, #b7ddd0);
-    border-radius: 20px;
-    background: color-mix(in srgb, var(--panel) 86%, #f2fff9);
-    box-shadow: 0 24px 56px rgba(7, 35, 24, 0.24);
+    border: 2px dashed color-mix(in srgb, var(--accent) 64%, var(--line));
+    border-radius: var(--radius-xl);
+    background: color-mix(in srgb, var(--panel) 86%, var(--surface-drop));
+    box-shadow: var(--shadow-drop);
     padding: clamp(22px, 3vw, 34px);
     text-align: center;
     display: grid;
@@ -135,7 +135,7 @@
     margin: 0;
     font-size: clamp(1.05rem, 2.1vw, 1.45rem);
     font-weight: 700;
-    color: color-mix(in srgb, #0c2017 85%, var(--accent));
+    color: color-mix(in srgb, var(--overlay-ink-strong) 85%, var(--accent));
   }
 
   .drag-import-subtitle {

@@ -80,7 +80,7 @@
   }
 
   .solve-meta.danger {
-    background: #ffebe9;
+    background: var(--danger-soft);
   }
 
   @media (hover: hover) and (pointer: fine) {
@@ -89,7 +89,7 @@
     }
 
     .solve-meta.danger:hover {
-      background: #ffddda;
+      background: var(--danger-soft-hover);
     }
   }
 
@@ -106,7 +106,7 @@
     width: 14px;
     height: 14px;
     border-radius: 50%;
-    border: 2px solid color-mix(in srgb, var(--line) 80%, #b5d0c5);
+    border: 2px solid color-mix(in srgb, var(--line) 80%, var(--line-tint-3));
     border-top-color: var(--accent);
     animation: spin 0.8s linear infinite;
     flex: 0 0 auto;

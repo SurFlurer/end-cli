@@ -94,7 +94,7 @@
 
   th,
   td {
-    border-bottom: 1px solid color-mix(in srgb, var(--line) 78%, #d7e5de);
+    border-bottom: 1px solid color-mix(in srgb, var(--line) 78%, var(--line-tint-2));
     text-align: left;
     padding: 8px 6px;
     overflow-wrap: anywhere;
@@ -147,7 +147,7 @@
   }
 
   .cell-warn {
-    color: var(--warn, color-mix(in srgb, var(--ink) 40%, #f9e9c8));
+    color: var(--warn);
     font-weight: 700;
   }
 </style>

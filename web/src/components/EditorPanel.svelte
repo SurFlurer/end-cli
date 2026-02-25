@@ -63,7 +63,6 @@
       />
 
       <IconActionButton
-        kind="secondary"
         icon="download"
         label={t("导入 aic.toml", "Import aic.toml")}
         ariaLabel={t("导入 aic.toml", "Import aic.toml")}
@@ -74,7 +73,6 @@
       />
 
       <IconActionButton
-        kind="secondary"
         icon="upload"
         onClick={actions.exportToml}
         label={t("导出", "Export")}
@@ -256,7 +254,6 @@
         />
 
         <IconActionButton
-          kind="danger"
           icon="horizontal_rule"
           onClick={() => actions.supply.remove(rowIndex)}
           ariaLabel={t("删除供给条目", "Remove supply row")}
@@ -312,7 +309,6 @@
         />
 
         <IconActionButton
-          kind="danger"
           icon="horizontal_rule"
           onClick={() => actions.consumption.remove(rowIndex)}
           ariaLabel={t("删除消耗条目", "Remove consumption row")}
@@ -377,7 +373,6 @@
                   `${t("据点", "Outpost")} ${(selectedOutpostIndex >= 0 ? selectedOutpostIndex : 0) + 1}`}
               </h4>
               <IconActionButton
-                kind="danger"
                 icon="delete"
                 onClick={() => actions.outposts.remove(selectedOutpostIndex)}
                 ariaLabel={t("删除据点", "Remove outpost")}
@@ -473,7 +468,6 @@
                 />
 
                 <IconActionButton
-                  kind="danger"
                   icon="horizontal_rule"
                   onClick={() =>
                     actions.prices.remove(selectedOutpostIndex, priceIndex)}
@@ -564,8 +558,8 @@
   }
 
   .outpost-pick.active {
-    border-color: color-mix(in srgb, var(--accent) 58%, #79c2ab);
-    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 35%, #cde7dd);
+    border-color: color-mix(in srgb, var(--accent) 58%, var(--accent-tint-1));
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 35%, var(--accent-tint-2));
   }
 
   .outpost-pick-title {
@@ -610,7 +604,7 @@
   }
 
   input {
-    border: 1px solid color-mix(in srgb, var(--line) 90%, #b6cec2);
+    border: 1px solid var(--control-border);
     border-radius: var(--radius-sm);
     height: var(--control-size);
     padding: 0 12px;
@@ -622,17 +616,17 @@
 
   @media (hover: hover) and (pointer: fine) {
     input:hover {
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-soft) 75%, #d8efe5);
+      box-shadow: var(--focus-ring);
     }
   }
 
   input:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-soft) 75%, #d8efe5);
+    box-shadow: var(--focus-ring);
   }
 
   button {
-    border: 1px solid color-mix(in srgb, var(--line) 90%, #b6cec2);
+    border: 1px solid var(--control-border);
     border-radius: var(--radius-sm);
     padding: 8px 12px;
     background: var(--panel-strong);

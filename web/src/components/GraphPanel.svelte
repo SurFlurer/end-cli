@@ -147,7 +147,7 @@
     {:else}
       <div class="flow-wrap" bind:this={flowElement}>
         <SvelteFlow nodes={flow.nodes} edges={flow.edges} fitView proOptions={{ hideAttribution: true }}>
-          <Background bgColor="#f9fcfa" patternColor="#d8e6de" gap={24} />
+          <Background bgColor="var(--surface-graph)" patternColor="var(--surface-graph-grid)" gap={24} />
           {#if isFullscreen}
           <MiniMap pannable zoomable />
           <Controls />
@@ -178,7 +178,7 @@
     height: 100%;
     overflow: hidden;
     background: var(--panel-strong);
-    --xy-edge-label-background-color: #f9fcfa;
+    --xy-edge-label-background-color: var(--surface-graph);
   }
 
   :global(.exit-fullscreen-float) {
@@ -186,7 +186,7 @@
     top: 12px;
     right: 12px;
     z-index: 10;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-floating);
   }
 
   .hint {

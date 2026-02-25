@@ -23,7 +23,7 @@
   .panel-frame {
     border-radius: var(--radius-md);
     background: var(--panel);
-    box-shadow:0 4px 12px rgba(0,0,0,0.10);
+    box-shadow: var(--shadow-panel);
     min-height: 0;
     height: 100%;
     overflow: hidden;
@@ -33,7 +33,7 @@
 
   .panel-header {
     padding: clamp(12px, 1.6vw, 16px);
-    border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, #deebe4);
+    border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, var(--line-tint-1));
     min-width: 0;
   }
 
@@ -54,7 +54,7 @@
   .panel-frame:hover .panel-content,
   .panel-frame:focus-within .panel-content {
     overflow-y: auto;
-    scrollbar-color: color-mix(in srgb, var(--accent) 44%, #fff) color-mix(in srgb, var(--surface-soft) 72%, transparent);
+    scrollbar-color: color-mix(in srgb, var(--accent) 44%, var(--panel-strong)) color-mix(in srgb, var(--surface-soft) 72%, transparent);
   }
 
   .panel-content::-webkit-scrollbar {
@@ -74,7 +74,7 @@
 
   .panel-frame:hover .panel-content::-webkit-scrollbar-thumb,
   .panel-frame:focus-within .panel-content::-webkit-scrollbar-thumb {
-    background: color-mix(in srgb, var(--accent) 44%, #fff);
+    background: color-mix(in srgb, var(--accent) 44%, var(--panel-strong));
   }
 
   .panel-content.flush {

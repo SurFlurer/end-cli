@@ -114,10 +114,10 @@ fn build_summary<'cid, 'sid, 'rid>(
         })
         .collect::<Result<Vec<_>>>()?;
 
-    // 默认排序：按据点 key、再按物品 key。
+    // 默认排序：按据点 key 倒序、再按物品 key。
     top_sales.sort_by(|lhs, rhs| {
-        lhs.outpost_key
-            .cmp(&rhs.outpost_key)
+        rhs.outpost_key
+            .cmp(&lhs.outpost_key)
             .then_with(|| lhs.item_key.cmp(&rhs.item_key))
     });
 

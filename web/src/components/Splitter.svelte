@@ -139,7 +139,7 @@
     width: 2px;
     transform: translateX(-50%) scaleY(0.6);
     border-radius: 999px;
-    background: color-mix(in srgb, var(--accent) 58%, #ffffff);
+    background: var(--accent);
     opacity: 0;
     transition:
       /* 更快出现，更慢垂直展开 */

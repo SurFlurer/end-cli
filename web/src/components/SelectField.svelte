@@ -192,10 +192,10 @@
     width: 100%;
     height: var(--control-size);
     min-height: var(--control-size);
-    border: 1px solid color-mix(in srgb, var(--line) 88%, #8cb6a4);
+    border: 1px solid var(--line);
     border-radius: var(--radius-sm);
     padding: 0 12px;
-    background: #ffffff;
+    background: var(--panel-strong);
     color: inherit;
     font: inherit;
     display: flex;
@@ -207,13 +207,13 @@
 
   @media (hover: hover) and (pointer: fine) {
     .trigger:hover {
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-soft) 75%, #d8efe5);
+      box-shadow: var(--focus-ring);
     }
   }
 
   .trigger:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-soft) 75%, #d8efe5);
+    box-shadow: var(--focus-ring);
   }
 
   .trigger:disabled {
@@ -232,8 +232,8 @@
   .chevron {
     width: 8px;
     height: 8px;
-    border-right: 2px solid color-mix(in srgb, var(--ink) 70%, #6f8f83);
-    border-bottom: 2px solid color-mix(in srgb, var(--ink) 70%, #6f8f83);
+    border-right: 2px solid var(--ink-soft);
+    border-bottom: 2px solid var(--ink-soft);
     transform: rotate(45deg);
     transition: transform 240ms ease;
     flex: 0 0 auto;
@@ -252,10 +252,8 @@
     top: calc(100% + 6px);
     z-index: 25;
     border-radius: var(--radius-md);
-    background: #fbfffc;
-    box-shadow:
-      0 2px 6px rgba(0, 0, 0, 0.08),
-      0 10px 24px rgba(0, 0, 0, 0.1);
+    background: var(--surface-menu);
+    box-shadow: var(--shadow-popover);
     padding: 8px;
     display: grid;
     gap: 8px;
@@ -263,17 +261,17 @@
 
   .search {
     width: 100%;
-    border: 1px solid color-mix(in srgb, var(--line) 88%, #96bbaa);
+    border: 1px solid var(--line);
     border-radius: var(--radius-sm);
     padding: 7px 10px;
-    background: #fff;
+    background: var(--panel-strong);
     color: inherit;
     font: inherit;
   }
 
   .search:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-soft) 75%, #d8efe5);
+    box-shadow: var(--focus-ring);
   }
 
   .options {
@@ -288,7 +286,7 @@
     width: 100%;
     border: 1px solid transparent;
     border-radius: var(--radius-sm);
-    background: #fff;
+    background: var(--panel-strong);
     color: inherit;
     text-align: left;
     font: inherit;
@@ -297,11 +295,11 @@
   }
 
   .option:hover {
-    background: color-mix(in srgb, var(--accent-soft) 62%, #f4fcf8);
+    background: color-mix(in srgb, var(--accent-soft) 62%, var(--surface-menu));
   }
 
   .option.is-selected {
-    background: color-mix(in srgb, var(--accent-soft) 74%, #effaf4);
+    background: color-mix(in srgb, var(--accent-soft) 74%, var(--surface-menu));
   }
 
   .empty {

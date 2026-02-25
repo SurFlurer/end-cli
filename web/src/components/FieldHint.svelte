@@ -106,12 +106,12 @@
   @media (hover: hover) and (pointer: fine) {
     .hint-trigger:hover {
       background: color-mix(in srgb,var(--surface-soft) 60%,var(--accent-soft));
-      color: var(--text);
+      color: var(--ink);
     }
   }
 
   .hint-trigger:focus-visible {
-    outline: 2px solid var(--primary);
+    outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
 
@@ -129,12 +129,12 @@
   .hint-bubble {
     position: fixed;
     min-width: 260px;
-    max-width: min(380px, calc(100vw - 24px));
-    border: 1px solid var(--line);
+    /* compatible with narrower screen */
+    max-width: min(380px, calc(100vw - 36px));
     border-radius: var(--radius-sm);
     background: var(--panel-strong);
     color: var(--ink-soft);
-    box-shadow: var(--shadow-soft);
+    box-shadow: var(--shadow-popover);
     padding: 10px 12px;
     font-size: 14px;
     line-height: 1.35;

@@ -20,7 +20,7 @@ const TOOLTIP_CSS = `
   border-radius: var(--radius-sm);
   background: var(--panel-strong);
   color: var(--ink);
-  box-shadow: var(--shadow-soft);
+  box-shadow: var(--shadow-popover);
   font-size: 12px;
   line-height: 1.35;
   pointer-events: none;

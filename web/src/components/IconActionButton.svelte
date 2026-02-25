@@ -11,7 +11,7 @@
     icon: string;
     label?: string;
     title?: string;
-    kind?: "default" | "secondary" | "danger";
+    kind?: "default" | "danger";
     disabled?: boolean;
     onClick?: () => void;
     className?: string;
@@ -39,9 +39,7 @@
       classes.push("with-label");
     }
 
-    if (kind === "secondary") {
-      classes.push("secondary");
-    } else if (kind === "danger") {
+    if (kind === "danger") {
       classes.push("danger");
     }
 
@@ -116,7 +114,7 @@
 
   .icon-action-btn.danger {
     color: var(--danger);
-    --icon-action-hover-bg: color-mix(in srgb, var(--danger) 12%, #fff);
+    --icon-action-hover-bg: color-mix(in srgb, var(--danger) 12%, var(--panel-strong));
   }
 
   .icon-action-btn.full-width {
