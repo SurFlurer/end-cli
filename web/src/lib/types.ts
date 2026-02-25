@@ -160,7 +160,7 @@ export interface AicDraft {
 }
 
 export const EMPTY_DRAFT: AicDraft = {
-  region: 'wuling',
+  region: 'fourth_valley',
   externalPowerConsumptionW: 0,
   stage2: {
     objective: 'min_machines',

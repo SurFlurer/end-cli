@@ -1,3 +1,5 @@
+import { reduceSolveState } from './solve-state';
+import type { SolveState } from './solve-state';
 import type { AicDraft, LangTag, SolvePayload } from './types';
 
 export type SolveTrigger = 'auto' | 'manual';
@@ -13,10 +15,8 @@ interface CreateSolverControllerOptions {
   getSnapshot: () => SolveSnapshot;
   toToml: (draft: AicDraft) => string;
   solve: (lang: LangTag, toml: string) => Promise<SolvePayload>;
-  onSolvingChange: (next: boolean) => void;
-  onSolveStarted?: (trigger: SolveTrigger) => void;
-  onErrorMessage: (next: string) => void;
-  onSolved: (payload: SolvePayload, trigger: SolveTrigger) => void;
+  onStateChange: (next: SolveState) => void;
+  nowMs?: () => number;
 }
 
 export interface SolverController {
@@ -27,22 +27,25 @@ export interface SolverController {
 }
 
 export function createSolverController(options: CreateSolverControllerOptions): SolverController {
+  const nowMs = options.nowMs ?? (() => performance.now());
+
   let autoSolveTimer: number | null = null;
   let autoSolveDirty = false;
   let solveSequence = 0;
   let latestSolveSequence = 0;
   let lastSolvedFingerprint = '';
   let isSolving = false;
-  let emittedSolving = false;
 
-  function emitSolvingState(): void {
-    const next = isSolving || autoSolveTimer !== null;
-    if (next === emittedSolving) {
+  let state: SolveState = { status: 'idle' };
+  options.onStateChange(state);
+
+  function applyEvent(event: Parameters<typeof reduceSolveState>[1]): void {
+    const next = reduceSolveState(state, event);
+    if (next === state) {
       return;
     }
-
-    emittedSolving = next;
-    options.onSolvingChange(next);
+    state = next;
+    options.onStateChange(state);
   }
 
   function clearAutoSolveTimer(): void {
@@ -51,7 +54,7 @@ export function createSolverController(options: CreateSolverControllerOptions): 
     }
     window.clearTimeout(autoSolveTimer);
     autoSolveTimer = null;
-    emitSolvingState();
+    applyEvent({ type: 'debounceCleared' });
   }
 
   function scheduleAutoSolve(): void {
@@ -60,14 +63,19 @@ export function createSolverController(options: CreateSolverControllerOptions): 
       return;
     }
 
+    if (isSolving) {
+      autoSolveDirty = true;
+      return;
+    }
+
     autoSolveDirty = true;
     clearAutoSolveTimer();
     autoSolveTimer = window.setTimeout(() => {
       autoSolveTimer = null;
-      emitSolvingState();
+      applyEvent({ type: 'debounceCleared' });
       void runSolve('auto');
     }, options.debounceMs);
-    emitSolvingState();
+    applyEvent({ type: 'debounceScheduled' });
   }
 
   async function runSolve(trigger: SolveTrigger = 'manual'): Promise<void> {
@@ -87,7 +95,10 @@ export function createSolverController(options: CreateSolverControllerOptions): 
     try {
       toml = options.toToml(snapshot.draft);
     } catch (error) {
-      options.onErrorMessage(error instanceof Error ? error.message : String(error));
+      applyEvent({
+        type: 'solveErr',
+        message: error instanceof Error ? error.message : String(error)
+      });
       return;
     }
 
@@ -101,9 +112,9 @@ export function createSolverController(options: CreateSolverControllerOptions): 
     latestSolveSequence = sequence;
 
     isSolving = true;
-    emitSolvingState();
-    options.onErrorMessage('');
-    options.onSolveStarted?.(trigger);
+    applyEvent({ type: 'clearError' });
+    const startedAt = nowMs();
+    applyEvent({ type: 'solveStarted', startedAt });
 
     try {
       const solved = await options.solve(snapshot.lang, toml);
@@ -111,17 +122,20 @@ export function createSolverController(options: CreateSolverControllerOptions): 
         return;
       }
 
-      options.onSolved(solved, trigger);
+      const elapsedMs = Math.max(0, Math.round(nowMs() - startedAt));
+      applyEvent({ type: 'solveOk', payload: solved, elapsedMs });
       lastSolvedFingerprint = fingerprint;
     } catch (error) {
       if (sequence !== latestSolveSequence) {
         return;
       }
-      options.onErrorMessage(error instanceof Error ? error.message : String(error));
+      applyEvent({
+        type: 'solveErr',
+        message: error instanceof Error ? error.message : String(error)
+      });
     } finally {
       if (sequence === latestSolveSequence) {
         isSolving = false;
-        emitSolvingState();
       }
 
       if (autoSolveDirty) {

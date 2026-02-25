@@ -1,6 +1,6 @@
 <script lang="ts">
   import Dialog from "./components/Dialog.svelte";
-  import { onMount, untrack } from "svelte";
+  import { onMount } from "svelte";
   import EditorPanel from "./components/EditorPanel.svelte";
   import DragImportOverlay from "./components/DragImportOverlay.svelte";
   import GraphPanel from "./components/GraphPanel.svelte";
@@ -43,7 +43,6 @@
     type SolverController,
   } from "./lib/solver-controller";
   import {
-    renderedOkState,
     type SolveState,
   } from "./lib/solve-state";
   import type {
@@ -59,7 +58,7 @@
   const MIN_RIGHT_WIDTH_PX = 420;
   const MIN_TOP_PANEL_HEIGHT_PX = 80;
   const MIN_BOTTOM_PANEL_HEIGHT_PX = 80+12;
-  const AUTO_SOLVE_DEBOUNCE_MS = 900;
+  const AUTO_SOLVE_DEBOUNCE_MS = 200;
 
   const STORAGE_CONFIG: DraftStorageConfig = {
     draftStorageKey: "end2.web.draft.v2",
@@ -339,51 +338,8 @@
       getSnapshot: () => ({ draft, lang, isBootstrapping }),
       toToml: buildAicToml,
       solve: (solveLang, toml) => solveScenario(solveLang, toml),
-      onSolvingChange: (next) => {
-        if (next) {
-          const previousOk = untrack(() => renderedOkState(solveState));
-          solveState = {
-            status: "pending",
-            previousOk,
-          };
-          return;
-        }
-
-        const pending = untrack(() => solveState.status === "pending");
-        if (!pending) return;
-        const previousOk = untrack(() => (solveState.status === "pending" ? solveState.previousOk : null));
-        solveState = previousOk ?? { status: "idle" };
-      },
-      onSolveStarted: () => {
-        const previousOk = untrack(() => renderedOkState(solveState));
-        solveState = {
-          status: "solving",
-          startedAt: performance.now(),
-          previousOk,
-        };
-      },
-      onErrorMessage: (next) => {
-        const message = next.trim();
-        if (message.length === 0) {
-          if (untrack(() => solveState.status === "err")) {
-            solveState = { status: "idle" };
-          }
-          return;
-        }
-
-        solveState = {
-          status: "err",
-          message,
-        };
-      },
-      onSolved: (payload) => {
-        const startedAt = untrack(() => (solveState.status === "solving" ? solveState.startedAt : null));
-        const elapsedMs = startedAt === null ? 0 : Math.max(0, Math.round(performance.now() - startedAt));
-        solveState = {
-          status: "ok",
-          payload,
-          elapsedMs,
-        };
+      onStateChange: (next) => {
+        solveState = next;
       },
     });
 
