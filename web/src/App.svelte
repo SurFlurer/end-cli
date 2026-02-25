@@ -1,6 +1,6 @@
 <script lang="ts">
   import Dialog from "./components/Dialog.svelte";
-  import ErrorToast from "./components/ErrorToast.svelte";
+  import ErrorToast, { type ErrorToastState } from "./components/ErrorToast.svelte";
   import { onMount } from "svelte";
   import EditorPanel from "./components/EditorPanel.svelte";
   import DragImportOverlay from "./components/DragImportOverlay.svelte";
@@ -98,8 +98,7 @@
   let isBootstrapping = $state(true);
   let solveState = $state<SolveState>({ status: "idle" });
 
-  let isErrorToastOpen = $state(false);
-  let errorToastMessage = $state("");
+  let errorToast = $state<ErrorToastState>({ kind: "closed" });
 
   let selectedOutpostIndex = $state(-1);
 
@@ -124,12 +123,11 @@
     if (trimmed.length === 0) {
       return;
     }
-    errorToastMessage = trimmed;
-    isErrorToastOpen = true;
+    errorToast = { kind: "open", message: trimmed };
   }
 
   function closeErrorToast(): void {
-    isErrorToastOpen = false;
+    errorToast = { kind: "closed" };
   }
 
   function applyToml(text: string): void {
@@ -292,7 +290,7 @@
     },
     outposts: {
       add: () => {
-        const next = addOutpost(draft, selectedOutpostIndex);
+        const next = addOutpost(draft);
         draft = next.draft;
         selectedOutpostIndex = next.selectedOutpostIndex;
       },
@@ -342,7 +340,6 @@
 
     solverController = createSolverController({
       debounceMs: AUTO_SOLVE_DEBOUNCE_MS,
-      getSnapshot: () => ({ draft, lang, isBootstrapping }),
       toToml: buildAicToml,
       solve: (solveLang, toml) => solveScenario(solveLang, toml),
       onStateChange: (next) => {
@@ -374,10 +371,7 @@
       return;
     }
 
-    draft;
-    lang;
-    isBootstrapping;
-    solverController.scheduleAutoSolve();
+    solverController.updateSnapshot({ draft, lang, isBootstrapping });
   });
 
   $effect(() => {
@@ -513,9 +507,8 @@
 </div>
 
 <ErrorToast
-  open={isErrorToastOpen}
+  state={errorToast}
   title={t("错误", "Error")}
-  message={errorToastMessage}
   onClose={closeErrorToast}
 />
 

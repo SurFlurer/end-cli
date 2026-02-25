@@ -1,19 +1,24 @@
 <script lang="ts">
   import IconActionButton from "./IconActionButton.svelte";
 
+  export type ErrorToastState =
+    | { kind: "closed" }
+    | { kind: "open"; message: string };
+
   interface Props {
-    open: boolean;
-    message: string;
+    state: ErrorToastState;
     onClose: () => void;
     title?: string;
   }
 
-  let { open, message, onClose, title = "Error" }: Props = $props();
+  let { state, onClose, title = "Error" }: Props = $props();
 
+  const message = $derived(state.kind === "open" ? state.message : "");
   const trimmedMessage = $derived(message.trim());
+  const isOpen = $derived(state.kind === "open" && trimmedMessage.length > 0);
 </script>
 
-{#if open && trimmedMessage.length > 0}
+{#if isOpen}
   <div class="toast" role="status" aria-live="polite" aria-label={title}>
     <div class="icon" aria-hidden="true">
       <span class="material-symbols-outlined">error</span>

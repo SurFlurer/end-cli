@@ -33,15 +33,15 @@
       <table>
         <thead>
           <tr>
-            {#each headers as header, index}
+            {#each headers as header, index (index)}
               <th class:numeric={isNumericColumn(index)}>{header}</th>
             {/each}
           </tr>
         </thead>
         <tbody>
-          {#each rows as row}
+          {#each rows as row, rowIndex (rowIndex)}
             <tr>
-              {#each row as value, index}
+              {#each row as value, index (index)}
                 <td class:numeric={isNumericColumn(index)}>
                   {#if typeof value === 'string'}
                     {value}

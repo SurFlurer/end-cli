@@ -2,8 +2,6 @@ import { reduceSolveState } from './solve-state';
 import type { SolveState } from './solve-state';
 import type { AicDraft, LangTag, SolvePayload } from './types';
 
-export type SolveTrigger = 'auto' | 'manual';
-
 export interface SolveSnapshot {
   draft: AicDraft;
   lang: LangTag;
@@ -12,7 +10,6 @@ export interface SolveSnapshot {
 
 interface CreateSolverControllerOptions {
   debounceMs: number;
-  getSnapshot: () => SolveSnapshot;
   toToml: (draft: AicDraft) => string;
   solve: (lang: LangTag, toml: string) => Promise<SolvePayload>;
   onStateChange: (next: SolveState) => void;
@@ -20,8 +17,8 @@ interface CreateSolverControllerOptions {
 }
 
 export interface SolverController {
-  scheduleAutoSolve: () => void;
-  runSolve: (trigger?: SolveTrigger) => Promise<void>;
+  updateSnapshot: (snapshot: SolveSnapshot) => void;
+  runSolve: () => Promise<void>;
   dispose: () => void;
   resetSolvedFingerprint: () => void;
 }
@@ -35,6 +32,7 @@ export function createSolverController(options: CreateSolverControllerOptions): 
   let latestSolveSequence = 0;
   let lastSolvedFingerprint = '';
   let isSolving = false;
+  let latestSnapshot: SolveSnapshot | null = null;
 
   let state: SolveState = { status: 'idle' };
   options.onStateChange(state);
@@ -58,8 +56,8 @@ export function createSolverController(options: CreateSolverControllerOptions): 
   }
 
   function scheduleAutoSolve(): void {
-    const snapshot = options.getSnapshot();
-    if (snapshot.isBootstrapping) {
+    const snapshot = latestSnapshot;
+    if (!snapshot || snapshot.isBootstrapping) {
       return;
     }
 
@@ -73,14 +71,14 @@ export function createSolverController(options: CreateSolverControllerOptions): 
     autoSolveTimer = window.setTimeout(() => {
       autoSolveTimer = null;
       applyEvent({ type: 'debounceCleared' });
-      void runSolve('auto');
+      void runSolve();
     }, options.debounceMs);
     applyEvent({ type: 'debounceScheduled' });
   }
 
-  async function runSolve(trigger: SolveTrigger = 'manual'): Promise<void> {
-    const snapshot = options.getSnapshot();
-    if (snapshot.isBootstrapping) {
+  async function runSolve(): Promise<void> {
+    const snapshot = latestSnapshot;
+    if (!snapshot || snapshot.isBootstrapping) {
       return;
     }
 
@@ -152,8 +150,13 @@ export function createSolverController(options: CreateSolverControllerOptions): 
     lastSolvedFingerprint = '';
   }
 
+  function updateSnapshot(snapshot: SolveSnapshot): void {
+    latestSnapshot = snapshot;
+    scheduleAutoSolve();
+  }
+
   return {
-    scheduleAutoSolve,
+    updateSnapshot,
     runSolve,
     dispose,
     resetSolvedFingerprint

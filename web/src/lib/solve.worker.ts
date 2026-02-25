@@ -1,3 +1,4 @@
+/* global importScripts */
 /// <reference lib="webworker" />
 
 import type { ApiEnvelope, BootstrapPayload, LangTag, SolvePayload } from './types';
@@ -119,9 +120,9 @@ function callJsonApi<T>(module: EndWebModule, fnName: string, stringArgs: string
   }
 }
 
-interface EndWorkerGlobalScope extends DedicatedWorkerGlobalScope {
+type EndWorkerGlobalScope = typeof self & {
   createEndWebModule?: (opts?: Record<string, unknown>) => Promise<EndWebModule>;
-}
+};
 
 interface SolveRequest {
   id: number;

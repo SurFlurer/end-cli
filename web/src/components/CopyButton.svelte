@@ -98,11 +98,6 @@
     resetCopyStateLater();
   }
 
-  $effect(() => {
-    text;
-    copyState = "idle";
-  });
-
   onDestroy(() => {
     if (copyStateTimerId !== null && typeof window !== "undefined") {
       window.clearTimeout(copyStateTimerId);

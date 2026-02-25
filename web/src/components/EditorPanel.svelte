@@ -231,7 +231,7 @@
       <p class="hint">{t("暂无供给条目。", "No supply rows yet.")}</p>
     {/if}
 
-    {#each draft.supply as row, rowIndex}
+    {#each draft.supply as row, rowIndex (rowIndex)}
       <div class="row-grid">
         <SelectField
           value={row.itemKey}
@@ -285,7 +285,7 @@
       <p class="hint">{t("暂无消耗条目。", "No consumption rows yet.")}</p>
     {/if}
 
-    {#each draft.consumption as row, rowIndex}
+    {#each draft.consumption as row, rowIndex (rowIndex)}
       <div class="row-grid">
         <SelectField
           value={row.itemKey}
@@ -343,7 +343,7 @@
     {#if draft.outposts.length > 0}
       <div class="outpost-layout">
         <div class="outpost-list">
-          {#each draft.outposts as outpost, outpostIndex}
+          {#each draft.outposts as outpost, outpostIndex (outpost.key)}
             <button
               type="button"
               class={`outpost-pick ${outpostIndex === selectedOutpostIndex ? "active" : ""}`}
@@ -439,7 +439,7 @@
               <p class="hint">{t("暂无价格条目。", "No price rows yet.")}</p>
             {/if}
 
-            {#each selectedOutpost.prices as price, priceIndex}
+            {#each selectedOutpost.prices as price, priceIndex (priceIndex)}
               <div class="row-grid">
                 <SelectField
                   value={price.itemKey}

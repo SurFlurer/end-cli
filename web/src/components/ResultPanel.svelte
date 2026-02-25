@@ -2,6 +2,7 @@
   import CopyButton from "./CopyButton.svelte";
   import DataTable from "./DataTable.svelte";
   import { onDestroy } from "svelte";
+  import { SvelteSet } from "svelte/reactivity";
   import Panel from "./Panel.svelte";
   import StatusPill, {
     type SolveStatusPillState,
@@ -82,7 +83,7 @@
       return { itemKindCount: 0, totalPerMin: 0 };
     }
 
-    const itemKeys = new Set<string>();
+    const itemKeys = new SvelteSet<string>();
     let totalPerMin = 0;
     for (const edge of graph.edges) {
       if (edge.target !== warehouseNode.id) {

@@ -47,8 +47,8 @@ describe('draft actions', () => {
   });
 
   it('adds and removes outposts while maintaining selected index', () => {
-    const added1 = addOutpost(EMPTY_DRAFT, -1);
-    const added2 = addOutpost(added1.draft, added1.selectedOutpostIndex);
+    const added1 = addOutpost(EMPTY_DRAFT);
+    const added2 = addOutpost(added1.draft);
 
     expect(added2.draft.outposts).toHaveLength(2);
     expect(added2.selectedOutpostIndex).toBe(1);
@@ -61,7 +61,7 @@ describe('draft actions', () => {
   });
 
   it('updates outpost fields and price rows immutably', () => {
-    const added = addOutpost(EMPTY_DRAFT, -1);
+    const added = addOutpost(EMPTY_DRAFT);
 
     let draft = setOutpostField(added.draft, 0, 'name', 'TradeHub');
     draft = addPriceRow(draft, 0, 'Circuit');
@@ -96,7 +96,7 @@ describe('draft actions', () => {
   it('normalizes selected outpost index for empty and invalid states', () => {
     expect(normalizeSelectedOutpostIndex(EMPTY_DRAFT, 2)).toBe(-1);
 
-    const added = addOutpost(EMPTY_DRAFT, -1);
+    const added = addOutpost(EMPTY_DRAFT);
     expect(normalizeSelectedOutpostIndex(added.draft, 9)).toBe(0);
   });
 

@@ -9,16 +9,6 @@ function asNonNegativeNumber(value: number): number {
   return Number.isFinite(value) ? Math.max(0, value) : 0;
 }
 
-function cloneOutpost(outpost: OutpostDraft): OutpostDraft {
-  return {
-    key: outpost.key,
-    name: outpost.name,
-    moneyCapPerHour: outpost.moneyCapPerHour,
-    prices: outpost.prices.map((price) => ({ ...price }))
-  };
-}
-
-
 function nextOutpostKey(draft: AicDraft): string {
   const used = new Set(draft.outposts.map((outpost) => outpost.key.trim().toLowerCase()));
   let index = 1;
@@ -168,8 +158,7 @@ export function createOutpost(key: string): OutpostDraft {
 }
 
 export function addOutpost(
-  draft: AicDraft,
-  selectedOutpostIndex: number
+  draft: AicDraft
 ): { draft: AicDraft; selectedOutpostIndex: number } {
   const outposts = [...draft.outposts, createOutpost(nextOutpostKey(draft))];
   return {
