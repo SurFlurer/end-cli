@@ -1,5 +1,6 @@
 <script lang="ts">
   import Dialog from "./components/Dialog.svelte";
+  import ErrorToast from "./components/ErrorToast.svelte";
   import { onMount } from "svelte";
   import EditorPanel from "./components/EditorPanel.svelte";
   import DragImportOverlay from "./components/DragImportOverlay.svelte";
@@ -97,6 +98,9 @@
   let isBootstrapping = $state(true);
   let solveState = $state<SolveState>({ status: "idle" });
 
+  let isErrorToastOpen = $state(false);
+  let errorToastMessage = $state("");
+
   let selectedOutpostIndex = $state(-1);
 
   let layoutElement = $state<HTMLElement | null>(null);
@@ -115,11 +119,28 @@
     return lang === "zh" ? zh : en;
   }
 
+  function showErrorToast(message: string): void {
+    const trimmed = message.trim();
+    if (trimmed.length === 0) {
+      return;
+    }
+    errorToastMessage = trimmed;
+    isErrorToastOpen = true;
+  }
+
+  function closeErrorToast(): void {
+    isErrorToastOpen = false;
+  }
+
   function applyToml(text: string): void {
-    draft = parseAicToml(text);
-    selectedOutpostIndex = draft.outposts.length > 0 ? 0 : -1;
-    solveState = { status: "idle" };
-    solverController?.resetSolvedFingerprint();
+    try {
+      const nextDraft = parseAicToml(text);
+      draft = nextDraft;
+      selectedOutpostIndex = nextDraft.outposts.length > 0 ? 0 : -1;
+      solverController?.resetSolvedFingerprint();
+    } catch (error) {
+      showErrorToast(error instanceof Error ? error.message : String(error));
+    }
   }
 
   function isTomlFile(file: File): boolean {
@@ -128,13 +149,12 @@
 
   async function importTomlFile(file: File): Promise<void> {
     if (!isTomlFile(file)) {
-      solveState = {
-        status: "err",
-        message: t(
-        "仅支持导入 .toml 文件（例如 aic.toml）。",
-        "Only .toml files are supported for import (for example aic.toml).",
+      showErrorToast(
+        t(
+          "仅支持导入 *.toml 格式文件。",
+          "Only *.toml files are supported for import.",
         ),
-      };
+      );
       return;
     }
 
@@ -142,16 +162,12 @@
       const text = await file.text();
       applyToml(text);
     } catch (error) {
-      solveState = {
-        status: "err",
-        message: error instanceof Error ? error.message : String(error),
-      };
+      showErrorToast(error instanceof Error ? error.message : String(error));
     }
   }
 
   async function loadInitialState(): Promise<void> {
     isBootstrapping = true;
-    solveState = { status: "idle" };
 
     try {
       const payload = await loadBootstrap(lang);
@@ -167,10 +183,7 @@
         applyToml(defaultToml);
       }
     } catch (error) {
-      solveState = {
-        status: "err",
-        message: error instanceof Error ? error.message : String(error),
-      };
+      showErrorToast(error instanceof Error ? error.message : String(error));
     } finally {
       isBootstrapping = false;
     }
@@ -185,10 +198,7 @@
 
       applyToml(defaultToml);
     } catch (error) {
-      solveState = {
-        status: "err",
-        message: error instanceof Error ? error.message : String(error),
-      };
+      showErrorToast(error instanceof Error ? error.message : String(error));
     }
   }
 
@@ -232,10 +242,7 @@
       anchor.click();
       URL.revokeObjectURL(url);
     } catch (error) {
-      solveState = {
-        status: "err",
-        message: error instanceof Error ? error.message : String(error),
-      };
+      showErrorToast(error instanceof Error ? error.message : String(error));
     }
   }
 
@@ -504,6 +511,13 @@
     <DragImportOverlay {lang} onImportFile={importTomlFile} />
   </main>
 </div>
+
+<ErrorToast
+  open={isErrorToastOpen}
+  title={t("错误", "Error")}
+  message={errorToastMessage}
+  onClose={closeErrorToast}
+/>
 
 <Dialog
   open={isResetDialogOpen}
