@@ -9,5 +9,5 @@
     "allowJs": false,
     "types": ["vite/client", "node"]
   },
-  "include": ["src/**/*.ts", "src/**/*.svelte", "vite.config.ts"]
+  "include": ["src/**/*.ts", "src/**/*.svelte", "vite.config.ts", "App.svelte"]
 }
