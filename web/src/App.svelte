@@ -59,8 +59,8 @@
   import { EMPTY_DRAFT } from "./lib/types";
   import { loadBootstrap, solveScenario, warmupWasmWorker } from "./lib/wasm";
 
-  const NARROW_LAYOUT_QUERY = "(max-width: 1160px)";
-  const MIN_EDITOR_WIDTH_PX = 720;
+  const NARROW_LAYOUT_QUERY = "(max-width: 760px)";
+  const MIN_EDITOR_WIDTH_PX = 300;
   const MIN_RIGHT_WIDTH_PX = 420;
   const MIN_TOP_PANEL_HEIGHT_PX = 80;
   const MIN_BOTTOM_PANEL_HEIGHT_PX = 80+12;
