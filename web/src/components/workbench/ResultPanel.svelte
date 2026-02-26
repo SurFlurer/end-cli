@@ -1,18 +1,22 @@
 <script lang="ts">
-  import DataTable from "./DataTable.svelte";
+  import DataTable from "../table/DataTable.svelte";
   import { onDestroy } from "svelte";
   import { SvelteSet } from "svelte/reactivity";
-  import Panel from "./Panel.svelte";
-  import PanelHeader from "./PanelHeader.svelte";
-  import StatusPill, { type SolveStatusPillState } from "./StatusPill.svelte";
-  import type { LogisticsGraphDto } from "../lib/types";
-  import type { LangTag } from "../lib/types";
+  import Panel from "../pane/Panel.svelte";
+  import PanelHeader from "../pane/PanelHeader.svelte";
+  import StatusPill from "../button/StatusPill.svelte";
+  import type { LangTag, LogisticsGraphDto } from "../../lib/types";
   import {
     errorMessageOf,
     isSolveBusy,
     renderedOkState,
     type SolveState,
-  } from "../lib/solve-state";
+  } from "../../lib/solve-state";
+
+  type SolveStatusPillState =
+    | { status: "solving"; elapsedMs: number | null }
+    | { status: "ok"; elapsedMs: number | null }
+    | { status: "error"; elapsedMs: number | null };
 
   interface Props {
     lang: LangTag;

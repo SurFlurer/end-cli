@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
-  import { tooltip } from "../lib/tooltip";
+  import { tooltip } from "../../lib/tooltip";
 
   interface FileInputConfig {
     accept: string;

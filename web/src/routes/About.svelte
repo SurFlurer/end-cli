@@ -1,6 +1,6 @@
 <script lang="ts">
-  import Panel from "../components/Panel.svelte";
-  import PanelHeader from "../components/PanelHeader.svelte";
+  import Panel from "../components/pane/Panel.svelte";
+  import PanelHeader from "../components/pane/PanelHeader.svelte";
   import type { LangTag } from "../lib/types";
 
   const GITHUB_REPO_URL = "https://github.com/sssxks/end-cli";

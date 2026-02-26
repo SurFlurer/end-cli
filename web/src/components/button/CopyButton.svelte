@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onDestroy } from "svelte";
   import IconActionButton from "./IconActionButton.svelte";
-  import { copyTextToClipboard } from "../lib/clipboard";
-  import type { LangTag } from "../lib/types";
+  import { copyTextToClipboard } from "../../lib/clipboard";
+  import type { LangTag } from "../../lib/types";
 
   interface Props {
     lang: LangTag;

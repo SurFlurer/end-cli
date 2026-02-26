@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
   import { onMount } from "svelte";
-  import IconActionButton from "./IconActionButton.svelte";
+  import IconActionButton from "../button/IconActionButton.svelte";
 
   interface Props {
     menuAriaLabel: string;

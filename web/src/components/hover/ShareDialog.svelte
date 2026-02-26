@@ -1,13 +1,13 @@
 <script lang="ts">
   import { tick } from "svelte";
-  import IconActionButton from "./IconActionButton.svelte";
+  import IconActionButton from "../button/IconActionButton.svelte";
   import {
     copyPngBlobToClipboard,
     copyTextToClipboard,
-  } from "../lib/clipboard";
-  import { exportCurrentFlowToPngBlob } from "../lib/export/export-flow";
-  import { encodeTomlToShareParam } from "../lib/share-link";
-  import type { LangTag } from "../lib/types";
+  } from "../../lib/clipboard";
+  import { exportCurrentFlowToPngBlob } from "../../lib/export/export-flow";
+  import { encodeTomlToShareParam } from "../../lib/share-link";
+  import type { LangTag } from "../../lib/types";
 
   interface Props {
     open: boolean;

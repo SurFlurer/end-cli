@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { LangTag } from "../lib/types";
-  import { tooltip } from "../lib/tooltip";
+  import type { LangTag } from "../../lib/types";
+  import { tooltip } from "../../lib/tooltip";
 
   export type SolveStatusPillState =
     | { status: "solving"; elapsedMs: number | null }

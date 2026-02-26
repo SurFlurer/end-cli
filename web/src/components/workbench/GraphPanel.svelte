@@ -1,8 +1,8 @@
 <script lang="ts">
-  import IconActionButton from "./IconActionButton.svelte";
+  import IconActionButton from "../button/IconActionButton.svelte";
   import { onMount } from "svelte";
-  import Panel from "./Panel.svelte";
-  import PanelHeader from "./PanelHeader.svelte";
+  import Panel from "../pane/Panel.svelte";
+  import PanelHeader from "../pane/PanelHeader.svelte";
   import {
     Background,
     Controls,
@@ -12,10 +12,10 @@
     type Node,
   } from "@xyflow/svelte";
   import type { Viewport } from "@xyflow/system";
-  import { buildFlowGraph } from "../lib/graph";
-  import { currentFlowSnapshot } from "../lib/export/flow-snapshot";
-  import type { LangTag } from "../lib/types";
-  import { renderedOkState, type SolveState } from "../lib/solve-state";
+  import { buildFlowGraph } from "../../lib/graph";
+  import { currentFlowSnapshot } from "../../lib/export/flow-snapshot";
+  import type { LangTag } from "../../lib/types";
+  import { renderedOkState, type SolveState } from "../../lib/solve-state";
 
   type FullscreenDocument = Document & {
     webkitFullscreenElement?: Element | null;

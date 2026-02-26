@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import SiteFooter from "./components/SiteFooter.svelte";
+  import SiteFooter from "./components/workbench/SiteFooter.svelte";
   import About from "./routes/About.svelte";
   import Home from "./routes/Home.svelte";
   import type { RouteKey } from "./lib/routes";

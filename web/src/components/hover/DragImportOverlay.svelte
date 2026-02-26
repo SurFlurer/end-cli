@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import type { LangTag } from "../lib/types";
+  import type { LangTag } from "../../lib/types";
 
   type DragImportOverlayProps = {
     lang: LangTag;

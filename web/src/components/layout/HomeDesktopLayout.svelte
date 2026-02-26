@@ -1,10 +1,10 @@
 <script lang="ts">
-  import DragImportOverlay from "../DragImportOverlay.svelte";
-  import EditorPanel from "../EditorPanel.svelte";
-  import GraphPanel from "../GraphPanel.svelte";
-  import HorizontalSplitter from "../HorizontalSplitter.svelte";
-  import ResultPanel from "../ResultPanel.svelte";
-  import Splitter from "../Splitter.svelte";
+  import DragImportOverlay from "../hover/DragImportOverlay.svelte";
+  import EditorPanel from "../workbench/EditorPanel.svelte";
+  import GraphPanel from "../workbench/GraphPanel.svelte";
+  import HorizontalSplitter from "../pane/HorizontalSplitter.svelte";
+  import ResultPanel from "../workbench/ResultPanel.svelte";
+  import Splitter from "../pane/Splitter.svelte";
   import { onMount } from "svelte";
   import type { EditorActions } from "../../lib/editor-actions";
   import type { SolveState } from "../../lib/solve-state";

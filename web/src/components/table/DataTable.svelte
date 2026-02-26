@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { tooltip, type TooltipValue } from "../lib/tooltip";
+  import { tooltip, type TooltipValue } from "../../lib/tooltip";
 
   export type DataTableCell =
     | string

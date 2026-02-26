@@ -1,13 +1,18 @@
 <script lang="ts">
-  import FieldHint from "./FieldHint.svelte";
-  import DropdownMenu from "./DropdownMenu.svelte";
-  import IconActionButton from "./IconActionButton.svelte";
-  import InputField from "./InputField.svelte";
-  import Panel from "./Panel.svelte";
-  import PanelHeader from "./PanelHeader.svelte";
-  import SelectField, { type SelectOption } from "./SelectField.svelte";
-  import type { EditorPanelProps } from "../lib/editor-actions";
-  import type { OutpostDraft } from "../lib/types";
+  import FieldHint from "../hover/FieldHint.svelte";
+  import DropdownMenu from "../hover/DropdownMenu.svelte";
+  import IconActionButton from "../button/IconActionButton.svelte";
+  import InputField from "../input/InputField.svelte";
+  import Panel from "../pane/Panel.svelte";
+  import PanelHeader from "../pane/PanelHeader.svelte";
+  import SelectField from "../input/SelectField.svelte";
+  import type { EditorPanelProps } from "../../lib/editor-actions";
+  import type { OutpostDraft } from "../../lib/types";
+
+  type SelectOption = {
+    value: string;
+    label: string;
+  };
 
   let {
     lang,

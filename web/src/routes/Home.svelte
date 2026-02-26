@@ -1,9 +1,9 @@
 <script lang="ts">
-  import Dialog from "../components/Dialog.svelte";
+  import Dialog from "../components/hover/Dialog.svelte";
   import ErrorToast, {
     type ErrorToastState,
-  } from "../components/ErrorToast.svelte";
-  import ShareDialog from "../components/ShareDialog.svelte";
+  } from "../components/hover/ErrorToast.svelte";
+  import ShareDialog from "../components/hover/ShareDialog.svelte";
   import { onMount } from "svelte";
   import HomeDesktopLayout from "../components/layout/HomeDesktopLayout.svelte";
   import HomeMobileLayout from "../components/layout/HomeMobileLayout.svelte";

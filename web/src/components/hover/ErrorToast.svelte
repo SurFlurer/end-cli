@@ -1,5 +1,5 @@
 <script lang="ts">
-  import IconActionButton from "./IconActionButton.svelte";
+  import IconActionButton from "../button/IconActionButton.svelte";
 
   export type ErrorToastState =
     | { kind: "closed" }

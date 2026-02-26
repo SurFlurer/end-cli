@@ -1,8 +1,8 @@
 <script lang="ts">
-  import DragImportOverlay from "../DragImportOverlay.svelte";
-  import EditorPanel from "../EditorPanel.svelte";
-  import GraphPanel from "../GraphPanel.svelte";
-  import ResultPanel from "../ResultPanel.svelte";
+  import DragImportOverlay from "../hover/DragImportOverlay.svelte";
+  import EditorPanel from "../workbench/EditorPanel.svelte";
+  import GraphPanel from "../workbench/GraphPanel.svelte";
+  import ResultPanel from "../workbench/ResultPanel.svelte";
   import type { EditorActions } from "../../lib/editor-actions";
   import type { SolveState } from "../../lib/solve-state";
   import type { AicDraft, CatalogItemDto, LangTag } from "../../lib/types";

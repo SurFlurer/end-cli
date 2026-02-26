@@ -1,8 +1,8 @@
 <script lang="ts">
   import "katex/dist/katex.min.css";
-  import CopyButton from "../components/CopyButton.svelte";
-  import Panel from "../components/Panel.svelte";
-  import PanelHeader from "../components/PanelHeader.svelte";
+  import CopyButton from "../components/button/CopyButton.svelte";
+  import Panel from "../components/pane/Panel.svelte";
+  import PanelHeader from "../components/pane/PanelHeader.svelte";
   import {
     MODEL_V1_RENDERED_HTML,
     MODEL_V1_SOURCE_MARKDOWN,
