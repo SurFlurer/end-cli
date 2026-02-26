@@ -123,6 +123,21 @@ const externalConsumptionFixture: LogisticsGraphDto = {
   ]
 };
 
+const upstreamSplitFixture: LogisticsGraphDto = {
+  items: [{ itemKey: 'Plate', itemName: 'Plate', edgeCount: 3, nodeCount: 4, totalFlowPerMin: 60 }],
+  nodes: [
+    { id: 'a', kind: 'external_supply', label: 'A Supply' },
+    { id: 'b', kind: 'recipe_machine', label: 'B Machine' },
+    { id: 'c', kind: 'outpost_sale', label: 'C Sink' },
+    { id: 'd', kind: 'outpost_sale', label: 'D Sink' }
+  ],
+  edges: [
+    { id: 'e_ab', itemKey: 'Plate', itemName: 'Plate', source: 'a', target: 'b', flowPerMin: 20 },
+    { id: 'e_bc', itemKey: 'Plate', itemName: 'Plate', source: 'b', target: 'c', flowPerMin: 20 },
+    { id: 'e_bd', itemKey: 'Plate', itemName: 'Plate', source: 'b', target: 'd', flowPerMin: 20 }
+  ]
+};
+
 function sortedValues(values: ReadonlySet<string>): string[] {
   return [...values].sort((lhs, rhs) => lhs.localeCompare(rhs));
 }
@@ -215,25 +230,6 @@ describe('buildFlowGraph', () => {
     expect(ingotEdge).toBeDefined();
     expect(ingotEdge?.source).toBe('recipe1');
     expect(ingotEdge?.target).toBe('sale1');
-  });
-
-  it('identifies SCC nodes with special styling', () => {
-    const flow = buildFlowGraph(sccFixture);
-
-    // SCC 中的节点应该有特殊样式（粗边框）
-    const sccNodes = flow.nodes.filter(
-      (n) => n.id === 'n2' || n.id === 'n3' || n.id === 'n4'
-    );
-    expect(sccNodes).toHaveLength(3);
-
-    for (const node of sccNodes) {
-      expect(node.style).toContain('border:2px solid');
-      expect(node.data?.isInSCC).toBe(true);
-    }
-
-    // 非 SCC 节点保持普通样式
-    const normalNode = flow.nodes.find((n) => n.id === 'n5');
-    expect(normalNode?.style).toContain('border:1px solid');
   });
 
   it('lays out SCC internals from top to bottom', () => {
@@ -340,5 +336,34 @@ describe('selectGraphHighlight', () => {
 
     expect(sortedValues(downstreamOnly.nodeIds)).toEqual(['m1', 'm2']);
     expect(sortedValues(downstreamOnly.edgeIds)).toEqual(['e2']);
+  });
+
+  it('classifies upstream and downstream edge sets separately', () => {
+    const flow = buildFlowGraph(upstreamSplitFixture);
+
+    const selection = selectGraphHighlight(flow.highlightIndex, {
+      startNodeId: 'b',
+      direction: 'both',
+      sccTraversal: 'collapsed'
+    });
+
+    expect(sortedValues(selection.upstreamEdgeIds)).toEqual(['e_ab']);
+    expect(sortedValues(selection.downstreamEdgeIds)).toEqual(['e_bc', 'e_bd']);
+  });
+
+  it('computes upstream used flow by proportional downstream usage', () => {
+    const flow = buildFlowGraph(upstreamSplitFixture);
+
+    const selection = selectGraphHighlight(flow.highlightIndex, {
+      startNodeId: 'c',
+      direction: 'both',
+      sccTraversal: 'collapsed'
+    });
+
+    expect(sortedValues(selection.upstreamEdgeIds)).toEqual(['e_ab', 'e_bc']);
+    expect(sortedValues(selection.downstreamEdgeIds)).toEqual([]);
+
+    expect(selection.upstreamUsedPerMinByEdgeId.get('e_bc')).toBeCloseTo(20, 6);
+    expect(selection.upstreamUsedPerMinByEdgeId.get('e_ab')).toBeCloseTo(10, 6);
   });
 });

@@ -29,6 +29,7 @@ export interface FlowGraphEdgeRecord {
   id: FlowGraphEdgeId;
   source: FlowGraphNodeId;
   target: FlowGraphNodeId;
+  flowPerMin: number;
 }
 
 /**
@@ -72,6 +73,15 @@ export interface GraphHighlightSelection {
   nodeIds: ReadonlySet<FlowGraphNodeId>;
   /** Concrete edge ids (XYFlow `Edge.id`). */
   edgeIds: ReadonlySet<FlowGraphEdgeId>;
+  /** Highlighted edges classified as upstream-side edges. */
+  upstreamEdgeIds: ReadonlySet<FlowGraphEdgeId>;
+  /** Highlighted edges classified as downstream-side edges. */
+  downstreamEdgeIds: ReadonlySet<FlowGraphEdgeId>;
+  /**
+   * For upstream highlighted edges, the flow portion used by the selected node.
+   * Unit: /min.
+   */
+  upstreamUsedPerMinByEdgeId: ReadonlyMap<FlowGraphEdgeId, number>;
 }
 
 export interface LayoutNode {

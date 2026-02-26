@@ -174,6 +174,7 @@ export function buildFlowGraph(graph: LogisticsGraphDto): BuildFlowGraphResult {
       style: 'stroke-width:1.6;stroke:#2f4a53;',
       labelStyle: 'font-size:11px;fill:#1f353f;'
     }));
+  const flowPerMinByEdgeId = new Map(expanded.edges.map((edge) => [edge.id, edge.flowPerMin]));
 
   const filteredSccResult = buildFilteredSccResult(sccResult, normalNodeIds);
 
@@ -196,7 +197,8 @@ export function buildFlowGraph(graph: LogisticsGraphDto): BuildFlowGraphResult {
     edges: drawnEdges.map((edge) => ({
       id: edge.id,
       source: edge.source,
-      target: edge.target
+      target: edge.target,
+      flowPerMin: flowPerMinByEdgeId.get(edge.id) ?? 0
     })),
     sccResult,
     lightweightNodeIds: expanded.lightweightNodeIds,

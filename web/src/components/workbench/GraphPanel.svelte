@@ -1,5 +1,6 @@
 <script lang="ts">
   import IconActionButton from "../button/IconActionButton.svelte";
+  import FlowEdge from "./FlowEdge.svelte";
   import { onMount } from "svelte";
   import Panel from "../pane/Panel.svelte";
   import PanelHeader from "../pane/PanelHeader.svelte";
@@ -9,9 +10,11 @@
     MiniMap,
     SvelteFlow,
     type Edge,
+    type EdgeTypes,
     type Node,
   } from "@xyflow/svelte";
   import type { Viewport } from "@xyflow/system";
+  import type { HighlightEdgeLabelData } from "../../lib/graph/highlight-edge-label";
   import {
     buildFlowGraph,
     selectGraphHighlight,
@@ -36,6 +39,27 @@
     solveState: SolveState;
   }
 
+  interface EdgeFlowMeta {
+    itemName: string;
+    flowPerMin: number;
+  }
+
+  const edgeTypes: EdgeTypes = {
+    default: FlowEdge,
+  };
+  const FLOW_SPLIT_EPSILON = 0.005;
+  const UPSTREAM_EDGE_STYLE = "stroke:#ab6a31;stroke-width:2.4;opacity:1;";
+  const DOWNSTREAM_EDGE_STYLE = "stroke:#1f6176;stroke-width:2.4;opacity:1;";
+  const BOTH_EDGE_STYLE = "stroke:#376f79;stroke-width:2.4;opacity:1;";
+  const INACTIVE_EDGE_STYLE = "opacity:0.14;";
+  const UPSTREAM_LABEL_STYLE =
+    "color:#7d512b;font-weight:700;white-space:pre-line;text-align:center;";
+  const DOWNSTREAM_LABEL_STYLE =
+    "color:#154a59;font-weight:700;white-space:pre-line;text-align:center;";
+  const BOTH_LABEL_STYLE =
+    "color:#285963;font-weight:700;white-space:pre-line;text-align:center;";
+  const INACTIVE_LABEL_STYLE = "color:#7a95a2;opacity:0.14;";
+
   let { lang, solveState }: Props = $props();
   let flowElement = $state<HTMLElement | null>(null);
   let isFullscreen = $state(false);
@@ -54,10 +78,31 @@
   let baseEdgeStyleById = new Map<string, string | undefined>();
   let baseEdgeLabelById = new Map<string, Edge["label"]>();
   let baseEdgeLabelStyleById = new Map<string, string | undefined>();
-  let highlightEdgeLabelById = new Map<string, string>();
+  let baseEdgeDataById = new Map<string, Edge["data"]>();
+  let edgeFlowMetaById = new Map<string, EdgeFlowMeta>();
 
   function appendStyle(baseStyle: string | undefined, extension: string): string {
     return `${baseStyle ?? ""}${extension}`;
+  }
+
+  function formatPerMin(value: number): string {
+    return `${value.toFixed(2)}/min`;
+  }
+
+  function buildLabelData(meta: EdgeFlowMeta, usedPerMin: number, mutedPerMin?: number): HighlightEdgeLabelData {
+    return {
+      kind: "flow-highlight-label",
+      topLine: meta.itemName,
+      mainRateText: formatPerMin(usedPerMin),
+      mutedRateText:
+        mutedPerMin !== undefined && mutedPerMin > FLOW_SPLIT_EPSILON
+          ? ` + ${formatPerMin(mutedPerMin)}`
+          : undefined,
+    };
+  }
+
+  function flattenLabelData(labelData: HighlightEdgeLabelData): string {
+    return `${labelData.topLine}\n${labelData.mainRateText}${labelData.mutedRateText ?? ""}`;
   }
 
   function applyHighlightSelection(selection: GraphHighlightSelection | null): void {
@@ -68,6 +113,7 @@
       }));
       edges = edges.map((edge) => ({
         ...edge,
+        data: baseEdgeDataById.get(edge.id),
         label: baseEdgeLabelById.get(edge.id),
         style: baseEdgeStyleById.get(edge.id),
         labelStyle: baseEdgeLabelStyleById.get(edge.id),
@@ -88,22 +134,50 @@
 
     edges = edges.map((edge) => {
       const isHighlighted = selection.edgeIds.has(edge.id);
+      const isUpstream = selection.upstreamEdgeIds.has(edge.id);
+      const isDownstream = selection.downstreamEdgeIds.has(edge.id);
+      const edgeFlowMeta = edgeFlowMetaById.get(edge.id);
+
+      let edgeData = baseEdgeDataById.get(edge.id);
+      let edgeLabel = baseEdgeLabelById.get(edge.id);
+      if (isHighlighted && edgeFlowMeta) {
+        if (isUpstream) {
+          const usedPerMin = Math.min(
+            edgeFlowMeta.flowPerMin,
+            Math.max(0, selection.upstreamUsedPerMinByEdgeId.get(edge.id) ?? edgeFlowMeta.flowPerMin),
+          );
+          const unusedPerMin = Math.max(0, edgeFlowMeta.flowPerMin - usedPerMin);
+          const labelData = buildLabelData(edgeFlowMeta, usedPerMin, unusedPerMin);
+          edgeData = labelData as Edge["data"];
+          edgeLabel = flattenLabelData(labelData);
+        } else {
+          const labelData = buildLabelData(edgeFlowMeta, edgeFlowMeta.flowPerMin);
+          edgeData = labelData as Edge["data"];
+          edgeLabel = flattenLabelData(labelData);
+        }
+      }
+
+      let highlightEdgeStyle = BOTH_EDGE_STYLE;
+      let highlightLabelStyle = BOTH_LABEL_STYLE;
+      if (isUpstream && !isDownstream) {
+        highlightEdgeStyle = UPSTREAM_EDGE_STYLE;
+        highlightLabelStyle = UPSTREAM_LABEL_STYLE;
+      } else if (!isUpstream && isDownstream) {
+        highlightEdgeStyle = DOWNSTREAM_EDGE_STYLE;
+        highlightLabelStyle = DOWNSTREAM_LABEL_STYLE;
+      }
+
       return {
         ...edge,
-        label: isHighlighted
-          ? (highlightEdgeLabelById.get(edge.id) ?? baseEdgeLabelById.get(edge.id))
-          : baseEdgeLabelById.get(edge.id),
+        data: edgeData,
+        label: edgeLabel,
         style: appendStyle(
           baseEdgeStyleById.get(edge.id),
-          isHighlighted
-            ? "stroke:#1f6176;stroke-width:2.4;opacity:1;"
-            : "opacity:0.14;",
+          isHighlighted ? highlightEdgeStyle : INACTIVE_EDGE_STYLE,
         ),
         labelStyle: appendStyle(
           baseEdgeLabelStyleById.get(edge.id),
-          isHighlighted
-            ? "fill:#154a59;font-weight:700;white-space:pre-line;text-align:center;"
-            : "fill:#7a95a2; opacity:0.14;",
+          isHighlighted ? highlightLabelStyle : INACTIVE_LABEL_STYLE,
         ),
       };
     });
@@ -145,7 +219,8 @@
       baseEdgeStyleById = new Map();
       baseEdgeLabelById = new Map();
       baseEdgeLabelStyleById = new Map();
-      highlightEdgeLabelById = new Map();
+      baseEdgeDataById = new Map();
+      edgeFlowMetaById = new Map();
       nodes = [];
       edges = [];
       viewport = { x: 0, y: 0, zoom: 1 };
@@ -161,10 +236,14 @@
     baseEdgeStyleById = new Map(flow.edges.map((edge: Edge) => [edge.id, edge.style]));
     baseEdgeLabelById = new Map(flow.edges.map((edge: Edge) => [edge.id, edge.label]));
     baseEdgeLabelStyleById = new Map(flow.edges.map((edge: Edge) => [edge.id, edge.labelStyle]));
-    highlightEdgeLabelById = new Map(
+    baseEdgeDataById = new Map(flow.edges.map((edge: Edge) => [edge.id, edge.data]));
+    edgeFlowMetaById = new Map(
       result.logisticsGraph.edges.map((edge) => [
         edge.id,
-        `${edge.itemName}\n${edge.flowPerMin.toFixed(2)}/min`,
+        {
+          itemName: edge.itemName,
+          flowPerMin: edge.flowPerMin,
+        } satisfies EdgeFlowMeta,
       ]),
     );
   });
@@ -282,6 +361,7 @@
           bind:nodes
           bind:edges
           bind:viewport
+          {edgeTypes}
           fitView
           proOptions={{ hideAttribution: true }}
           onnodeclick={handleNodeClick}
