@@ -2,7 +2,7 @@ import { elementToSVG } from "dom-to-svg";
 import { mount, unmount } from "svelte";
 import { get } from "svelte/store";
 import type { Node } from "@xyflow/svelte";
-import FlowExportRenderer from "../components/FlowExportRenderer.svelte";
+import FlowExportRenderer from "./FlowExportRenderer.svelte";
 import { currentFlowSnapshot, type FlowSnapshot } from "./flow-snapshot";
 
 type ExportSize = {

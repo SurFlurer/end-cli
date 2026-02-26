@@ -143,7 +143,7 @@
 
   .btn {
     border: 1px solid var(--control-border);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-lg);
     padding: 8px 12px;
     background: var(--panel-strong);
     color: inherit;
@@ -154,7 +154,7 @@
 
   @media (hover: hover) and (pointer: fine) {
     .btn:hover:not(:disabled) {
-      background: var(--surface-soft);
+      box-shadow: var(--focus-ring);
     }
   }
 

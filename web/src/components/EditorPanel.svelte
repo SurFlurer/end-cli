@@ -89,7 +89,6 @@
               }}
               disabled={isResetDisabled}
               ariaLabel={t("重置示例输入", "Reset Example Input")}
-              fullWidth={true}
             />
 
             <IconActionButton
@@ -103,7 +102,6 @@
                   return actions.importFromFile(event);
                 },
               }}
-              fullWidth={true}
             />
 
             <IconActionButton
@@ -115,7 +113,6 @@
               }}
               title={t("导出", "Export")}
               ariaLabel={t("导出 aic.toml", "Export aic.toml")}
-              fullWidth={true}
             />
           {/snippet}
         </DropdownMenu>
@@ -125,10 +122,6 @@
 
   <section class="editor-shell">
     <section>
-      <!-- <div class="heading-with-hint">
-        <h3>{t("次级目标", "Secondary Objective")}</h3>
-      </div> -->
-
       <div class="field-row">
         <div class="label-with-hint">
           <label for="stage2-objective">{t("优化目标", "Objective")}</label>
@@ -140,6 +133,7 @@
           />
         </div>
         <SelectField
+          id="stage2-objective"
           value={draft.stage2.objective}
           options={stage2ObjectiveOptions}
           ariaLabel={t("选择 Stage2 目标", "Select Stage2 objective")}
@@ -204,7 +198,7 @@
 
       <div class="field-row">
         <div class="label-with-hint">
-          <label for="scenario-region">{t("地区", "Region")}</label>
+          <label for="region">{t("地区", "Region")}</label>
           <FieldHint
             text={t(
               "地区不会改变据点信息；主要影响部分带地区限制的机器是否可用。",
@@ -213,6 +207,7 @@
           />
         </div>
         <SelectField
+          id="region"
           value={draft.region}
           options={regionOptions}
           ariaLabel={t("选择地区", "Select region")}
@@ -301,7 +296,6 @@
             icon="horizontal_rule"
             onClick={() => actions.supply.remove(rowIndex)}
             ariaLabel={t("删除供给条目", "Remove supply row")}
-            fullWidth
           />
         </div>
       {/each}
@@ -361,7 +355,6 @@
             icon="horizontal_rule"
             onClick={() => actions.consumption.remove(rowIndex)}
             ariaLabel={t("删除消耗条目", "Remove consumption row")}
-            fullWidth
           />
         </div>
       {/each}
@@ -564,7 +557,6 @@
                       );
                     }}
                     ariaLabel={t("删除价格条目", "Remove price row")}
-                    fullWidth
                   />
                 </div>
               {/each}
@@ -575,6 +567,7 @@
     </section>
   </section>
 </Panel>
+
 <style>
   .editor-shell {
     display: grid;

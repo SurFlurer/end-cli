@@ -5,7 +5,7 @@
     copyPngBlobToClipboard,
     copyTextToClipboard,
   } from "../lib/clipboard";
-  import { exportCurrentFlowToPngBlob } from "../lib/export-flow";
+  import { exportCurrentFlowToPngBlob } from "../lib/export/export-flow";
   import { encodeTomlToShareParam } from "../lib/share-link";
   import type { LangTag } from "../lib/types";
 

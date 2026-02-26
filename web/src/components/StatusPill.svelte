@@ -42,10 +42,10 @@
     }
 
     if (state.status === "error") {
-      return t("失败，请查看下方原因", "Failed, see details below");
+      return t("求解失败，请查看下方原因", "Failed, see details below");
     }
 
-    return t("已成功，耗时 ", "Succeeded, elapsed ") + elapsedText;
+    return t("求解已成功，耗时 ", "Succeeded, elapsed ") + elapsedText;
   });
 
 </script>

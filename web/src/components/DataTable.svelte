@@ -43,16 +43,19 @@
             <tr>
               {#each row as value, index (index)}
                 <td class:numeric={isNumericColumn(index)}>
-                  {#if typeof value === 'string'}
+                  {#if typeof value === "string"}
                     {value}
                   {:else}
                     <span
-                      class={['cell', value.className ?? ''].filter(Boolean).join(' ')}
+                      class={["cell", value.className ?? ""]
+                        .filter(Boolean)
+                        .join(" ")}
                       use:tooltip={value.tooltip}
                     >
                       {#if value.icon}
-                        <span class="material-symbols-outlined cell-icon" aria-hidden="true"
-                          >{value.icon}</span
+                        <span
+                          class="material-symbols-outlined cell-icon"
+                          aria-hidden="true">{value.icon}</span
                         >
                       {/if}
                       <span>{value.text}</span>
@@ -94,7 +97,8 @@
 
   th,
   td {
-    border-bottom: 1px solid color-mix(in srgb, var(--line) 78%, var(--line-tint-2));
+    border-bottom: 1px solid
+      color-mix(in srgb, var(--line) 78%, var(--line-tint-2));
     text-align: left;
     padding: 8px 6px;
     overflow-wrap: anywhere;
@@ -108,10 +112,6 @@
 
   tbody tr:last-child td {
     border-bottom: none;
-  }
-
-  td {
-    transition: background-color 140ms ease;
   }
 
   @media (hover: hover) and (pointer: fine) {

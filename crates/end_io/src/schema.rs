@@ -46,7 +46,7 @@ pub(crate) struct MachineToml {
     #[serde(deserialize_with = "deserialize_display_name")]
     pub(crate) zh: DisplayName,
     #[serde(default)]
-    pub(crate) regions: Box<[ScenarioRegionToml]>,
+    pub(crate) regions: Box<[RegionToml]>,
 }
 
 /// Thermal bank facility entry from `facilities.toml`.
@@ -109,8 +109,8 @@ pub(crate) struct PowerRecipeToml {
 #[serde(deny_unknown_fields)]
 pub(crate) struct AicToml {
     #[serde(
-        default = "default_scenario_region",
-        deserialize_with = "deserialize_scenario_region"
+        default = "default_region",
+        deserialize_with = "deserialize_region"
     )]
     pub(crate) region: Region,
     #[serde(deserialize_with = "deserialize_non_negative_u32")]
@@ -223,21 +223,21 @@ pub(crate) struct OutpostToml {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct ScenarioRegionToml(Region);
+pub(crate) struct RegionToml(Region);
 
-impl ScenarioRegionToml {
+impl RegionToml {
     pub(crate) fn into_inner(self) -> Region {
         self.0
     }
 }
 
-impl<'de> Deserialize<'de> for ScenarioRegionToml {
+impl<'de> Deserialize<'de> for RegionToml {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
         let raw = String::deserialize(deserializer)?;
-        parse_scenario_region(raw.as_str())
+        parse_region(raw.as_str())
             .map(Self)
             .map_err(D::Error::custom)
     }
@@ -355,7 +355,7 @@ where
         .transpose()
 }
 
-fn parse_scenario_region(value: &str) -> Result<Region, String> {
+fn parse_region(value: &str) -> Result<Region, String> {
     match value {
         "fourth_valley" => Ok(Region::FourthValley),
         "wuling" => Ok(Region::Wuling),
@@ -365,16 +365,16 @@ fn parse_scenario_region(value: &str) -> Result<Region, String> {
     }
 }
 
-fn default_scenario_region() -> Region {
-    Region::Wuling
+fn default_region() -> Region {
+    Region::FourthValley
 }
 
-fn deserialize_scenario_region<'de, D>(deserializer: D) -> Result<Region, D::Error>
+fn deserialize_region<'de, D>(deserializer: D) -> Result<Region, D::Error>
 where
     D: serde::Deserializer<'de>,
 {
     let raw = String::deserialize(deserializer)?;
-    parse_scenario_region(raw.as_str()).map_err(D::Error::custom)
+    parse_region(raw.as_str()).map_err(D::Error::custom)
 }
 
 fn parse_positive_u32(value: i64) -> Result<NonZeroU32, String> {

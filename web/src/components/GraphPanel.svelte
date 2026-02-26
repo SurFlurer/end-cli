@@ -13,7 +13,7 @@
   } from "@xyflow/svelte";
   import type { Viewport } from "@xyflow/system";
   import { buildFlowGraph } from "../lib/graph";
-  import { currentFlowSnapshot } from "../lib/flow-snapshot";
+  import { currentFlowSnapshot } from "../lib/export/flow-snapshot";
   import type { LangTag } from "../lib/types";
   import { renderedOkState, type SolveState } from "../lib/solve-state";
 

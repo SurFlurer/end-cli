@@ -11,6 +11,7 @@
     options: SelectOption[];
     onChange: (nextValue: string) => void;
     ariaLabel: string;
+    id?: string;
     searchPlaceholder?: string;
     emptyText?: string;
     searchable?: boolean;
@@ -22,6 +23,7 @@
     options,
     onChange,
     ariaLabel,
+    id,
     searchPlaceholder = "",
     emptyText = "",
     searchable = true,
@@ -133,6 +135,7 @@
   <button
     type="button"
     class="trigger"
+    {id}
     onclick={togglePanel}
     {disabled}
     aria-label={ariaLabel}

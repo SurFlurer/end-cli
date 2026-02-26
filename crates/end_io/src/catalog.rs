@@ -205,7 +205,7 @@ pub fn load_catalog<'id>(data_dir: Option<&Path>, guard: Guard<'id>) -> Result<C
     Ok(builder.build())
 }
 
-fn facility_regions_from_machine_regions(regions: &[crate::schema::ScenarioRegionToml]) -> FacilityRegions {
+fn facility_regions_from_machine_regions(regions: &[crate::schema::RegionToml]) -> FacilityRegions {
     let mut has_fourth_valley = false;
     let mut has_wuling = false;
     for region in regions {

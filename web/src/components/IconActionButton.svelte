@@ -18,7 +18,6 @@
     active?: boolean;
     onClick?: () => void;
     className?: string;
-    fullWidth?: boolean;
   }
 
   interface Props extends CommonProps {
@@ -39,7 +38,6 @@
     active = false,
     onClick,
     className = "",
-    fullWidth = false,
     fileInput,
     href,
     target,
@@ -55,10 +53,6 @@
 
     if (kind === "danger") {
       classes.push("danger");
-    }
-
-    if (fullWidth) {
-      classes.push("full-width");
     }
 
     if (disabled) {
@@ -169,10 +163,6 @@
   .icon-action-btn.danger {
     color: var(--danger);
     --icon-action-hover-bg: color-mix(in srgb, var(--danger) 12%, var(--panel-strong));
-  }
-
-  .icon-action-btn.full-width {
-    width: 100%;
   }
 
   .icon-action-btn.disabled {

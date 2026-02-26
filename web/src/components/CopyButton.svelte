@@ -6,17 +6,21 @@
 
   interface Props {
     lang: LangTag;
-    text: string;
+    text: string | null;
   }
 
   type CopyState = "idle" | "copied" | "failed";
 
   let { lang, text }: Props = $props();
 
-  let copyState = $state<CopyState>("idle");
-  let copyStateTimerId: number | null = null;
+  function t(zh: string, en: string): string {
+    return lang === "zh" ? zh : en;
+  }
 
-  const isDisabled = $derived(text.trim().length === 0);
+  let copyState = $state<CopyState>("idle");
+  let timer: number | null = null;
+
+  const isDisabled = $derived(text === null);
 
   const buttonLabel = $derived.by(() => {
     if (copyState === "copied") {
@@ -32,22 +36,14 @@
       : t("复制输出", "Copy output");
   });
 
-  function t(zh: string, en: string): string {
-    return lang === "zh" ? zh : en;
-  }
-
   function resetCopyStateLater(): void {
-    if (copyStateTimerId !== null && typeof window !== "undefined") {
-      window.clearTimeout(copyStateTimerId);
+    if (timer !== null) {
+      window.clearTimeout(timer);
     }
 
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    copyStateTimerId = window.setTimeout(() => {
+    timer = window.setTimeout(() => {
       copyState = "idle";
-      copyStateTimerId = null;
+      timer = null;
     }, 1400);
   }
 
@@ -57,7 +53,7 @@
     }
 
     try {
-      await copyTextToClipboard(text);
+      await copyTextToClipboard(text!);
       copyState = "copied";
     } catch {
       copyState = "failed";
@@ -66,18 +62,16 @@
   }
 
   onDestroy(() => {
-    if (copyStateTimerId !== null && typeof window !== "undefined") {
-      window.clearTimeout(copyStateTimerId);
-      copyStateTimerId = null;
+    if (timer !== null) {
+      window.clearTimeout(timer);
+      timer = null;
     }
   });
 </script>
 
 <IconActionButton
   icon={copyState === "copied" ? "check" : "content_copy"}
-  onClick={() => {
-    void copyOutput();
-  }}
+  onClick={copyOutput}
   disabled={isDisabled}
   ariaLabel={buttonLabel}
   title={buttonLabel}
