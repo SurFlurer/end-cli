@@ -1,7 +1,11 @@
 <script lang="ts">
+  import { tick } from "svelte";
   import { toBlob } from "html-to-image";
   import IconActionButton from "./IconActionButton.svelte";
-  import { copyPngBlobToClipboard, copyTextToClipboard } from "../lib/clipboard";
+  import {
+    copyPngBlobToClipboard,
+    copyTextToClipboard,
+  } from "../lib/clipboard";
   import { encodeTomlToShareParam } from "../lib/share-link";
   import type { LangTag } from "../lib/types";
 
@@ -21,14 +25,12 @@
   let isRendering = $state(false);
 
   let exportFrame = $state<HTMLIFrameElement | null>(null);
-  let exportWait:
-    | {
-        token: string;
-        resolve: () => void;
-        reject: (reason?: unknown) => void;
-        timeoutId: number;
-      }
-    | null = $state(null);
+  let exportWait: {
+    token: string;
+    resolve: () => void;
+    reject: (reason?: unknown) => void;
+    timeoutId: number;
+  } | null = $state(null);
 
   let actionError = $state<string>("");
   let actionBusy = $state<"" | "link" | "image" | "bundle">("");
@@ -57,7 +59,10 @@
     exportWait = null;
   }
 
-  function waitForExportReady(token: string, timeoutMs = 20_000): Promise<void> {
+  function waitForExportReady(
+    token: string,
+    timeoutMs = 20_000,
+  ): Promise<void> {
     if (typeof window === "undefined") {
       return Promise.reject(new Error("export is unavailable"));
     }
@@ -91,7 +96,10 @@
       return;
     }
 
-    if (typeof window !== "undefined" && event.origin !== window.location.origin) {
+    if (
+      typeof window !== "undefined" &&
+      event.origin !== window.location.origin
+    ) {
       return;
     }
 
@@ -118,7 +126,11 @@
     if (kind === "end2.export.err") {
       const message = (data as { message?: unknown }).message;
       exportWait.reject(
-        new Error(typeof message === "string" ? message : t("导出失败。", "Export failed.")),
+        new Error(
+          typeof message === "string"
+            ? message
+            : t("导出失败。", "Export failed."),
+        ),
       );
     }
   }
@@ -202,7 +214,12 @@
       clearExportWait();
       return;
     }
-    // void renderPreview();
+
+    // render preview reads/writes some state, we don't want then tracked by this effect
+    void (async () => {
+      await tick();
+      await renderPreview();
+    })();
   });
 
   function onKeyDown(event: KeyboardEvent): void {
