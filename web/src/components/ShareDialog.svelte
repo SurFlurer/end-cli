@@ -1,11 +1,11 @@
 <script lang="ts">
   import { tick } from "svelte";
-  import { toBlob } from "html-to-image";
   import IconActionButton from "./IconActionButton.svelte";
   import {
     copyPngBlobToClipboard,
     copyTextToClipboard,
   } from "../lib/clipboard";
+  import { exportCurrentFlowToPngBlob } from "../lib/export-flow";
   import { encodeTomlToShareParam } from "../lib/share-link";
   import type { LangTag } from "../lib/types";
 
@@ -24,14 +24,6 @@
   let previewError = $state<string>("");
   let isRendering = $state(false);
 
-  let exportFrame = $state<HTMLIFrameElement | null>(null);
-  let exportWait: {
-    token: string;
-    resolve: () => void;
-    reject: (reason?: unknown) => void;
-    timeoutId: number;
-  } | null = $state(null);
-
   let actionError = $state<string>("");
   let actionBusy = $state<"" | "link" | "image" | "bundle">("");
   let lastCopied = $state<"" | "link" | "image" | "bundle">("");
@@ -47,92 +39,6 @@
     previewBlob = null;
     previewUrl = null;
     previewError = "";
-  }
-
-  function clearExportWait(): void {
-    if (!exportWait) {
-      return;
-    }
-    if (typeof window !== "undefined") {
-      window.clearTimeout(exportWait.timeoutId);
-    }
-    exportWait = null;
-  }
-
-  function waitForExportReady(
-    token: string,
-    timeoutMs = 20_000,
-  ): Promise<void> {
-    if (typeof window === "undefined") {
-      return Promise.reject(new Error("export is unavailable"));
-    }
-
-    clearExportWait();
-    return new Promise<void>((resolve, reject) => {
-      const timeoutId = window.setTimeout(() => {
-        exportWait = null;
-        reject(new Error(t("导出超时。", "Export timed out.")));
-      }, timeoutMs);
-
-      exportWait = {
-        token,
-        resolve: () => {
-          window.clearTimeout(timeoutId);
-          exportWait = null;
-          resolve();
-        },
-        reject: (reason) => {
-          window.clearTimeout(timeoutId);
-          exportWait = null;
-          reject(reason);
-        },
-        timeoutId,
-      };
-    });
-  }
-
-  function onMessage(event: MessageEvent): void {
-    if (!open) {
-      return;
-    }
-
-    if (
-      typeof window !== "undefined" &&
-      event.origin !== window.location.origin
-    ) {
-      return;
-    }
-
-    const data = event.data as unknown;
-    if (!data || typeof data !== "object") {
-      return;
-    }
-
-    const kind = (data as { kind?: unknown }).kind;
-    const token = (data as { token?: unknown }).token;
-    if (typeof kind !== "string" || typeof token !== "string") {
-      return;
-    }
-
-    if (!exportWait || exportWait.token !== token) {
-      return;
-    }
-
-    if (kind === "end2.export.ready") {
-      exportWait.resolve();
-      return;
-    }
-
-    if (kind === "end2.export.err") {
-      const message = (data as { message?: unknown }).message;
-      exportWait.reject(
-        new Error(
-          typeof message === "string"
-            ? message
-            : t("导出失败。", "Export failed."),
-        ),
-      );
-    }
   }
 
   async function renderPreview(): Promise<void> {
@@ -160,42 +66,11 @@
     previewError = "";
 
     try {
-      if (!exportFrame) {
-        previewError = t("导出组件未就绪。", "Export frame is not ready.");
-        return;
-      }
+      const pngBlob = await exportCurrentFlowToPngBlob({
+        width: 1600,
+        height: 900,
+      });
 
-      const encoded = await encodeTomlToShareParam(tomlText);
-      const token = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-
-      const url = new URL(window.location.href);
-      url.searchParams.set("s", encoded);
-      url.searchParams.set("lang", lang);
-      url.searchParams.set("token", token);
-      url.searchParams.set("w", "1600");
-      url.searchParams.set("h", "900");
-      url.hash = "#export";
-
-      exportFrame.src = url.toString();
-      await waitForExportReady(token);
-
-      const exportDocument = exportFrame.contentDocument;
-      const element = exportDocument?.getElementById("logistics-flow-map");
-      if (!element) {
-        previewError = t("未找到导出物流图。", "Export flow map not found.");
-        return;
-      }
-
-      const blob = await toBlob(element, { cacheBust: true });
-      if (!blob) {
-        previewError = t("截图失败。", "Failed to render screenshot.");
-        return;
-      }
-
-      const pngBlob =
-        blob.type === "image/png"
-          ? blob
-          : blob.slice(0, blob.size, "image/png");
       previewBlob = pngBlob;
       previewUrl = URL.createObjectURL(pngBlob);
     } catch (error) {
@@ -211,7 +86,6 @@
       actionError = "";
       actionBusy = "";
       lastCopied = "";
-      clearExportWait();
       return;
     }
 
@@ -287,7 +161,7 @@
   }
 </script>
 
-<svelte:window onkeydown={onKeyDown} onmessage={onMessage} />
+<svelte:window onkeydown={onKeyDown} />
 
 {#if open}
   <div
@@ -324,13 +198,6 @@
           <p class="hint">{previewError || t("暂无预览。", "No preview.")}</p>
         {/if}
       </div>
-
-      <iframe
-        class="export-frame"
-        title={t("导出", "Export")}
-        bind:this={exportFrame}
-        src="about:blank"
-      ></iframe>
 
       <div class="actions">
         <button
@@ -432,16 +299,6 @@
     display: block;
   }
 
-  .export-frame {
-    position: fixed;
-    left: -10000px;
-    top: -10000px;
-    width: 1600px;
-    height: 900px;
-    border: 0;
-    opacity: 0;
-    pointer-events: none;
-  }
 
   .hint {
     margin: 0;

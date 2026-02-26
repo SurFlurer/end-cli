@@ -1,4 +1,4 @@
-export type RouteKey = "home" | "about" | "how" | "export";
+export type RouteKey = "home" | "about" | "how";
 
 export function parseHashRoute(hash: string): RouteKey {
   const raw = hash.trim();
@@ -20,9 +20,5 @@ export function parseHashRoute(hash: string): RouteKey {
   if (firstSegment === "how" || firstSegment === "how-it-works") {
     return "how";
   }
-  if (firstSegment === "export") {
-    return "export";
-  }
-
   return "home";
 }
