@@ -3,15 +3,14 @@
   import type { LangTag } from "../../lib/types";
   import type { RouteKey } from "../../lib/routes";
   import { parseHashRoute } from "../../lib/routes";
+  import { tooltip } from "../../lib/tooltip";
+  import FooterCollapseHandle from "./FooterCollapseHandle.svelte";
   import IconActionButton from "../button/IconActionButton.svelte";
 
   const GITHUB_REPO_URL = "https://github.com/sssxks/end-cli";
+  const FOOTER_COLLAPSED_STORAGE_KEY = "end2.siteFooter.collapsed";
 
   function detectBrowserLang(): LangTag {
-    if (typeof navigator === "undefined") {
-      return "zh";
-    }
-
     const preferred = Array.isArray(navigator.languages)
       ? [...navigator.languages, navigator.language]
       : [navigator.language];
@@ -55,15 +54,49 @@
   const tooltipApp = () => t("返回应用首页", "Go to the app");
   const tooltipAbout = () => t("了解此项目", "About this project");
   const tooltipHow = () => t("了解它如何工作", "Learn how it works");
+
+  let isCollapsed = $state(false);
+
+  onMount(() => {
+    try {
+      const stored = window.localStorage.getItem(FOOTER_COLLAPSED_STORAGE_KEY);
+      if (stored === "1" || stored === "true") {
+        isCollapsed = true;
+      }
+      if (stored === "0" || stored === "false") {
+        isCollapsed = false;
+      }
+    } catch {
+      // ignore (private mode / storage disabled)
+    }
+  });
+
+  $effect(() => {
+    try {
+      window.localStorage.setItem(FOOTER_COLLAPSED_STORAGE_KEY, isCollapsed ? "1" : "0");
+    } catch {
+      // ignore (private mode / storage disabled)
+    }
+  });
+
+  const handleLabel = () =>
+    isCollapsed ? t("展开页脚", "Expand footer") : t("折叠页脚", "Collapse footer");
 </script>
 
-<footer>
+<footer class:collapsed={isCollapsed}>
   <div class="brand">
-    <img src="/favicon.svg" alt="" width="24" height="24" aria-hidden="true" />
-    <span class="title"
-      >{t("源石计划", "end-cli")}</span
-    >
+    <FooterCollapseHandle
+      isCollapsed={isCollapsed}
+      label={handleLabel()}
+      onToggle={() => {
+        isCollapsed = !isCollapsed;
+      }}
+    />
+
+    <span class="title">{t("源石计划", "end-cli")}</span>
+    
     <span class="dot" aria-hidden="true">·</span>
+    
     <span class="github-link">
       <IconActionButton
         ariaLabel={t("GitHub 仓库", "GitHub repository")}
@@ -134,12 +167,28 @@
     align-items: center;
   }
 
+  footer.collapsed {
+    position: fixed;
+    left: var(--space-3);
+    bottom: var(--space-3);
+    z-index: 20;
+  }
+
   .brand {
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
     min-width: 0;
     flex-wrap: wrap;
+  }
+
+  footer.collapsed .title {
+    display: none;
+  }
+  footer.collapsed .dot,
+  footer.collapsed .github-link,
+  footer.collapsed .nav {
+    display: none;
   }
 
   .title {

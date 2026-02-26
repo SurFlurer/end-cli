@@ -96,7 +96,7 @@
     position: absolute;
     top: calc(var(--control-size) + var(--space-2));
     right: 0;
-    min-width: 240px;
+    min-width: 160px;
     padding: var(--space-2);
     border-radius: var(--radius-md);
     background: var(--panel-strong);
@@ -104,5 +104,10 @@
     display: grid;
     gap: var(--space-1);
     z-index: 100;
+  }
+
+  .dropdown :global(.icon-action-btn.with-label) {
+    width: 100%;
+    justify-content: flex-start;
   }
 </style>

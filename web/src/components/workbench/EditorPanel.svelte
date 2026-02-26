@@ -72,14 +72,13 @@
         <IconActionButton
           icon="share"
           onClick={onOpenShare}
-          title={t("分享", "Share")}
+          label={t("分享", "Share")}
           ariaLabel={t("分享", "Share")}
         />
 
         <DropdownMenu
           menuAriaLabel={t("输入操作菜单", "Input actions menu")}
           triggerAriaLabel={t("打开菜单", "Open menu")}
-          triggerTitle={t("菜单", "Menu")}
           triggerIcon="more_vert"
           disabled={false}
         >
@@ -116,7 +115,6 @@
                 close();
                 actions.exportToml();
               }}
-              title={t("导出", "Export")}
               ariaLabel={t("导出 aic.toml", "Export aic.toml")}
             />
           {/snippet}

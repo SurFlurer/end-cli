@@ -2,6 +2,74 @@ import dagre from '@dagrejs/dagre';
 import type { Edge, Node, Position } from '@xyflow/svelte';
 import type { LogisticsGraphDto, LogisticsNodeDto } from './types';
 
+export type FlowGraphNodeId = string;
+export type FlowGraphEdgeId = string;
+
+/**
+ * A node id in the SCC-collapsed graph.
+ *
+ * - `node:<id>`: a regular node not considered as part of an SCC cluster.
+ * - `scc:<index>`: an SCC cluster (treated as a single super node).
+ */
+export type CollapsedNodeId = `node:${string}` | `scc:${number}`;
+
+export type GraphHighlightDirection = 'upstream' | 'downstream' | 'both';
+
+export type GraphSccTraversalMode =
+  /** Do not traverse inside SCCs; treat each SCC as a single super node. */
+  | 'collapsed'
+  /** Traverse individual nodes inside SCCs (not used by current UX). */
+  | 'expanded';
+
+export interface GraphHighlightRequest {
+  startNodeId: FlowGraphNodeId;
+  direction: GraphHighlightDirection;
+  sccTraversal: GraphSccTraversalMode;
+}
+
+/**
+ * A purely-structural index for reachability / highlighting.
+ *
+ * Note: this is intentionally decoupled from XYFlow's `Node`/`Edge` types.
+ */
+export interface FlowGraphHighlightIndex {
+  nodeIds: ReadonlySet<FlowGraphNodeId>;
+  edgeIds: ReadonlySet<FlowGraphEdgeId>;
+
+  edges: ReadonlyArray<{
+    id: FlowGraphEdgeId;
+    source: FlowGraphNodeId;
+    target: FlowGraphNodeId;
+  }>;
+
+  /** Original SCC information over the (rendered) node set. */
+  scc: {
+    components: ReadonlyArray<ReadonlyArray<FlowGraphNodeId>>;
+    nodeToComponent: ReadonlyMap<FlowGraphNodeId, number>;
+  };
+
+  /** Maps a concrete node id to its SCC-collapsed representative. */
+  nodeToCollapsed: ReadonlyMap<FlowGraphNodeId, CollapsedNodeId>;
+  /** Inverse of `nodeToCollapsed`. */
+  collapsedToNodes: ReadonlyMap<CollapsedNodeId, ReadonlyArray<FlowGraphNodeId>>;
+
+  /** Adjacency of the SCC-collapsed graph. */
+  collapsedOut: ReadonlyMap<CollapsedNodeId, ReadonlySet<CollapsedNodeId>>;
+  collapsedIn: ReadonlyMap<CollapsedNodeId, ReadonlySet<CollapsedNodeId>>;
+
+  /** Synthetic nodes created for external_supply fan-out reduction. */
+  lightweightNodeIds: ReadonlySet<FlowGraphNodeId>;
+  /** Lightweight node -> downstream target mapping (render-graph edge already uses this as source). */
+  lightweightToTarget: ReadonlyMap<FlowGraphNodeId, FlowGraphNodeId>;
+}
+
+export interface GraphHighlightSelection {
+  /** Concrete node ids (XYFlow `Node.id`). */
+  nodeIds: ReadonlySet<FlowGraphNodeId>;
+  /** Concrete edge ids (XYFlow `Edge.id`). */
+  edgeIds: ReadonlySet<FlowGraphEdgeId>;
+}
+
 const NODE_WIDTH = 220;
 const NODE_HEIGHT = 44;
 const NODE_X_OFFSET = NODE_WIDTH / 2;
