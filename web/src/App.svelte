@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import SiteFooter from "./components/SiteFooter.svelte";
   import About from "./routes/About.svelte";
+  import ExportFlow from "./routes/ExportFlow.svelte";
   import Home from "./routes/Home.svelte";
   import type { RouteKey } from "./lib/routes";
   import { parseHashRoute } from "./lib/routes";
@@ -33,20 +34,24 @@
   });
 </script>
 
-<div class="shell">
-  {#if route === "home"}
-    <Home />
-  {:else if route === "about"}
-    <About />
-  {:else}
-    {#await loadHowRoute() then howModule}
-      {@const HowItWorks = howModule.default}
-      <HowItWorks />
-    {/await}
-  {/if}
+{#if route === "export"}
+  <ExportFlow />
+{:else}
+  <div class="shell">
+    {#if route === "home"}
+      <Home />
+    {:else if route === "about"}
+      <About />
+    {:else}
+      {#await loadHowRoute() then howModule}
+        {@const HowItWorks = howModule.default}
+        <HowItWorks />
+      {/await}
+    {/if}
 
-  <SiteFooter />
-</div>
+    <SiteFooter />
+  </div>
+{/if}
 
 <style>
   .shell {

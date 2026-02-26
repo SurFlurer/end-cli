@@ -474,7 +474,6 @@
   {lang}
   tomlText={shareTomlText}
   outputJsonText={shareOutputJsonText}
-  graphElementId="logistics-flow-map"
   onClose={closeShareDialog}
 />
 

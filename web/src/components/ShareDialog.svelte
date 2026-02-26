@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { tick } from "svelte";
   import { toBlob } from "html-to-image";
   import IconActionButton from "./IconActionButton.svelte";
   import { copyPngBlobToClipboard, copyTextToClipboard } from "../lib/clipboard";
@@ -11,17 +10,25 @@
     lang: LangTag;
     tomlText: string;
     outputJsonText: string;
-    graphElementId: string;
     onClose: () => void;
   }
 
-  let { open, lang, tomlText, outputJsonText, graphElementId, onClose }: Props =
-    $props();
+  let { open, lang, tomlText, outputJsonText, onClose }: Props = $props();
 
   let previewBlob = $state<Blob | null>(null);
   let previewUrl = $state<string | null>(null);
   let previewError = $state<string>("");
   let isRendering = $state(false);
+
+  let exportFrame = $state<HTMLIFrameElement | null>(null);
+  let exportWait:
+    | {
+        token: string;
+        resolve: () => void;
+        reject: (reason?: unknown) => void;
+        timeoutId: number;
+      }
+    | null = $state(null);
 
   let actionError = $state<string>("");
   let actionBusy = $state<"" | "link" | "image" | "bundle">("");
@@ -40,6 +47,82 @@
     previewError = "";
   }
 
+  function clearExportWait(): void {
+    if (!exportWait) {
+      return;
+    }
+    if (typeof window !== "undefined") {
+      window.clearTimeout(exportWait.timeoutId);
+    }
+    exportWait = null;
+  }
+
+  function waitForExportReady(token: string, timeoutMs = 20_000): Promise<void> {
+    if (typeof window === "undefined") {
+      return Promise.reject(new Error("export is unavailable"));
+    }
+
+    clearExportWait();
+    return new Promise<void>((resolve, reject) => {
+      const timeoutId = window.setTimeout(() => {
+        exportWait = null;
+        reject(new Error(t("导出超时。", "Export timed out.")));
+      }, timeoutMs);
+
+      exportWait = {
+        token,
+        resolve: () => {
+          window.clearTimeout(timeoutId);
+          exportWait = null;
+          resolve();
+        },
+        reject: (reason) => {
+          window.clearTimeout(timeoutId);
+          exportWait = null;
+          reject(reason);
+        },
+        timeoutId,
+      };
+    });
+  }
+
+  function onMessage(event: MessageEvent): void {
+    if (!open) {
+      return;
+    }
+
+    if (typeof window !== "undefined" && event.origin !== window.location.origin) {
+      return;
+    }
+
+    const data = event.data as unknown;
+    if (!data || typeof data !== "object") {
+      return;
+    }
+
+    const kind = (data as { kind?: unknown }).kind;
+    const token = (data as { token?: unknown }).token;
+    if (typeof kind !== "string" || typeof token !== "string") {
+      return;
+    }
+
+    if (!exportWait || exportWait.token !== token) {
+      return;
+    }
+
+    if (kind === "end2.export.ready") {
+      exportWait.resolve();
+      return;
+    }
+
+    if (kind === "end2.export.err") {
+      const message = (data as { message?: unknown }).message;
+      exportWait.reject(
+        new Error(typeof message === "string" ? message : t("导出失败。", "Export failed.")),
+      );
+    }
+  }
+
   async function renderPreview(): Promise<void> {
     if (!open) {
       return;
@@ -52,18 +135,42 @@
       return;
     }
 
+    if (typeof window === "undefined") {
+      previewError = t(
+        "当前环境不支持截图预览。",
+        "Preview is unavailable in this environment.",
+      );
+      return;
+    }
+
     clearPreview();
     isRendering = true;
     previewError = "";
 
     try {
-      await tick();
-      const element = document.getElementById(graphElementId);
+      if (!exportFrame) {
+        previewError = t("导出组件未就绪。", "Export frame is not ready.");
+        return;
+      }
+
+      const encoded = await encodeTomlToShareParam(tomlText);
+      const token = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+      const url = new URL(window.location.href);
+      url.searchParams.set("s", encoded);
+      url.searchParams.set("lang", lang);
+      url.searchParams.set("token", token);
+      url.searchParams.set("w", "1600");
+      url.searchParams.set("h", "900");
+      url.hash = "#export";
+
+      exportFrame.src = url.toString();
+      await waitForExportReady(token);
+
+      const exportDocument = exportFrame.contentDocument;
+      const element = exportDocument?.getElementById("logistics-flow-map");
       if (!element) {
-        previewError = t(
-          "未找到物流图（移动端请先切到「物流」页再打开分享）。",
-          "Flow map not found (on mobile, switch to the Flow tab first).",
-        );
+        previewError = t("未找到导出物流图。", "Export flow map not found.");
         return;
       }
 
@@ -92,6 +199,7 @@
       actionError = "";
       actionBusy = "";
       lastCopied = "";
+      clearExportWait();
       return;
     }
     // void renderPreview();
@@ -162,7 +270,7 @@
   }
 </script>
 
-<svelte:window onkeydown={onKeyDown} />
+<svelte:window onkeydown={onKeyDown} onmessage={onMessage} />
 
 {#if open}
   <div
@@ -199,6 +307,13 @@
           <p class="hint">{previewError || t("暂无预览。", "No preview.")}</p>
         {/if}
       </div>
+
+      <iframe
+        class="export-frame"
+        title={t("导出", "Export")}
+        bind:this={exportFrame}
+        src="about:blank"
+      ></iframe>
 
       <div class="actions">
         <button
@@ -298,6 +413,17 @@
     max-height: min(52vh, 520px);
     border-radius: var(--radius-sm);
     display: block;
+  }
+
+  .export-frame {
+    position: fixed;
+    left: -10000px;
+    top: -10000px;
+    width: 1600px;
+    height: 900px;
+    border: 0;
+    opacity: 0;
+    pointer-events: none;
   }
 
   .hint {
