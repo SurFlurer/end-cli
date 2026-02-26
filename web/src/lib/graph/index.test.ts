@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { buildFlowGraph } from './graph';
-import type { LogisticsGraphDto } from './types';
+import { buildFlowGraph, selectGraphHighlight } from './index';
+import type { LogisticsGraphDto } from '../types';
 
 const graphFixture: LogisticsGraphDto = {
   items: [
@@ -122,6 +122,10 @@ const externalConsumptionFixture: LogisticsGraphDto = {
     { id: 'e1', itemKey: 'Ore', itemName: 'Ore', source: 's1', target: 'c1', flowPerMin: 2 }
   ]
 };
+
+function sortedValues(values: ReadonlySet<string>): string[] {
+  return [...values].sort((lhs, rhs) => lhs.localeCompare(rhs));
+}
 
 describe('buildFlowGraph', () => {
   it('returns all nodes and edges', () => {
@@ -260,5 +264,67 @@ describe('buildFlowGraph', () => {
       expect(nodeIds.has(edge.source)).toBe(true);
       expect(nodeIds.has(edge.target)).toBe(true);
     }
+  });
+});
+
+describe('selectGraphHighlight', () => {
+  it('highlights all upstream and downstream nodes/edges in a linear chain', () => {
+    const flow = buildFlowGraph(linearChainFixture);
+
+    const selection = selectGraphHighlight(flow.highlightIndex, {
+      startNodeId: 'm1',
+      direction: 'both',
+      sccTraversal: 'collapsed'
+    });
+
+    expect(sortedValues(selection.nodeIds)).toEqual(['m1', 'm2', 's1__lw__m1']);
+    expect(sortedValues(selection.edgeIds)).toEqual(['e1', 'e2']);
+  });
+
+  it('returns empty selection when the start node is missing', () => {
+    const flow = buildFlowGraph(graphFixture);
+
+    const selection = selectGraphHighlight(flow.highlightIndex, {
+      startNodeId: 'missing-node',
+      direction: 'both',
+      sccTraversal: 'collapsed'
+    });
+
+    expect(selection.nodeIds.size).toBe(0);
+    expect(selection.edgeIds.size).toBe(0);
+  });
+
+  it('treats SCC as a single super node for collapsed traversal', () => {
+    const flow = buildFlowGraph(sccFixture);
+
+    const selection = selectGraphHighlight(flow.highlightIndex, {
+      startNodeId: 'n1__lw__n2',
+      direction: 'downstream',
+      sccTraversal: 'collapsed'
+    });
+
+    expect(sortedValues(selection.nodeIds)).toEqual(['n1__lw__n2', 'n2', 'n3', 'n4', 'n5']);
+    expect(sortedValues(selection.edgeIds)).toEqual(['e1', 'e2', 'e3', 'e4', 'e5']);
+  });
+
+  it('supports direction-specific traversal', () => {
+    const flow = buildFlowGraph(linearChainFixture);
+
+    const upstreamOnly = selectGraphHighlight(flow.highlightIndex, {
+      startNodeId: 'm1',
+      direction: 'upstream',
+      sccTraversal: 'collapsed'
+    });
+    const downstreamOnly = selectGraphHighlight(flow.highlightIndex, {
+      startNodeId: 'm1',
+      direction: 'downstream',
+      sccTraversal: 'collapsed'
+    });
+
+    expect(sortedValues(upstreamOnly.nodeIds)).toEqual(['m1', 's1__lw__m1']);
+    expect(sortedValues(upstreamOnly.edgeIds)).toEqual(['e1']);
+
+    expect(sortedValues(downstreamOnly.nodeIds)).toEqual(['m1', 'm2']);
+    expect(sortedValues(downstreamOnly.edgeIds)).toEqual(['e2']);
   });
 });

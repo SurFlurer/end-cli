@@ -4,7 +4,6 @@
   import type { LangTag } from "../lib/types";
 
   const GITHUB_REPO_URL = "https://github.com/sssxks/end-cli";
-  const WEB_URL = "https://end-8jk.pages.dev/";
 
   function detectBrowserLang(): LangTag {
     const preferred = Array.isArray(navigator.languages)

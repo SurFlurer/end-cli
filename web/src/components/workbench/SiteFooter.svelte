@@ -3,7 +3,6 @@
   import type { LangTag } from "../../lib/types";
   import type { RouteKey } from "../../lib/routes";
   import { parseHashRoute } from "../../lib/routes";
-  import { tooltip } from "../../lib/tooltip";
   import FooterCollapseHandle from "./FooterCollapseHandle.svelte";
   import IconActionButton from "../button/IconActionButton.svelte";
 

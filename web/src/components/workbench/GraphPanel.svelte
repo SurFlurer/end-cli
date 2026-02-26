@@ -12,7 +12,12 @@
     type Node,
   } from "@xyflow/svelte";
   import type { Viewport } from "@xyflow/system";
-  import { buildFlowGraph } from "../../lib/graph";
+  import {
+    buildFlowGraph,
+    selectGraphHighlight,
+    type BuildFlowGraphResult,
+    type GraphHighlightSelection,
+  } from "../../lib/graph";
   import { currentFlowSnapshot } from "../../lib/export/flow-snapshot";
   import type { LangTag } from "../../lib/types";
   import { renderedOkState, type SolveState } from "../../lib/solve-state";
@@ -34,19 +39,103 @@
   let { lang, solveState }: Props = $props();
   let flowElement = $state<HTMLElement | null>(null);
   let isFullscreen = $state(false);
+  let highlightedNodeId = $state<string | null>(null);
 
   let result = $derived(renderedOkState(solveState)?.payload ?? null);
 
-  const flow = $derived<{ nodes: Node[]; edges: Edge[] }>(
-    result ? buildFlowGraph(result.logisticsGraph) : { nodes: [], edges: [] },
+  const flow = $derived<BuildFlowGraphResult | null>(
+    result ? buildFlowGraph(result.logisticsGraph) : null,
   );
 
   let nodes = $state<Node[]>([]);
   let edges = $state<Edge[]>([]);
   let viewport = $state<Viewport>({ x: 0, y: 0, zoom: 1 });
+  let baseNodeStyleById = new Map<string, string | undefined>();
+  let baseEdgeStyleById = new Map<string, string | undefined>();
+  let baseEdgeLabelStyleById = new Map<string, string | undefined>();
+
+  function appendStyle(baseStyle: string | undefined, extension: string): string {
+    return `${baseStyle ?? ""}${extension}`;
+  }
+
+  function applyHighlightSelection(selection: GraphHighlightSelection | null): void {
+    if (!selection) {
+      nodes = nodes.map((node) => ({
+        ...node,
+        style: baseNodeStyleById.get(node.id),
+      }));
+      edges = edges.map((edge) => ({
+        ...edge,
+        style: baseEdgeStyleById.get(edge.id),
+        labelStyle: baseEdgeLabelStyleById.get(edge.id),
+      }));
+      return;
+    }
+
+    nodes = nodes.map((node) => {
+      const isHighlighted = selection.nodeIds.has(node.id);
+      return {
+        ...node,
+        style: appendStyle(
+          baseNodeStyleById.get(node.id),
+          isHighlighted ? "opacity:1;" : "opacity:0.22;",
+        ),
+      };
+    });
+
+    edges = edges.map((edge) => {
+      const isHighlighted = selection.edgeIds.has(edge.id);
+      return {
+        ...edge,
+        style: appendStyle(
+          baseEdgeStyleById.get(edge.id),
+          isHighlighted
+            ? "stroke:#1f6176;stroke-width:2.4;opacity:1;"
+            : "opacity:0.14;",
+        ),
+        labelStyle: appendStyle(
+          baseEdgeLabelStyleById.get(edge.id),
+          isHighlighted ? "fill:#154a59;font-weight:700;" : "fill:#7a95a2;",
+        ),
+      };
+    });
+  }
+
+  function clearHighlight(): void {
+    highlightedNodeId = null;
+    applyHighlightSelection(null);
+  }
+
+  function handleNodeClick({ node }: { node: Node }): void {
+    if (!flow) {
+      return;
+    }
+
+    if (highlightedNodeId === node.id) {
+      clearHighlight();
+      return;
+    }
+
+    highlightedNodeId = node.id;
+    applyHighlightSelection(
+      selectGraphHighlight(flow.highlightIndex, {
+        startNodeId: node.id,
+        direction: "both",
+        sccTraversal: "collapsed",
+      }),
+    );
+  }
+
+  function handlePaneClick(): void {
+    clearHighlight();
+  }
 
   $effect(() => {
-    if (!result) {
+    if (!result || !flow) {
+      highlightedNodeId = null;
+      baseNodeStyleById = new Map();
+      baseEdgeStyleById = new Map();
+      baseEdgeLabelStyleById = new Map();
       nodes = [];
       edges = [];
       viewport = { x: 0, y: 0, zoom: 1 };
@@ -55,8 +144,12 @@
     }
 
     // Reset graph elements when we get a fresh solve result.
+    highlightedNodeId = null;
     nodes = flow.nodes;
     edges = flow.edges;
+    baseNodeStyleById = new Map(flow.nodes.map((node) => [node.id, node.style]));
+    baseEdgeStyleById = new Map(flow.edges.map((edge) => [edge.id, edge.style]));
+    baseEdgeLabelStyleById = new Map(flow.edges.map((edge) => [edge.id, edge.labelStyle]));
   });
 
   $effect(() => {
@@ -168,7 +261,15 @@
       </div>
     {:else}
       <div class="flow-wrap" id="logistics-flow-map" bind:this={flowElement}>
-        <SvelteFlow bind:nodes bind:edges bind:viewport fitView proOptions={{ hideAttribution: true }}>
+        <SvelteFlow
+          bind:nodes
+          bind:edges
+          bind:viewport
+          fitView
+          proOptions={{ hideAttribution: true }}
+          onnodeclick={handleNodeClick}
+          onpaneclick={handlePaneClick}
+        >
           <Background bgColor="var(--surface-graph)" patternColor="var(--surface-graph-grid)" gap={24} />
           {#if isFullscreen}
           <MiniMap pannable zoomable />
