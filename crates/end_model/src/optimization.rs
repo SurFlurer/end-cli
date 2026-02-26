@@ -116,7 +116,9 @@ pub enum LogisticsNodeSite<'cid, 'sid> {
     /// This node represents per-item remaining quantities after fulfilling all *real* demands.
     /// In particular, virtual sales (used by stage-2 objectives) should be interpreted as
     /// potential value rather than a physical sink, so those quantities end up here.
-    WarehouseStockpile,
+    WarehouseStockpile {
+        item: ItemId<'cid>,
+    },
 }
 
 /// Per-item stockpile quantity in units/min.

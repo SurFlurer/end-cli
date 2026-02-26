@@ -271,7 +271,7 @@ prices = {{ "{price_item}" = 1 }}
 
     let aic = load_aic_from_str(&src, &catalog, aic_guard).expect("valid aic should load");
     assert_eq!(aic.external_power_consumption_w(), 0);
-    assert_eq!(aic.region(), Region::Wuling);
+    assert_eq!(aic.region(), Region::FourthValley);
     assert_eq!(aic.external_consumption_per_min().len(), 1);
     assert_eq!(aic.outposts().len(), 1);
 }

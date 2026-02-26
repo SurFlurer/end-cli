@@ -16,11 +16,12 @@ pub use lang::Lang;
 
 #[cfg(test)]
 mod tests {
-    #![allow(clippy::unwrap_used, clippy::expect_used)]
+    #![allow(clippy::unwrap_used, clippy::expect_used, clippy::indexing_slicing)]
 
     use super::{Lang, bootstrap, solve_from_aic_toml};
     use end_io::{default_aic_toml, load_catalog};
     use generativity::make_guard;
+    use std::collections::{BTreeMap, BTreeSet};
 
     #[test]
     fn bootstrap_returns_catalog_and_default_aic() {
@@ -76,6 +77,62 @@ mod tests {
         assert!(
             msg.contains("Aic parse failed"),
             "error message should mention aic parse"
+        );
+    }
+
+    #[test]
+    fn solve_creates_per_item_warehouse_stockpile_nodes() {
+        make_guard!(guard);
+        let catalog = load_catalog(None, guard).expect("builtin catalog should load");
+        assert!(
+            catalog.items().len() >= 2,
+            "builtin catalog should include at least two items"
+        );
+
+        let item_a = catalog.items()[0].key.as_str();
+        let item_b = catalog.items()[1].key.as_str();
+        let aic_toml = format!(
+            r#"
+external_power_consumption_w = 0
+
+[supply_per_min]
+"{item_a}" = 5
+"{item_b}" = 7
+"#
+        );
+
+        let payload = solve_from_aic_toml(Lang::En, &aic_toml).expect("solve should succeed");
+        let warehouse_node_ids = payload
+            .logistics_graph
+            .nodes
+            .iter()
+            .filter(|node| node.kind.as_ref() == "warehouse_stockpile")
+            .map(|node| node.id.as_ref())
+            .collect::<BTreeSet<_>>();
+        assert_eq!(
+            warehouse_node_ids.len(),
+            2,
+            "stockpiled items should not share one warehouse node"
+        );
+
+        let stockpile_target_by_item = payload
+            .logistics_graph
+            .edges
+            .iter()
+            .filter(|edge| warehouse_node_ids.contains(edge.target.as_ref()))
+            .fold(BTreeMap::<&str, &str>::new(), |mut acc, edge| {
+                acc.insert(edge.item_key.as_ref(), edge.target.as_ref());
+                acc
+            });
+        assert_eq!(
+            stockpile_target_by_item.len(),
+            2,
+            "each supplied item should have stockpile flow"
+        );
+        assert_ne!(
+            stockpile_target_by_item.get(item_a),
+            stockpile_target_by_item.get(item_b),
+            "different items should end at different warehouse nodes"
         );
     }
 }

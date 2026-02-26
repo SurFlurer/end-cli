@@ -49,7 +49,7 @@
     return lang === "zh" ? zh : en;
   }
 
-  const tooltipGithub = () => t("反馈和问题", "Feedback and issues");
+  const tooltipGithub = () => t("反馈和问题点这里", "Feedback and issues");
   const tooltipApp = () => t("返回应用首页", "Go to the app");
   const tooltipAbout = () => t("了解此项目", "About this project");
   const tooltipHow = () => t("了解它如何工作", "Learn how it works");

@@ -66,17 +66,19 @@
     itemKindCount: number;
     totalPerMin: number;
   } {
-    const warehouseNode = graph.nodes.find(
-      (n) => n.kind === "warehouse_stockpile",
+    const warehouseNodeIds = new SvelteSet(
+      graph.nodes
+        .filter((node) => node.kind === "warehouse_stockpile")
+        .map((node) => node.id),
     );
-    if (!warehouseNode) {
+    if (warehouseNodeIds.size === 0) {
       return { itemKindCount: 0, totalPerMin: 0 };
     }
 
     const itemKeys = new SvelteSet<string>();
     let totalPerMin = 0;
     for (const edge of graph.edges) {
-      if (edge.target !== warehouseNode.id) {
+      if (!warehouseNodeIds.has(edge.target)) {
         continue;
       }
       if (edge.flowPerMin <= 0) {

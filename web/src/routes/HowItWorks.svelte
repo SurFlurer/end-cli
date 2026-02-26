@@ -50,6 +50,7 @@
   {/snippet}
 
   <article class="content">
+    <!-- eslint-disable-next-line svelte/no-at-html-tags -- trusted static HTML generated from in-repo markdown -->
     {@html MODEL_V1_RENDERED_HTML}
   </article>
 </Panel>

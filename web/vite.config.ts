@@ -266,11 +266,10 @@ function modelV1BuildPlugin(): PluginOption {
       webRoot = config.root;
     },
     async buildStart() {
-      const logger = this;
       const ok = await runModelV1Generator(
         webRoot,
-        (message) => logger.info(`[model-v1] ${message}`),
-        (message) => logger.error(`[model-v1] ${message}`)
+        (message) => this.info(`[model-v1] ${message}`),
+        (message) => this.error(`[model-v1] ${message}`)
       );
 
       if (!ok) {

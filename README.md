@@ -63,37 +63,6 @@ Error: aic.toml not found; run `end-cli init --aic aic.toml` to create it
 
 它表示当前目录没有对应配置文件，`solve` 会直接拒绝执行。先运行 `end-cli init` 生成模板并按需修改后再求解。
 
-## `aic.toml` 关键字段
-
-`end-cli init` 生成的模板大致如下:
-
-```toml
-external_power_consumption_w = 300
-
-[supply_per_min]
-"Originium Ore" = 520
-"Ferrium Ore" = 160
-"Amethyst Ore" = 160
-
-[external_consumption_per_min]
-"Originium Ore" = 20
-
-[[outposts]]
-key = "Refugee Camp"
-money_cap_per_hour = 17316
-[outposts.prices]
-"SC Valley Battery" = 30
-Origocrust = 1
-```
-
-可重点调整:
-
-- `external_power_consumption_w`: 非生产机器占用的额外电力
-- `supply_per_min`: 每种原料的每分钟外部供给
-- `external_consumption_per_min`: 场景每分钟的固定外部消耗（例如被任务从仓库提取）
-- `outposts[].money_cap_per_hour`: 据点每小时交易额上限
-- `outposts[].prices`: 各商品在该据点的收购价
-
 ## 常用命令
 
 ```bash

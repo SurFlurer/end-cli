@@ -38,16 +38,21 @@
         "Rust + WebAssembly 的终末地产线规划器，使用 HiGHS 求解器在浏览器本地执行。",
         "A Rust + WebAssembly production planner, using the HiGHS solver locally in the browser.",
       )}
-    >
-    </PanelHeader>
+    ></PanelHeader>
   {/snippet}
 
   <section class="content">
     <h3>{t("能做什么", "What it does")}</h3>
     <p>
       {t(
-        "这个 App 可以计算产线，然后变成漂亮的报告和可视化流程图，并且和朋友、ChatGPT 分享。",
+        "这个 App 可以计算产线，然后变成漂亮的报告和可视化流程图，并且和陈千语、ChatGPT 分享。",
         "This app can compute production plans, then turn them into nice reports and visualized flow charts, and share with your friends and ChatGPT.",
+      )}
+    </p>
+    <p>
+      {t(
+        "基于稳态模型，不考虑仓储容量和生产线布局因素，适合用来做高层次的规划和产线配平。",
+        "Based on a steady-state model, it does not consider storage capacity and production line layout factors, suitable for high-level planning and production line balancing.",
       )}
     </p>
     <p>
@@ -56,7 +61,7 @@
         "If you're interested, you can check out the formulas on the right page.",
       )}
     </p>
-    <h3>{t("快速上手", "How to use it")}</h3>
+    <h3>{t("怎么使用", "How to use it")}</h3>
     <p>
       {t(
         "首先，根据游戏进程在左侧输入当前矿点产量、据点价格与交易额上限、电力情况等信息。",
@@ -66,28 +71,36 @@
     <ol>
       <li>
         {t(
-          "使用方式 1：已经明确知道想要生产的物品时，把它们填在外部消耗里，据点列表可以留空，将本工具当作产线配平计算器使用。",
+          "使用方式 1：已经明确知道想要生产的物品时，填写外部消耗里，据点列表可以留空，将本工具当作产线配平计算器使用。",
           "Mode 1: when you already know exactly which items you want to produce, put them into external consumption, leave the outpost list empty, and use this as a pure production-balancing calculator.",
         )}
       </li>
       <li>
         {t(
-          "使用方式 2：需要探索各种方案时，填好据点收购价与交易额上限，让求解器在先打满据点收入的前提下，尽量优化剩余可支撑的物资生产和电力生产。",
+          "使用方式 2：需要探索各种生产方案时，填好据点收购价与交易额上限，让求解器在先打满据点收入的前提下，尽量优化剩余可支撑的物资生产和电力生产。",
           "Mode 2: when you want to explore different plans, fill in outpost buy prices and money caps so the solver first maxes out outpost income, then uses the remaining capacity to optimize additional goods and power production.",
         )}
       </li>
     </ol>
     <p>
       {t(
-        "需要保存当前输入时，用导出按钮下载对应的 toml 文件。",
-        "When you want to save the current inputs, use Export to download the corresponding toml file.",
+        "需要保存当前输入时，用导出按钮下载对应的 toml 文件，或者使用分享按钮生成一个包含输入信息的链接。",
+        "When you want to save the current inputs, use Export to download the corresponding toml file, or use the Share button to generate a link containing the input information.",
+      )}
+    </p>
+    <p>
+      {t(
+        "结果也可以导出成图片！",
+        "The results can also be exported as images!",
       )}
     </p>
 
     <h3>{t("项目链接", "Links")}</h3>
     <ul>
       <li>
-        <a href={GITHUB_REPO_URL} target="_blank" rel="noreferrer">GitHub: sssxks/end-cli</a>
+        <a href={GITHUB_REPO_URL} target="_blank" rel="noreferrer"
+          >GitHub: sssxks/end-cli</a
+        >
       </li>
     </ul>
 
@@ -105,6 +118,9 @@
     display: grid;
     gap: var(--space-3);
     line-height: 1.5;
+
+    max-width: 960px;
+    margin: 0 auto;
   }
 
   ul,

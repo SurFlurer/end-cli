@@ -1,7 +1,6 @@
 import type { Node } from '@xyflow/svelte';
 import type { LogisticsNodeDto } from '../types';
 import {
-  LIGHTWEIGHT_NODE_HEIGHT,
   LIGHTWEIGHT_NODE_WIDTH,
   LIGHTWEIGHT_NODE_Y_OFFSET,
   NODE_Y_OFFSET

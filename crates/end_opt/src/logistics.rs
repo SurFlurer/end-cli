@@ -358,7 +358,7 @@ pub fn build_logistics_plan<'cid, 'sid, 'rid>(
         }
 
         for demand in subproblem.demands() {
-            let key = demand_site_key(&demand.site);
+            let key = demand_site_key(subproblem.item(), &demand.site);
             let node_id = allocate_logistics_node(&mut node_index, &mut nodes, key, rid);
             demand_nodes.insert(
                 demand.id.as_u32(),
@@ -440,7 +440,9 @@ enum LogisticsNodeKey<'cid, 'sid> {
         power_recipe_index: end_model::PowerRecipeId<'cid>,
         item: ItemId<'cid>,
     },
-    WarehouseStockpile,
+    WarehouseStockpile {
+        item: ItemId<'cid>,
+    },
 }
 
 fn allocate_logistics_node<'cid, 'sid, 'rid>(
@@ -471,7 +473,10 @@ fn supply_site_key<'cid, 'sid>(site: &SupplySite<'cid>) -> LogisticsNodeKey<'cid
     }
 }
 
-fn demand_site_key<'cid, 'sid>(site: &DemandSite<'cid, 'sid>) -> LogisticsNodeKey<'cid, 'sid> {
+fn demand_site_key<'cid, 'sid>(
+    item: ItemId<'cid>,
+    site: &DemandSite<'cid, 'sid>,
+) -> LogisticsNodeKey<'cid, 'sid> {
     match *site {
         DemandSite::RecipeInput {
             recipe_index,
@@ -492,7 +497,7 @@ fn demand_site_key<'cid, 'sid>(site: &DemandSite<'cid, 'sid>) -> LogisticsNodeKe
             power_recipe_index,
             item,
         },
-        DemandSite::WarehouseStockpile => LogisticsNodeKey::WarehouseStockpile,
+        DemandSite::WarehouseStockpile => LogisticsNodeKey::WarehouseStockpile { item },
     }
 }
 
@@ -519,7 +524,9 @@ fn key_to_site<'cid, 'sid>(key: LogisticsNodeKey<'cid, 'sid>) -> LogisticsNodeSi
             power_recipe_index,
             item,
         },
-        LogisticsNodeKey::WarehouseStockpile => LogisticsNodeSite::WarehouseStockpile,
+        LogisticsNodeKey::WarehouseStockpile { item } => {
+            LogisticsNodeSite::WarehouseStockpile { item }
+        }
     }
 }
 
@@ -1021,6 +1028,93 @@ mod tests {
         assert!(
             has_incoming,
             "external consumption node should have incoming item flow"
+        );
+    }
+
+    #[test]
+    fn logistics_plan_splits_warehouse_stockpile_nodes_per_item() {
+        make_guard!(guard);
+        let mut b = Catalog::builder(guard);
+        let ore = b
+            .add_item(ItemDef {
+                key: key("Ore"),
+                en: name("Ore"),
+                zh: name("Ore_zh"),
+            })
+            .expect("add ore");
+        let ingot = b
+            .add_item(ItemDef {
+                key: key("Ingot"),
+                en: name("Ingot"),
+                zh: name("Ingot_zh"),
+            })
+            .expect("add ingot");
+        let b = b
+            .add_thermal_bank(ThermalBankDef {
+                key: key("Thermal Bank"),
+                en: name("Thermal Bank"),
+                zh: name("Thermal_Bank_zh"),
+            })
+            .expect("add thermal bank");
+        let catalog = b.build();
+
+        make_guard!(aic_guard);
+        let mut aic_builder = AicInputs::builder(
+            aic_guard,
+            0,
+            vec![(ore, nz(10)), (ingot, nz(7))].into(),
+            Default::default(),
+        );
+        aic_builder
+            .add_outpost(OutpostInput {
+                key: key("sink"),
+                en: Some(name("sink")),
+                zh: Some(name("sink")),
+                money_cap_per_hour: 1,
+                prices: vec![(ore, 1)].into(),
+            })
+            .expect("valid aic outpost");
+        let aic = aic_builder.build();
+
+        make_guard!(result_guard);
+        let solved = run_two_stage(&catalog, &aic, result_guard).expect("solve scenario");
+
+        let mut warehouse_by_item = BTreeMap::new();
+        for node in &solved.logistics.nodes {
+            if let LogisticsNodeSite::WarehouseStockpile { item } = node.site {
+                warehouse_by_item.insert(item, node.id);
+            }
+        }
+        assert_eq!(
+            warehouse_by_item.len(),
+            2,
+            "each stocked item should have its own warehouse node"
+        );
+        assert_ne!(
+            warehouse_by_item.get(&ore),
+            warehouse_by_item.get(&ingot),
+            "different items must not share one warehouse node"
+        );
+
+        let has_ore_incoming = solved.logistics.edges.iter().any(|edge| {
+            edge.item == ore
+                && warehouse_by_item
+                    .get(&ore)
+                    .is_some_and(|warehouse_node| edge.to == *warehouse_node)
+        });
+        let has_ingot_incoming = solved.logistics.edges.iter().any(|edge| {
+            edge.item == ingot
+                && warehouse_by_item
+                    .get(&ingot)
+                    .is_some_and(|warehouse_node| edge.to == *warehouse_node)
+        });
+        assert!(
+            has_ore_incoming,
+            "ore flow should end at ore warehouse node"
+        );
+        assert!(
+            has_ingot_incoming,
+            "ingot flow should end at ingot warehouse node"
         );
     }
 

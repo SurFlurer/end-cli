@@ -169,7 +169,7 @@ export function buildFlowGraph(graph: LogisticsGraphDto): BuildFlowGraphResult {
       id: edge.id,
       source: edge.source,
       target: edge.target,
-      animated: edge.flowPerMin > 0.9,
+      animated: true,
       label: `${edge.flowPerMin.toFixed(2)}/min`,
       style: 'stroke-width:1.6;stroke:#2f4a53;',
       labelStyle: 'font-size:11px;fill:#1f353f;'

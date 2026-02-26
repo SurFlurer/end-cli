@@ -84,18 +84,6 @@
         >
           {#snippet menu(close)}
             <IconActionButton
-              kind="danger"
-              icon="delete"
-              label={t("重置为示例输入", "Reset to Example Input")}
-              onClick={() => {
-                close();
-                actions.resetToDefault();
-              }}
-              disabled={isResetDisabled}
-              ariaLabel={t("重置示例输入", "Reset Example Input")}
-            />
-
-            <IconActionButton
               icon="download"
               label={t("导入 aic.toml", "Import aic.toml")}
               ariaLabel={t("导入 aic.toml", "Import aic.toml")}
@@ -116,6 +104,18 @@
                 actions.exportToml();
               }}
               ariaLabel={t("导出 aic.toml", "Export aic.toml")}
+            />
+
+            <IconActionButton
+              kind="danger"
+              icon="delete"
+              label={t("重置为示例输入", "Reset to Example Input")}
+              onClick={() => {
+                close();
+                actions.resetToDefault();
+              }}
+              disabled={isResetDisabled}
+              ariaLabel={t("重置示例输入", "Reset Example Input")}
             />
           {/snippet}
         </DropdownMenu>
