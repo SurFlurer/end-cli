@@ -224,7 +224,7 @@ checksum = "48c757948c5ede0e46177b7add2e67155f70e33c07fea8284df6576da70b3719"
 
 [[package]]
 name = "end-cli"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -240,7 +240,7 @@ dependencies = [
 
 [[package]]
 name = "end-io"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "end-model",
  "generativity",
@@ -252,7 +252,7 @@ dependencies = [
 
 [[package]]
 name = "end-model"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "generativity",
  "thiserror",
@@ -262,7 +262,7 @@ dependencies = [
 
 [[package]]
 name = "end-opt"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "end-model",
  "generativity",
@@ -274,7 +274,7 @@ dependencies = [
 
 [[package]]
 name = "end-report"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "clap",
  "end-model",
@@ -285,7 +285,7 @@ dependencies = [
 
 [[package]]
 name = "end-web"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "end-io",
  "end-model",
