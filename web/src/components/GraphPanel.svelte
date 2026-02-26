@@ -11,7 +11,9 @@
     type Edge,
     type Node,
   } from "@xyflow/svelte";
+  import type { Viewport } from "@xyflow/system";
   import { buildFlowGraph } from "../lib/graph";
+  import { currentFlowSnapshot } from "../lib/flow-snapshot";
   import type { LangTag } from "../lib/types";
   import { renderedOkState, type SolveState } from "../lib/solve-state";
 
@@ -38,6 +40,33 @@
   const flow = $derived<{ nodes: Node[]; edges: Edge[] }>(
     result ? buildFlowGraph(result.logisticsGraph) : { nodes: [], edges: [] },
   );
+
+  let nodes = $state<Node[]>([]);
+  let edges = $state<Edge[]>([]);
+  let viewport = $state<Viewport>({ x: 0, y: 0, zoom: 1 });
+
+  $effect(() => {
+    if (!result) {
+      nodes = [];
+      edges = [];
+      viewport = { x: 0, y: 0, zoom: 1 };
+      currentFlowSnapshot.set(null);
+      return;
+    }
+
+    // Reset graph elements when we get a fresh solve result.
+    nodes = flow.nodes;
+    edges = flow.edges;
+  });
+
+  $effect(() => {
+    if (!result) {
+      return;
+    }
+
+    // Keep an up-to-date snapshot for export/share.
+    currentFlowSnapshot.set({ nodes, edges, viewport });
+  });
 
   function t(zh: string, en: string): string {
     return lang === "zh" ? zh : en;
@@ -139,7 +168,7 @@
       </div>
     {:else}
       <div class="flow-wrap" id="logistics-flow-map" bind:this={flowElement}>
-        <SvelteFlow nodes={flow.nodes} edges={flow.edges} fitView proOptions={{ hideAttribution: true }}>
+        <SvelteFlow bind:nodes bind:edges bind:viewport fitView proOptions={{ hideAttribution: true }}>
           <Background bgColor="var(--surface-graph)" patternColor="var(--surface-graph-grid)" gap={24} />
           {#if isFullscreen}
           <MiniMap pannable zoomable />

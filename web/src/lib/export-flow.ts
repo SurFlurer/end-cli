@@ -1,14 +1,56 @@
 import { elementToSVG } from "dom-to-svg";
+import { mount, unmount } from "svelte";
+import { get } from "svelte/store";
 
-import appCss from "../app.css?inline";
-import xyflowCss from "@xyflow/svelte/dist/style.css?inline";
+import FlowExportRenderer from "../components/FlowExportRenderer.svelte";
+import { currentFlowSnapshot } from "./flow-snapshot";
 
 export type FlowExportSize = {
   width: number;
   height: number;
 };
 
-const FLOW_MAP_ID = "logistics-flow-map";
+type NodeBounds = {
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
+};
+
+type FlowNodeLike = {
+  position?: { x?: unknown; y?: unknown };
+  positionAbsolute?: { x?: unknown; y?: unknown };
+  measured?: { width?: unknown; height?: unknown };
+  width?: unknown;
+  height?: unknown;
+  style?: unknown;
+};
+
+type ExportFlowDebugConfig = {
+  enabled: boolean;
+  showIframe: boolean;
+  keepIframe: boolean;
+};
+
+function getExportFlowDebugConfig(): ExportFlowDebugConfig {
+  // Debug helpers should be dev-only; exporting in production should stay clean.
+  if (!import.meta.env.DEV) {
+    return { enabled: false, showIframe: false, keepIframe: false };
+  }
+
+  // Enable via either:
+  // - URL params: ?debugExportFlow=1&debugExportFlowShow=1&debugExportFlowKeep=1
+  // - or localStorage: debugExportFlow=1, debugExportFlowShow=1, debugExportFlowKeep=1
+  const params = new URLSearchParams(window.location.search);
+  const hasParam = (key: string): boolean => params.has(key);
+  const ls = window.localStorage;
+  const hasLs = (key: string): boolean => ls.getItem(key) === "1";
+
+  const enabled = hasParam("debugExportFlow") || hasLs("debugExportFlow");
+  const showIframe = enabled && (hasParam("debugExportFlowShow") || hasLs("debugExportFlowShow"));
+  const keepIframe = enabled && (hasParam("debugExportFlowKeep") || hasLs("debugExportFlowKeep"));
+  return { enabled, showIframe, keepIframe };
+}
 
 function clampExportSize(size: FlowExportSize): FlowExportSize {
   const width = Math.max(240, Math.min(8192, Math.trunc(size.width)));
@@ -22,51 +64,147 @@ function ensureBrowser(): void {
   }
 }
 
-function findFlowMapElement(): HTMLElement {
-  const element = document.getElementById(FLOW_MAP_ID);
-  if (!element) {
-    throw new Error(`Could not find flow map element: #${FLOW_MAP_ID}`);
-  }
-  return element;
+function createOffscreenExportRoot(size: FlowExportSize): HTMLDivElement {
+  const root = document.createElement("div");
+  root.style.width = `${size.width}px`;
+  root.style.height = `${size.height}px`;
+  root.style.position = "fixed";
+  root.style.left = "-10000px";
+  root.style.top = "-10000px";
+  root.style.opacity = "0";
+  root.style.pointerEvents = "none";
+  root.style.overflow = "hidden";
+  root.style.background = "transparent";
+  root.dataset.exportFlowRoot = "1";
+  return root;
 }
 
-function createOffscreenIframe(size: FlowExportSize): HTMLIFrameElement {
-  const iframe = document.createElement("iframe");
-  iframe.style.width = `${size.width}px`;
-  iframe.style.height = `${size.height}px`;
-  iframe.style.position = "fixed";
-  iframe.style.left = "-10000px";
-  iframe.style.top = "-10000px";
-  iframe.style.opacity = "0";
-  iframe.style.pointerEvents = "none";
-  iframe.style.border = "0";
-  return iframe;
-}
-
-function setupIframeDocument(
-  iframeDocument: Document,
+function applyDebugStylesToExportRoot(
+  root: HTMLDivElement,
   size: FlowExportSize,
-): HTMLElement {
-  const docEl = iframeDocument.documentElement;
-  const body = iframeDocument.body;
+  debug: ExportFlowDebugConfig,
+): void {
+  if (!debug.enabled) {
+    return;
+  }
 
-  docEl.style.width = `${size.width}px`;
-  docEl.style.height = `${size.height}px`;
-  body.style.margin = "0";
-  body.style.width = `${size.width}px`;
-  body.style.height = `${size.height}px`;
-  body.style.overflow = "hidden";
+  root.dataset.exportFlowDebug = "1";
+  root.style.opacity = "1";
 
-  const styleEl = iframeDocument.createElement("style");
-  styleEl.textContent = `${appCss}\n${xyflowCss}`;
-  (iframeDocument.head ?? iframeDocument.documentElement).append(styleEl);
+  if (debug.showIframe) {
+    // Keep the same query param naming, but now it shows the export root.
+    root.style.left = "0";
+    root.style.top = "0";
+    root.style.zIndex = "2147483647";
+    root.style.pointerEvents = "auto";
+    root.style.border = "1px solid currentColor";
+    root.style.background = "white";
+    root.style.width = `${size.width}px`;
+    root.style.height = `${size.height}px`;
+  }
 
-  const wrapper = iframeDocument.createElement("div");
-  wrapper.style.width = `${size.width}px`;
-  wrapper.style.height = `${size.height}px`;
-  wrapper.style.overflow = "hidden";
-  body.append(wrapper);
-  return wrapper;
+  (window as Window & { __exportFlowDebugRoot?: HTMLDivElement }).__exportFlowDebugRoot = root;
+}
+
+function nextAnimationFrame(): Promise<void> {
+  return new Promise((resolve) => {
+    window.requestAnimationFrame(() => resolve());
+  });
+}
+
+function parseInlineStylePx(style: unknown, property: string): number | null {
+  if (typeof style !== "string") {
+    return null;
+  }
+  // e.g. "width:12px;min-width:220px;"
+  const needle = `${property}:`;
+  const idx = style.indexOf(needle);
+  if (idx < 0) {
+    return null;
+  }
+  const after = style.slice(idx + needle.length);
+  const match = after.match(/\s*([0-9]+(?:\.[0-9]+)?)px/i);
+  if (!match) {
+    return null;
+  }
+  const parsed = Number.parseFloat(match[1]);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function computeNodesBounds(nodes: FlowNodeLike[]): NodeBounds | null {
+  let minX = Number.POSITIVE_INFINITY;
+  let minY = Number.POSITIVE_INFINITY;
+  let maxX = Number.NEGATIVE_INFINITY;
+  let maxY = Number.NEGATIVE_INFINITY;
+
+  for (const node of nodes) {
+    const posAbs = node.positionAbsolute;
+    const pos = node.position ?? {};
+    const xRaw = posAbs?.x ?? pos.x;
+    const yRaw = posAbs?.y ?? pos.y;
+    const x = typeof xRaw === "number" ? xRaw : Number.NaN;
+    const y = typeof yRaw === "number" ? yRaw : Number.NaN;
+    if (!Number.isFinite(x) || !Number.isFinite(y)) {
+      continue;
+    }
+
+    const measured = node.measured;
+    const widthRaw = measured?.width ?? node.width;
+    const heightRaw = measured?.height ?? node.height;
+    const style = node.style;
+
+    const width =
+      (typeof widthRaw === "number" && Number.isFinite(widthRaw) && widthRaw > 0
+        ? widthRaw
+        : null) ??
+      parseInlineStylePx(style, "width") ??
+      parseInlineStylePx(style, "min-width") ??
+      220;
+
+    const height =
+      (typeof heightRaw === "number" && Number.isFinite(heightRaw) && heightRaw > 0
+        ? heightRaw
+        : null) ??
+      parseInlineStylePx(style, "height") ??
+      44;
+
+    minX = Math.min(minX, x);
+    minY = Math.min(minY, y);
+    maxX = Math.max(maxX, x + width);
+    maxY = Math.max(maxY, y + height);
+  }
+
+  if (!Number.isFinite(minX) || !Number.isFinite(minY) || !Number.isFinite(maxX) || !Number.isFinite(maxY)) {
+    return null;
+  }
+  return { minX, minY, maxX, maxY };
+} 
+
+function fitViewportToNodes(
+  nodes: FlowNodeLike[],
+  size: FlowExportSize,
+): { x: number; y: number; zoom: number } | null {
+  const bounds = computeNodesBounds(nodes);
+  if (!bounds) {
+    return null;
+  }
+
+  const boundsWidth = Math.max(1, bounds.maxX - bounds.minX);
+  const boundsHeight = Math.max(1, bounds.maxY - bounds.minY);
+
+  // Match typical fitView defaults: ~10% padding.
+  const padding = 0.1;
+  const paddedMinX = bounds.minX - boundsWidth * padding;
+  const paddedMinY = bounds.minY - boundsHeight * padding;
+  const paddedWidth = boundsWidth * (1 + padding * 2);
+  const paddedHeight = boundsHeight * (1 + padding * 2);
+
+  const rawZoom = Math.min(size.width / paddedWidth, size.height / paddedHeight);
+  const zoom = Math.max(0.05, Math.min(2, rawZoom));
+
+  const x = (size.width - paddedWidth * zoom) / 2 - paddedMinX * zoom;
+  const y = (size.height - paddedHeight * zoom) / 2 - paddedMinY * zoom;
+  return { x, y, zoom };
 }
 
 function serializeSvgDocument(svgDocument: Document): string {
@@ -137,28 +275,42 @@ export async function exportCurrentFlowToSvgString(
 ): Promise<string> {
   ensureBrowser();
   const size = clampExportSize(rawSize);
+  const debug = getExportFlowDebugConfig();
+  const snapshot = get(currentFlowSnapshot);
 
-  const source = findFlowMapElement();
-  const iframe = createOffscreenIframe(size);
-  document.body.append(iframe);
+  if (!snapshot) {
+    throw new Error("Flow is not ready to export");
+  }
+
+  const root = createOffscreenExportRoot(size);
+  applyDebugStylesToExportRoot(root, size, debug);
+  document.body.append(root);
+
+  const exportApp = mount(FlowExportRenderer, {
+    target: root,
+    props: {
+      nodes: snapshot.nodes,
+      edges: snapshot.edges,
+      viewport: fitViewportToNodes(snapshot.nodes as unknown as FlowNodeLike[], size) ?? snapshot.viewport,
+      width: size.width,
+      height: size.height,
+    },
+  });
 
   try {
-    const iframeDocument = iframe.contentDocument;
-    if (!iframeDocument) {
-      throw new Error("Could not get iframe document");
-    }
+    // Allow SvelteFlow to layout/measure.
+    await nextAnimationFrame();
+    await nextAnimationFrame();
 
-    const wrapper = setupIframeDocument(iframeDocument, size);
-    const clone = source.cloneNode(true) as HTMLElement;
-
-    clone.style.width = "100%";
-    clone.style.height = "100%";
-    wrapper.append(clone);
-
-    const svgDocument = elementToSVG(iframeDocument.documentElement);
+    const svgDocument = elementToSVG(root);
     return serializeSvgDocument(svgDocument);
   } finally {
-    iframe.remove();
+    if (!debug.keepIframe) {
+      unmount(exportApp);
+      root.remove();
+    } else {
+      (window as Window & { __exportFlowDebugApp?: unknown }).__exportFlowDebugApp = exportApp;
+    }
   }
 }
 
