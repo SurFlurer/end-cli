@@ -1,4 +1,5 @@
-# Default solve input for `end-cli`.
+# Example solve input for `end-cli`.
+# Modify this file for your own use.
 #
 # Units:
 # - power: watts (W)
@@ -15,17 +16,17 @@ objective = "min_machines"
 
 # External item supply per minute.
 [supply_per_min]
-"Originium Ore" = 520
-"Ferrium Ore" = 160
-"Amethyst Ore" = 160
+"Originium Ore" = 560
+"Amethyst Ore" = 240
+"Ferrium Ore" = 1080
 
-# Scenario-side external item consumption per minute.
-# e.g. Consumables
+# External item consumption per minute.
+# e.g. Consumables, Delivery
 [external_consumption_per_min]
-"Industrial Explosive" = 10
+"Industrial Explosive" = 6
 
 [[outposts]]
-# Unique outpost identifier.
+# Unique identifier.
 key = "Refugee Camp"
 # Max revenue accepted by this outpost per hour.
 money_cap_per_hour = 17316
@@ -40,11 +41,9 @@ zh = "难民暂居处"
 "Buck Capsule (A)" = 70
 "Buck Capsule (B)" = 27
 "Buck Capsule (C)" = 10
+"Canned Citrome (A)" = 70
 "Canned Citrome (B)" = 27
 "Canned Citrome (C)" = 10
-"Origocrust" = 1
-"Amethyst Part" = 1
-"Amethyst Bottle" = 2
 
 [[outposts]]
 key = "Infra Station"
@@ -53,9 +52,25 @@ en = "Infra Station"
 zh = "基建前站"
 
 [outposts.prices]
+"HC Valley Battery" = 70
 "SC Valley Battery" = 30
 "LC Valley Battery" = 16
 "Buck Capsule (A)" = 70
 "Buck Capsule (B)" = 27
-"Buck Capsule (C)" = 10
-"Ferrium Part" = 1
+"Canned Citrome (A)" = 70
+"Canned Citrome (B)" = 27
+"Canned Citrome (C)" = 10
+
+[[outposts]]
+key = "Reconstruction HQ"
+money_cap_per_hour = 51408
+zh = "重建指挥部"
+
+[outposts.prices]
+"Buck Capsule (A)" = 70
+"Buck Capsule (B)" = 27
+"Canned Citrome (A)" = 70
+"Canned Citrome (B)" = 27
+"Canned Citrome (C)" = 10
+"HC Valley Battery" = 70
+"SC Valley Battery" = 30

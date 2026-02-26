@@ -19,4 +19,4 @@ args = ["crates", "web", "--exclude", "package-lock.json", "--exclude", "*.toml"
 [tasks.archive]
 workspace = false
 command = "git"
-args = ["archive", "--format=zip", "--output", "end2-latest.zip", "HEAD"]
+args = ["archive", "--format=zip", "--output", "../end2-head.zip", "HEAD"]
