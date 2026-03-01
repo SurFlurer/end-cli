@@ -1,115 +1,115 @@
-## 1. 集合（Sets）
+## 1. 集合
 
 - 物品：$i \in I$，$|I|=m$
 - 配方：$r \in R$
-- outpost：$o \in O$，$|O|=k$
+- 哨站：$o \in O$，$|O|=k$
 - 机器类型：$t \in T$
 - 热能池燃料（电池）：$b \in B \subseteq I$
 
-## 2. 参数（Parameters）
+## 2. 参数
 
 ### 2.1 物料与配方
 - $s_i \ge 0$：每分钟外部供给
-- $c_i \ge 0$：每分钟外部消耗（如送货委托从仓库提取）
-- $a_{r,i}$：配方净变化
-  - $a_{r,i} > 0$ 产出，$a_{r,i} < 0$ 消耗
+- $c_i \ge 0$：每分钟外部消耗
+- $a_{r,i}$：配方净变化（$a_{r,i}>0$ 产出，$a_{r,i}<0$ 消耗）
 
 ### 2.2 贸易
-- $p_{o,i} \ge 0$：outpost $o$ 对物品 $i$ 的收购单价
-- $C_o \ge 0$：outpost $o$ **每小时**最大交易额
+- $p_{o,i} \ge 0$：哨站 $o$ 对物品 $i$ 的收购单价
+- $C_o \ge 0$：哨站 $o$ 每小时最大交易额
 
 ### 2.3 机器产能与耗电
-- 机器类型 $t$ 的机器可以生产配方集合 $R_t$，每台机器只能专门生产一个配方。
 - $R_t \subseteq R$：类型 $t$ 机器可生产的配方集合
-- $u_{t,r} \ge 0$：若一台跑配方 $r$ 的类型 $t$ 机器，其每分钟最大吞吐
-  - 约定：若 $r \notin R_t$，则 $u_{t,r}=0$
+- $u_{t,r} \ge 0$：一台运行配方 $r$ 的类型 $t$ 机器的每分钟最大吞吐（若 $r \notin R_t$，则 $u_{t,r}=0$）
 - $w_t \ge 0$：类型 $t$ 机器的功率消耗（瓦）
-- $P^\text{core} = 200$: 核心免费送 200 瓦电力
-- $P^\text{ext} \ge 0$: 生产机器外的其他电力消耗
 
-### 2.4 热能池（Thermal Bank）
-- 热能池自身不耗电，只发电；电池消耗计入物料守恒。
-- 为简化，在该模型中热能池必须持续喂入同一类型电池以稳定输出功率。事实上，游戏电网存在容量，允许启停热能池。
+### 2.4 热能池
 - 对每个 $b \in B$：
-  - $P_b \ge 0$：每台热能池持续喂入电池 $b$ 时输出功率（瓦）
+  - $P_b \ge 0$：每台持续喂入电池 $b$ 的热能池输出功率（瓦）
   - $D_b > 0$：电池 $b$ 在热能池中持续发电秒数
 
-## 3. 决策变量（Decision Variables）
+### 2.5 电力系统开关与外部电力
+- $\kappa^{P} \in \{0,1\}$：电力建模启用标志（$\kappa^{P}=1$ 启用，$\kappa^{P}=0$ 禁用）
+- $P^{\text{ext-gen}} \ge 0$：外部稳定发电功率（当 $\kappa^{P}=1$ 时有效）
+- $P^{\text{ext-use}} \ge 0$：系统外稳定耗电功率（当 $\kappa^{P}=1$ 时有效）
 
-### 3.1 连续的流量变量
-- $x_r \ge 0$：每分钟执行配方 $r$ 次数
-- $q_{o,i} \ge 0$：每分钟卖给 outpost $o$ 的物品 $i$ 数量
+### 2.6 目标权重
+- $\alpha, \beta, \gamma \ge 0$：用户指定的加权目标系数（用于 `weighted` 模式）
 
-### 3.2 离散的产线设计变量
+## 3. 决策变量
+
+### 3.1 连续变量
+- $x_r \ge 0$：每分钟执行配方 $r$ 的次数
+- $q_{o,i} \ge 0$：每分钟卖给哨站 $o$ 的物品 $i$ 数量
+
+### 3.2 整数变量
 - $M_t \in \mathbb{Z}_{\ge 0}$：类型 $t$ 机器总台数
-- $Y_{t,r} \in \mathbb{Z}_{\ge 0}\quad \forall t\in T,\ \forall r\in R_t$：类型 $t$ 中专门分配给配方 $r$ 的机器台数
-- $Z_b \in \mathbb{Z}_{\ge 0}$：**持续**喂入电池 $b$ 的热能池台数
+- $Y_{t,r} \in \mathbb{Z}_{\ge 0} \quad \forall t\in T,\ \forall r\in R_t$：类型 $t$ 中专门分配给配方 $r$ 的机器台数
+- $Z_b \in \mathbb{Z}_{\ge 0}$：持续喂入电池 $b$ 的热能池台数（仅当 $\kappa^{P}=1$ 时存在）
 
-### 3.3 Stage 2 富余变量
-- $s^{P}\ge 0$：电力富余（瓦）
-- $\tilde q_{o,i}\ge 0$：超出 outpost 预算上限的每分钟虚拟销量
-- $s^{\$}\ge 0$：每分钟虚拟成交额
+### 3.3 第二阶段富余变量（用于特定目标）
+- $s^{P} \ge 0$：电力富余（瓦）（仅当 $\kappa^{P}=1$ 时存在）
+- $\tilde q_{o,i} \ge 0$：超出哨站预算上限的每分钟虚拟销量
+- $s^{\$} \ge 0$：每分钟虚拟成交额
 
-变量启用规则：`max_money_slack` 与 `weighted` 启用 $\tilde q_{o,i}, s^{\$}$；`max_power_slack` 与 `weighted` 启用 $s^{P}$；`min_machines` 模式可视为这些富余变量固定为 0。
+## 4. 目标函数（两阶段优化）
 
-## 4. 目标（Two-stage Objective）
-
-### Stage 1：最大化每分钟收入
+### 第一阶段：最大化每分钟收入
 $$
-R^* = \max \ \text{Rev} \;=\; \max \ \sum_{o \in O}\sum_{i \in I} p_{o,i}\, q_{o,i}
+R^* = \max \; \sum_{o \in O}\sum_{i \in I} p_{o,i}\, q_{o,i}
 $$
 
-### Stage 2：在 Stage 1 最优解集合中，按用户选择优化目标
+### 第二阶段：在第一阶段最优解集合中，按以下之一优化
 
-**真实**收入不退化约束：
+保持第一阶段最优收入：
 $$
 \sum_{o\in O}\sum_{i\in I} p_{o,i}\, q_{o,i} \;\ge\; R^*
 $$
 
 可选目标：
 
-- `min_machines`：最小化机器数量
-$$
-\min\ N^{mach} \;=\; \min\ \left(\sum_{t \in T} M_t \;+\; \sum_{b \in B} Z_b\right)
-$$
+- **最小化机器总数**（`min_machines`）
+  $$
+  \min \; N^{\text{mach}} = \min \; \left( \sum_{t \in T} M_t \;+\; \kappa^{P}\sum_{b \in B} Z_b \right)
+  $$
 
-- `max_power_slack`：最大化电力富余
-$$
-\max\ s^{P}
-$$
+- **最大化电力富余**（`max_power_slack`，仅当 $\kappa^{P}=1$）
+  $$
+  \max \; s^{P}
+  $$
 
-- `max_money_slack`：去除预算上限，最大化每分钟虚拟成交额
-$$
-\max\ s^{\$} \;=\; \max\ \sum_{o\in O}\sum_{i\in I} p_{o,i}\, \tilde q_{o,i}
-$$
+- **最大化虚拟成交额**（`max_money_slack`）
+  $$
+  \max \; s^{\$} = \max \; \sum_{o\in O}\sum_{i\in I} p_{o,i}\, \tilde q_{o,i}
+  $$
 
-- `weighted`：归一化加权目标
-$$
-\min\ \alpha\,N^{mach} \;-\; \beta\,\hat s^{P} \;-\; \gamma\,\hat s^{\$}
-$$
-其中
-$$
-\hat s^{P}=\frac{s^{P}}{S^{P}_{\max}+\epsilon},\qquad
-\hat s^{\$}=\frac{s^{\$}}{S^{\$}_{\max}+\epsilon}
-$$
-$S^{P}_{\max}$ 可由 `max_power_slack` 的 Stage 2 最优值给出，$S^{\$}_{\max}$ 可由 `max_money_slack` 的 Stage 2 最优值给出，$\epsilon>0$ 为数值稳定用的小常数。
-权重 $\alpha,\beta,\gamma$ 由用户填写。
+- **加权组合**（`weighted`）
+  $$
+  \min \; \alpha\,N^{\text{mach}} \;-\; \beta\,\hat s^{P} \;-\; \gamma\,\hat s^{\$}
+  $$
+  其中
+  $$
+  \hat s^{P} = \frac{s^{P}}{S^{P}_{\max}+\epsilon},\qquad
+  \hat s^{\$} = \frac{s^{\$}}{S^{\$}_{\max}+\epsilon}
+  $$
+  $S^{P}_{\max}$、$S^{\$}_{\max}$ 分别为 `max_power_slack` 和 `max_money_slack` 单独优化得到的最优值，$\epsilon>0$ 为小常数。
 
-## 5. 约束（Constraints）
+  当 $\kappa^{P}=0$ 时，$\beta=0$。
+
+## 5. 约束条件
 
 ### 5.1 物品守恒
 
-- 对所有 $i \in I \setminus B$：
-$$
-s_i \;+\; \sum_{r \in R} a_{r,i}\, x_r \;-\; c_i \;-\; \sum_{o \in O} \left(q_{o,i}+\tilde q_{o,i}\right) \;\ge\; 0
-$$
+- 对非电池物品 $i \in I \setminus B$：
+  $$
+  s_i \;+\; \sum_{r \in R} a_{r,i}\, x_r \;-\; c_i \;-\; \sum_{o \in O} \left(q_{o,i}+\tilde q_{o,i}\right) \;\ge\; 0
+  $$
 
-- 对所有 $b \in B$：
-$$
-s_b \;+\; \sum_{r \in R} a_{r,b}\, x_r \;-\; c_b \;-\; \sum_{o \in O} \left(q_{o,b}+\tilde q_{o,b}\right) \;-\; \frac{60}{D_b}\, Z_b \;\ge\; 0
-$$
+- 对电池物品 $b \in B$：
+  $$
+  s_b \;+\; \sum_{r \in R} a_{r,b}\, x_r \;-\; c_b \;-\; \sum_{o \in O} \left(q_{o,b}+\tilde q_{o,b}\right) \;-\; \frac{60}{D_b}\, Z_b \;\ge\; 0
+  $$
 
-### 5.2 outpost 每小时交易额上限
+### 5.2 哨站每小时交易额上限
 对所有 $o \in O$：
 $$
 \sum_{i \in I} p_{o,i}\, q_{o,i} \;\le\; \frac{C_o}{60}
@@ -127,16 +127,16 @@ $$
 x_r \;\le\; \sum_{t \in T:\ r \in R_t} u_{t,r}\, Y_{t,r}
 $$
 
-### 5.5 电力平衡
+### 5.5 电力平衡（仅当 $\kappa^{P}=1$）
 
 总耗电功率：
 $$
-P^{use} \;=\; \sum_{t \in T} w_t\, M_t \;+\; P^\text{ext}
+P^{use} \;=\; P^{\text{ext-use}} \;+\; \sum_{t \in T} w_t\, M_t
 $$
 
-每台持续喂入电池 $b$ 的热能池稳定输出 $P_b$，总发电功率：
+总发电功率：
 $$
-P^{gen} \;=\; \sum_{b \in B} P_b\, Z_b \;+\; P^\text{core}
+P^{gen} \;=\; P^{\text{ext-gen}} \;+\; \sum_{b \in B} P_b\, Z_b
 $$
 
 电力不短缺：
@@ -144,127 +144,15 @@ $$
 P^{gen} \;\ge\; P^{use}
 $$
 
-电力富余定义，在最大化 $s^{P}$ 时会自动取等：
+电力富余定义（自动取等当最大化 $s^{P}$）：
 $$
 s^{P} \;\le\; P^{gen} \;-\; P^{use},\qquad s^{P}\ge 0
 $$
+
+**注**：当 $\kappa^{P}=0$ 时，变量 $Z_b$、$s^{P}$ 及电力平衡约束（5.5）被移除；加权目标中的 $\beta$ 视为 0。
 
 ### 5.6 每分钟虚拟成交额定义
 $$
 s^{\$} \;=\; \sum_{o\in O}\sum_{i\in I} p_{o,i}\, \tilde q_{o,i}
 $$
 
-## 6. 扩展模式（已实现）：`version` + `[power]` + `[objective]`
-
-### 6.1 输入形态（AIC）
-
-推荐格式：
-
-```toml
-version = 2
-
-[power]
-enabled = true
-external_production = 200
-external_consumption = 0
-
-[objective]
-# all of them are optional. (pos f64)
-# 0 present - no stage2 optimization at all
-# 1 present - optimize the target
-# >= 2 present - optimize weighted
-min_machines = 0.1
-max_power_slack = 1
-max_money_slack = 1
-```
-
-也支持仅配平模式：
-
-```toml
-version = 2
-
-[power]
-enabled = false
-```
-
-约定：
-
-- `version` 省略时按当前最新版本（`2`）解析。
-- `power.enabled=false` 时，不接受 `external_production` / `external_consumption`。
-- `power.enabled=true` 时：
-- `external_production` 默认 `200`。
-- `external_consumption` 默认 `0`。
-- 解析兼容 `enternal_consumption` 旧拼写别名；规范键名仍为 `external_consumption`。
-
-### 6.2 电力参数与开关
-
-引入电力模式开关：
-$$
-\kappa^{P}\in\{0,1\}
-$$
-
-- $\kappa^{P}=1$：启用电力建模。
-- $\kappa^{P}=0$：禁用电力建模（纯配平）。
-
-并将核心电力重写为可配置输入：
-
-- $P^\text{ext-gen}\ge 0$：外部稳定发电功率
-- $P^\text{ext-use}\ge 0$：系统外稳定耗电功率
-
-启用电力时：
-$$
-P^{gen} \;=\; P^\text{ext-gen} + \sum_{b \in B} P_b Z_b
-$$
-$$
-P^{use} \;=\; P^\text{ext-use} + \sum_{t\in T} w_t M_t
-$$
-并保留约束
-$$
-P^{gen} \ge P^{use}
-$$
-
-禁用电力时（$\kappa^{P}=0$）：
-
-- 移除热能池变量 $Z_b$ 与其燃料消耗项。
-- 移除电力平衡约束与电力富余变量。
-- 仅保留配平相关的供需与流量约束。
-
-### 6.3 Stage 2：三目标正交权重语义
-
-令
-$$
-[\alpha,\beta,\gamma] = [\text{min\_machines},\ \text{max\_power\_slack},\ \text{max\_money\_slack}]
-$$
-
-统一目标形式为：
-$$
-\min\ \alpha N^{mach} - \beta \hat s^{P} - \gamma \hat s^{\$}
-$$
-
-其中：
-$$
-N^{mach}=\sum_{t\in T} M_t + \kappa^{P}\sum_{b\in B}Z_b
-$$
-
-设有效目标数
-$$
-k = \left|\{x\in\{\alpha,\beta,\gamma\}\mid x>0\}\right|
-$$
-
-则 Stage2 行为为：
-
-- $k=0$：不做阶段二优化（`stage2 = stage1`）。
-- $k=1$：执行对应单目标优化。
-- $k\ge2$：执行加权优化（按各目标可达尺度归一化后组合）。
-
-并约定：当 $\kappa^{P}=0$ 时，$\beta=0$，即禁用电力时不能优化 `max_power_slack`。
-
-### 6.4 输出语义（Option 化）
-
-电力相关输出打包为可选结构：
-$$
-\text{power\_summary}\in \{\text{None},\ \text{Some}(\cdot)\}
-$$
-
-- $\kappa^{P}=1$：返回 `Some(power_summary)`。
-- $\kappa^{P}=0$：返回 `None`。
