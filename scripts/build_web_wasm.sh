@@ -4,8 +4,8 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WASM_TARGET_DIR="$ROOT_DIR/target/wasm32-unknown-emscripten/release"
 WEB_WASM_DIR="$ROOT_DIR/web/public/wasm"
-# Keep this enabled by default to rewrite legacy EH ops into exnref/try_table form.
-ENABLE_WASM_EH_POSTPROCESS="${END_WEB_WASM_EH_POSTPROCESS:-1}"
+# Keep this not enabled by default because older browsers (2025-05) still experimentally support try-table
+ENABLE_WASM_EH_POSTPROCESS="${END_WEB_WASM_EH_POSTPROCESS:-0}"
 
 mkdir -p "$WEB_WASM_DIR"
 
