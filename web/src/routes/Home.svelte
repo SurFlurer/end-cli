@@ -85,7 +85,7 @@
   let hasHydratedLocalState = $state(false);
   let hasRestoredDraftFromStorage = $state(false);
 
-  let solverController: SolverController | null = null;
+  let solverController = $state<SolverController | null>(null);
 
   let isShareDialogOpen = $state(false);
   let shareTomlText = $state("");
@@ -126,17 +126,38 @@
     isShareDialogOpen = true;
   }
 
+  function applyDraft(nextDraft: AicDraft): void {
+    draft = nextDraft;
+    selectedOutpostIndex =
+      nextDraft.outposts.length > 0
+        ? { kind: "selected", index: 0 }
+        : NO_OUTPOST_SELECTED;
+  }
+
   function applyToml(text: string): void {
     try {
       const nextDraft = parseAicToml(text);
-      draft = nextDraft;
-      selectedOutpostIndex =
-        nextDraft.outposts.length > 0
-          ? { kind: "selected", index: 0 }
-          : NO_OUTPOST_SELECTED;
+      applyDraft(nextDraft);
       solverController?.resetSolvedFingerprint();
     } catch (error) {
       showErrorToast(error instanceof Error ? error.message : String(error));
+    }
+  }
+
+  async function resolveSharedDraft(
+    shareParam: string | null,
+  ): Promise<AicDraft | null> {
+    const normalized = shareParam?.trim();
+    if (!normalized) {
+      return null;
+    }
+
+    try {
+      const sharedToml = await decodeTomlFromShareParam(normalized);
+      return parseAicToml(sharedToml);
+    } catch (error) {
+      showErrorToast(error instanceof Error ? error.message : String(error));
+      return null;
     }
   }
 
@@ -339,37 +360,13 @@
       void warmupWasmWorker().catch(() => undefined);
 
       const restored = restoreLocalState(STORAGE_CONFIG);
+      const sharedDraft = await resolveSharedDraft(
+        new URLSearchParams(window.location.search).get("s"),
+      );
+      const initialDraft = sharedDraft ?? restored.draft;
 
-      const shareParam =
-        typeof window === "undefined"
-          ? null
-          : new URLSearchParams(window.location.search).get("s");
-
-      if (shareParam && shareParam.trim().length > 0) {
-        try {
-          const sharedToml = await decodeTomlFromShareParam(shareParam.trim());
-          applyToml(sharedToml);
-          hasRestoredDraftFromStorage = true;
-        } catch (error) {
-          showErrorToast(error instanceof Error ? error.message : String(error));
-
-          if (restored.draft) {
-            draft = restored.draft;
-            selectedOutpostIndex =
-              restored.draft.outposts.length > 0
-                ? { kind: "selected", index: 0 }
-                : NO_OUTPOST_SELECTED;
-            hasRestoredDraftFromStorage = true;
-          } else {
-            hasRestoredDraftFromStorage = false;
-          }
-        }
-      } else if (restored.draft) {
-        draft = restored.draft;
-        selectedOutpostIndex =
-          restored.draft.outposts.length > 0
-            ? { kind: "selected", index: 0 }
-            : NO_OUTPOST_SELECTED;
+      if (initialDraft) {
+        applyDraft(initialDraft);
         hasRestoredDraftFromStorage = true;
       }
 
@@ -403,11 +400,7 @@
   });
 
   $effect(() => {
-    if (!solverController) {
-      return;
-    }
-
-    solverController.updateSnapshot({ draft, lang, isBootstrapping });
+    solverController?.updateSnapshot({ draft, lang, isBootstrapping });
   });
 
   $effect(() => {

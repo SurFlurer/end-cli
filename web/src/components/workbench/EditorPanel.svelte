@@ -296,8 +296,8 @@
           <span>{t("电力建模", "Power Modeling")}</span>
           <FieldHint
             text={t(
-              "关闭后不再计算热能池与电力平衡，可将工具作为纯配平计算器使用。",
-              "When disabled, thermal-bank and power-balance constraints are removed so the tool works as a pure balancing calculator.",
+              "开启后，模型会考虑电力供需平衡，自动计算电池消耗。",
+              "When enabled, the model considers power supply/demand balance and automatically accounts for battery consumption.",
             )}
           />
         </div>
