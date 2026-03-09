@@ -8,11 +8,19 @@ export interface SolveSnapshot {
   isBootstrapping: boolean;
 }
 
+type TimeoutHandle = ReturnType<typeof globalThis.setTimeout>;
+
+export interface TimeoutApi {
+  setTimeout: (handler: () => void, delayMs: number) => TimeoutHandle;
+  clearTimeout: (timeout: TimeoutHandle) => void;
+}
+
 interface CreateSolverControllerOptions {
   debounceMs: number;
   toToml: (draft: AicDraft) => string;
   solve: (lang: LangTag, toml: string) => Promise<SolvePayload>;
   onStateChange: (next: SolveState) => void;
+  timeoutApi: TimeoutApi;
   nowMs?: () => number;
 }
 
@@ -24,9 +32,9 @@ export interface SolverController {
 }
 
 export function createSolverController(options: CreateSolverControllerOptions): SolverController {
-  const nowMs = options.nowMs ?? (() => performance.now());
+  const nowMs = options.nowMs ?? (() => (typeof performance === 'undefined' ? Date.now() : performance.now()));
 
-  let autoSolveTimer: number | null = null;
+  let autoSolveTimer: TimeoutHandle | null = null;
   let autoSolveDirty = false;
   let solveSequence = 0;
   let latestSolveSequence = 0;
@@ -50,7 +58,7 @@ export function createSolverController(options: CreateSolverControllerOptions): 
     if (autoSolveTimer === null) {
       return;
     }
-    window.clearTimeout(autoSolveTimer);
+    options.timeoutApi.clearTimeout(autoSolveTimer);
     autoSolveTimer = null;
     applyEvent({ type: 'debounceCleared' });
   }
@@ -68,7 +76,7 @@ export function createSolverController(options: CreateSolverControllerOptions): 
 
     autoSolveDirty = true;
     clearAutoSolveTimer();
-    autoSolveTimer = window.setTimeout(() => {
+    autoSolveTimer = options.timeoutApi.setTimeout(() => {
       autoSolveTimer = null;
       applyEvent({ type: 'debounceCleared' });
       void runSolve();

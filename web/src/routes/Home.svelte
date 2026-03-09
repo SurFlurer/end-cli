@@ -85,7 +85,18 @@
   let hasHydratedLocalState = $state(false);
   let hasRestoredDraftFromStorage = $state(false);
 
-  let solverController = $state<SolverController | null>(null);
+  const solverController: SolverController = createSolverController({
+    debounceMs: AUTO_SOLVE_DEBOUNCE_MS,
+    toToml: buildAicToml,
+    solve: (solveLang, toml) => solveScenario(solveLang, toml),
+    onStateChange: (next) => {
+      solveState = next;
+    },
+    timeoutApi: {
+      setTimeout: globalThis.setTimeout.bind(globalThis),
+      clearTimeout: globalThis.clearTimeout.bind(globalThis),
+    },
+  });
 
   let isShareDialogOpen = $state(false);
   let shareTomlText = $state("");
@@ -138,7 +149,7 @@
     try {
       const nextDraft = parseAicToml(text);
       applyDraft(nextDraft);
-      solverController?.resetSolvedFingerprint();
+      solverController.resetSolvedFingerprint();
     } catch (error) {
       showErrorToast(error instanceof Error ? error.message : String(error));
     }
@@ -376,15 +387,6 @@
 
       hasHydratedLocalState = true;
 
-      solverController = createSolverController({
-        debounceMs: AUTO_SOLVE_DEBOUNCE_MS,
-        toToml: buildAicToml,
-        solve: (solveLang, toml) => solveScenario(solveLang, toml),
-        onStateChange: (next) => {
-          solveState = next;
-        },
-      });
-
       mediaQuery = window.matchMedia(NARROW_LAYOUT_QUERY);
       updateScreenMode();
       mediaQuery.addEventListener("change", updateScreenMode);
@@ -394,13 +396,12 @@
     return () => {
       disposed = true;
       mediaQuery?.removeEventListener("change", updateScreenMode);
-      solverController?.dispose();
-      solverController = null;
+      solverController.dispose();
     };
   });
 
   $effect(() => {
-    solverController?.updateSnapshot({ draft, lang, isBootstrapping });
+    solverController.updateSnapshot({ draft, lang, isBootstrapping });
   });
 
   $effect(() => {
