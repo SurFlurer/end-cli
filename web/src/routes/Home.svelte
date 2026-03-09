@@ -86,7 +86,6 @@
   const persistGate = createHydrationGate(() => {
     persistDraft(STORAGE_CONFIG.draftStorageKey, draft);
   });
-  let hasRestoredDraftFromStorage = $state(false);
 
   const solverController: SolverController = createSolverController({
     debounceMs: AUTO_SOLVE_DEBOUNCE_MS,
@@ -198,24 +197,25 @@
     }
   }
 
-  async function loadInitialState(): Promise<void> {
+  function isDraftContentEmpty(value: AicDraft): boolean {
+    return (
+      value.outposts.length === 0 &&
+      value.supply.length === 0 &&
+      value.consumption.length === 0
+    );
+  }
+
+  async function loadBootstrapData(): Promise<string | null> {
     isBootstrapping = true;
 
     try {
       const payload = await loadBootstrap(lang);
       catalogItems = payload.catalog.items;
       defaultToml = payload.defaultAicToml;
-
-      if (
-        !hasRestoredDraftFromStorage &&
-        draft.outposts.length === 0 &&
-        draft.supply.length === 0 &&
-        draft.consumption.length === 0
-      ) {
-        applyToml(defaultToml);
-      }
+      return payload.defaultAicToml;
     } catch (error) {
       showErrorToast(error instanceof Error ? error.message : String(error));
+      return null;
     } finally {
       isBootstrapping = false;
     }
@@ -223,12 +223,20 @@
 
   async function resetToDefault(): Promise<void> {
     try {
-      if (defaultToml.length === 0) {
-        await loadInitialState();
+      let nextDefaultToml = defaultToml;
+      if (nextDefaultToml.length === 0) {
+        const loadedDefaultToml = await loadBootstrapData();
+        if (!loadedDefaultToml) {
+          return;
+        }
+        nextDefaultToml = loadedDefaultToml;
+      }
+
+      if (nextDefaultToml.length === 0) {
         return;
       }
 
-      applyToml(defaultToml);
+      applyToml(nextDefaultToml);
     } catch (error) {
       showErrorToast(error instanceof Error ? error.message : String(error));
     }
@@ -378,10 +386,10 @@
         new URLSearchParams(window.location.search).get("s"),
       );
       const initialDraft = sharedDraft ?? restored.draft;
+      const shouldApplyDefaultDraft = initialDraft === null;
 
       if (initialDraft) {
         applyDraft(initialDraft);
-        hasRestoredDraftFromStorage = true;
       }
 
       if (disposed) {
@@ -393,7 +401,15 @@
       mediaQuery = window.matchMedia(NARROW_LAYOUT_QUERY);
       updateScreenMode();
       mediaQuery.addEventListener("change", updateScreenMode);
-      void loadInitialState();
+
+      const loadedDefaultToml = await loadBootstrapData();
+      if (disposed || !loadedDefaultToml) {
+        return;
+      }
+
+      if (shouldApplyDefaultDraft && isDraftContentEmpty(draft)) {
+        applyToml(loadedDefaultToml);
+      }
     })();
 
     return () => {
