@@ -90,7 +90,10 @@
     return { nodes, edges };
   }
 
-  function appendStyle(baseStyle: string | undefined, extension: string): string {
+  function appendStyle(
+    baseStyle: string | undefined,
+    extension: string,
+  ): string {
     return `${baseStyle ?? ""}${extension}`;
   }
 
@@ -98,7 +101,11 @@
     return `${value.toFixed(2)}/min`;
   }
 
-  function buildLabelData(meta: EdgeFlowMeta, usedPerMin: number, mutedPerMin?: number): HighlightEdgeLabelData {
+  function buildLabelData(
+    meta: EdgeFlowMeta,
+    usedPerMin: number,
+    mutedPerMin?: number,
+  ): HighlightEdgeLabelData {
     return {
       kind: "flow-highlight-label",
       topLine: meta.itemName,
@@ -114,7 +121,9 @@
     return `${labelData.topLine}\n${labelData.mainRateText}${labelData.mutedRateText ?? ""}`;
   }
 
-  function applyHighlightSelection(selection: GraphHighlightSelection | null): void {
+  function applyHighlightSelection(
+    selection: GraphHighlightSelection | null,
+  ): void {
     if (!selection) {
       nodes = nodes.map((node) => ({
         ...node,
@@ -153,14 +162,28 @@
         if (isUpstream) {
           const usedPerMin = Math.min(
             edgeFlowMeta.flowPerMin,
-            Math.max(0, selection.upstreamUsedPerMinByEdgeId.get(edge.id) ?? edgeFlowMeta.flowPerMin),
+            Math.max(
+              0,
+              selection.upstreamUsedPerMinByEdgeId.get(edge.id) ??
+                edgeFlowMeta.flowPerMin,
+            ),
           );
-          const unusedPerMin = Math.max(0, edgeFlowMeta.flowPerMin - usedPerMin);
-          const labelData = buildLabelData(edgeFlowMeta, usedPerMin, unusedPerMin);
+          const unusedPerMin = Math.max(
+            0,
+            edgeFlowMeta.flowPerMin - usedPerMin,
+          );
+          const labelData = buildLabelData(
+            edgeFlowMeta,
+            usedPerMin,
+            unusedPerMin,
+          );
           edgeData = labelData as Edge["data"];
           edgeLabel = flattenLabelData(labelData);
         } else {
-          const labelData = buildLabelData(edgeFlowMeta, edgeFlowMeta.flowPerMin);
+          const labelData = buildLabelData(
+            edgeFlowMeta,
+            edgeFlowMeta.flowPerMin,
+          );
           edgeData = labelData as Edge["data"];
           edgeLabel = flattenLabelData(labelData);
         }
@@ -240,11 +263,21 @@
     highlightedNodeId = null;
     nodes = flow.nodes;
     edges = flow.edges;
-    baseNodeStyleById = new Map(flow.nodes.map((node: Node) => [node.id, node.style]));
-    baseEdgeStyleById = new Map(flow.edges.map((edge: Edge) => [edge.id, edge.style]));
-    baseEdgeLabelById = new Map(flow.edges.map((edge: Edge) => [edge.id, edge.label]));
-    baseEdgeLabelStyleById = new Map(flow.edges.map((edge: Edge) => [edge.id, edge.labelStyle]));
-    baseEdgeDataById = new Map(flow.edges.map((edge: Edge) => [edge.id, edge.data]));
+    baseNodeStyleById = new Map(
+      flow.nodes.map((node: Node) => [node.id, node.style]),
+    );
+    baseEdgeStyleById = new Map(
+      flow.edges.map((edge: Edge) => [edge.id, edge.style]),
+    );
+    baseEdgeLabelById = new Map(
+      flow.edges.map((edge: Edge) => [edge.id, edge.label]),
+    );
+    baseEdgeLabelStyleById = new Map(
+      flow.edges.map((edge: Edge) => [edge.id, edge.labelStyle]),
+    );
+    baseEdgeDataById = new Map(
+      flow.edges.map((edge: Edge) => [edge.id, edge.data]),
+    );
     edgeFlowMetaById = new Map(
       result.logisticsGraph.edges.map((edge) => [
         edge.id,
@@ -316,7 +349,10 @@
 
     return () => {
       document.removeEventListener("fullscreenchange", onFullscreenChange);
-      document.removeEventListener("webkitfullscreenchange", onFullscreenChange);
+      document.removeEventListener(
+        "webkitfullscreenchange",
+        onFullscreenChange,
+      );
     };
   });
 </script>
@@ -346,46 +382,50 @@
     </PanelHeader>
   {/snippet}
 
-    {#if !result}
-      <div class="hint-wrap">
-        <p class="hint">
-          {t(
-            "先在左侧改一条参数并触发求解，随后这里会显示物流网络。",
-            "Edit a parameter on the left to solve first, then the logistics network will appear here.",
-          )}
-        </p>
-      </div>
-    {:else}
-      <div class="flow-wrap" id="logistics-flow-map" bind:this={flowElement}>
-        <SvelteFlow
-          bind:nodes
-          bind:edges
-          bind:viewport
-          {edgeTypes}
-          fitView
-          proOptions={{ hideAttribution: true }}
-          onnodeclick={handleNodeClick}
-          onpaneclick={handlePaneClick}
-        >
-          <Background bgColor="var(--surface-graph)" patternColor="var(--surface-graph-grid)" gap={24} />
-          {#if isFullscreen}
+  {#if !result}
+    <div class="hint-wrap">
+      <p class="hint">
+        {t(
+          "先在左侧改一条参数并触发求解，随后这里会显示物流网络。",
+          "Edit a parameter on the left to solve first, then the logistics network will appear here.",
+        )}
+      </p>
+    </div>
+  {:else}
+    <div class="flow-wrap" id="logistics-flow-map" bind:this={flowElement}>
+      <SvelteFlow
+        bind:nodes
+        bind:edges
+        bind:viewport
+        {edgeTypes}
+        fitView
+        proOptions={{ hideAttribution: true }}
+        onnodeclick={handleNodeClick}
+        onpaneclick={handlePaneClick}
+      >
+        <Background
+          bgColor="var(--surface-graph)"
+          patternColor="var(--surface-graph-grid)"
+          gap={24}
+        />
+        {#if isFullscreen}
           <MiniMap pannable zoomable />
           <Controls />
-          {/if}
-        </SvelteFlow>
-        {#if isFullscreen}
-          <IconActionButton
-            className="exit-fullscreen-float"
-            icon="fullscreen_exit"
-            ariaLabel={t("退出全屏", "Exit fullscreen")}
-            title={t("退出全屏", "Exit fullscreen")}
-            onClick={() => {
-              void toggleFullscreen();
-            }}
-          />
         {/if}
-      </div>
-    {/if}
+      </SvelteFlow>
+      {#if isFullscreen}
+        <IconActionButton
+          className="exit-fullscreen-float"
+          icon="fullscreen_exit"
+          ariaLabel={t("退出全屏", "Exit fullscreen")}
+          title={t("退出全屏", "Exit fullscreen")}
+          onClick={() => {
+            void toggleFullscreen();
+          }}
+        />
+      {/if}
+    </div>
+  {/if}
 </Panel>
 
 <style>
@@ -419,5 +459,12 @@
     width: 100%;
     height: 100%;
     border-radius: 0;
+  }
+
+  :global(.svelte-flow__pane.draggable) {
+    cursor: default !important;
+  }
+  :global(.svelte-flow__pane.dragging) {
+    cursor: default !important;
   }
 </style>

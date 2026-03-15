@@ -20,3 +20,9 @@ args = ["crates", "web", "--exclude", "package-lock.json", "--exclude", "*.toml"
 workspace = false
 command = "git"
 args = ["archive", "--format=zip", "--output", "../end2-head.zip", "HEAD"]
+
+[tasks.data]
+workspace = false
+command = "uv"
+args = ["run", "data-generator", "generate"]
+cwd = "scripts/data_generator"

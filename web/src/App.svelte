@@ -43,8 +43,6 @@
 
 <style>
   .shell {
-    /* 1800px x 100dvh, padding var(--space-3) */
-    width: min(1800px, 100%);
     margin: 0 auto;
     padding: var(--space-3);
     height: 100dvh;

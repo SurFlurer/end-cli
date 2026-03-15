@@ -36,7 +36,7 @@ zh = "紫晶质瓶（清水）"
 [[items]]
 key = "Amethyst Bottle (Inert Xircon Effluent)"
 en = "Amethyst Bottle (Inert Xircon Effluent)"
-zh = "紫晶质瓶（惰性息壤废水）"
+zh = "紫晶质瓶（惰性壤晶废液）"
 
 [[items]]
 key = "Amethyst Bottle (Jincao Solution)"
@@ -56,7 +56,7 @@ zh = "紫晶质瓶（污水）"
 [[items]]
 key = "Amethyst Bottle (Xircon Effluent)"
 en = "Amethyst Bottle (Xircon Effluent)"
-zh = "紫晶质瓶（息壤废水）"
+zh = "紫晶质瓶（壤晶废液）"
 
 [[items]]
 key = "Amethyst Bottle (Yazhen Solution)"
@@ -186,7 +186,7 @@ zh = "高晶质瓶（清水）"
 [[items]]
 key = "Cryston Bottle (Inert Xircon Effluent)"
 en = "Cryston Bottle (Inert Xircon Effluent)"
-zh = "高晶质瓶（惰性息壤废水）"
+zh = "高晶质瓶（惰性壤晶废液）"
 
 [[items]]
 key = "Cryston Bottle (Jincao Solution)"
@@ -206,7 +206,7 @@ zh = "高晶质瓶（污水）"
 [[items]]
 key = "Cryston Bottle (Xircon Effluent)"
 en = "Cryston Bottle (Xircon Effluent)"
-zh = "高晶质瓶（息壤废水）"
+zh = "高晶质瓶（壤晶废液）"
 
 [[items]]
 key = "Cryston Bottle (Yazhen Solution)"
@@ -251,7 +251,7 @@ zh = "赤铜瓶（清水）"
 [[items]]
 key = "Cuprium Bottle (Inert Xircon Effluent)"
 en = "Cuprium Bottle (Inert Xircon Effluent)"
-zh = "赤铜瓶（惰性息壤废水）"
+zh = "赤铜瓶（惰性壤晶废液）"
 
 [[items]]
 key = "Cuprium Bottle (Jincao Solution)"
@@ -271,7 +271,7 @@ zh = "赤铜瓶（污水）"
 [[items]]
 key = "Cuprium Bottle (Xircon Effluent)"
 en = "Cuprium Bottle (Xircon Effluent)"
-zh = "赤铜瓶（息壤废水）"
+zh = "赤铜瓶（壤晶废液）"
 
 [[items]]
 key = "Cuprium Bottle (Yazhen Solution)"
@@ -336,7 +336,7 @@ zh = "铁质瓶（清水）"
 [[items]]
 key = "Ferrium Bottle (Inert Xircon Effluent)"
 en = "Ferrium Bottle (Inert Xircon Effluent)"
-zh = "铁质瓶（惰性息壤废水）"
+zh = "铁质瓶（惰性壤晶废液）"
 
 [[items]]
 key = "Ferrium Bottle (Jincao Solution)"
@@ -356,7 +356,7 @@ zh = "铁质瓶（污水）"
 [[items]]
 key = "Ferrium Bottle (Xircon Effluent)"
 en = "Ferrium Bottle (Xircon Effluent)"
-zh = "铁质瓶（息壤废水）"
+zh = "铁质瓶（壤晶废液）"
 
 [[items]]
 key = "Ferrium Bottle (Yazhen Solution)"
@@ -406,7 +406,7 @@ zh = "工业爆炸物"
 [[items]]
 key = "Inert Xircon Effluent"
 en = "Inert Xircon Effluent"
-zh = "惰性息壤废水"
+zh = "惰性壤晶废液"
 
 [[items]]
 key = "Jincao"
@@ -551,7 +551,7 @@ zh = "钢质瓶（清水）"
 [[items]]
 key = "Steel Bottle (Inert Xircon Effluent)"
 en = "Steel Bottle (Inert Xircon Effluent)"
-zh = "钢质瓶（惰性息壤废水）"
+zh = "钢质瓶（惰性壤晶废液）"
 
 [[items]]
 key = "Steel Bottle (Jincao Solution)"
@@ -571,7 +571,7 @@ zh = "钢质瓶（污水）"
 [[items]]
 key = "Steel Bottle (Xircon Effluent)"
 en = "Steel Bottle (Xircon Effluent)"
-zh = "钢质瓶（息壤废水）"
+zh = "钢质瓶（壤晶废液）"
 
 [[items]]
 key = "Steel Bottle (Yazhen Solution)"
@@ -611,12 +611,12 @@ zh = "息壤装备原件"
 [[items]]
 key = "Xircon"
 en = "Xircon"
-zh = "息壤晶"
+zh = "壤晶"
 
 [[items]]
 key = "Xircon Effluent"
 en = "Xircon Effluent"
-zh = "息壤废水"
+zh = "壤晶废液"
 
 [[items]]
 key = "Yazhen"
