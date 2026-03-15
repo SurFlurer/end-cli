@@ -1,5 +1,7 @@
 # <img src="https://raw.githubusercontent.com/sssxks/end-cli/refs/heads/main/web/public/favicon.svg" alt="源石图标" width="64" height="64"> 源石计划 - 终末地产线规划
 
+[![CI](https://github.com/sssxks/end-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/sssxks/end-cli/actions/workflows/ci.yml)
+
 使用 Rust/WebAssembly 实现的终末地生产线规划工具，支持 CLI 和 Web 版本。基于 HiGHS 求解器实现 MILP 模型求解。
 
 🔗 网页链接: [end-8jk.pages.dev](https://end-8jk.pages.dev/), [sssxks.github.io/end-cli/](https://sssxks.github.io/end-cli/)
