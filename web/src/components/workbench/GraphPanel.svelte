@@ -325,7 +325,8 @@
   {#snippet header()}
     <PanelHeader
       titleText={t("产线可视化", "Flow Map")}
-      subtitleText={t(
+      icon="flowchart"
+      fieldHintText={t(
         "点击节点聚焦上下游，节点代表机器和输入输出，线条表示物品流",
         "Click a node to focus on its upstream and downstream. Nodes represent machines and inputs/outputs, and lines indicate item flow.",
       )}

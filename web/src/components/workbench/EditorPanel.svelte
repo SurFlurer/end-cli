@@ -129,10 +129,7 @@
   {#snippet header()}
     <PanelHeader
       titleText={t("求解输入", "Solver Inputs")}
-      subtitleText={t(
-        "这里填写输入内容",
-        "Set supply, external consumption, outpost prices, and power budget. The right side auto-solves revenue plans.",
-      )}
+      icon="draw"
     >
       {#snippet controls()}
         <IconActionButton

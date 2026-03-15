@@ -65,8 +65,8 @@
   const NARROW_LAYOUT_QUERY = "(max-width: 760px)";
   const MIN_EDITOR_WIDTH_PX = 300;
   const MIN_RIGHT_WIDTH_PX = 420;
-  const MIN_TOP_PANEL_HEIGHT_PX = 74;
-  const MIN_BOTTOM_PANEL_HEIGHT_PX = 74 + 12;
+  const MIN_TOP_PANEL_HEIGHT_PX = 51;
+  const MIN_BOTTOM_PANEL_HEIGHT_PX = 51 + 12;
   const AUTO_SOLVE_DEBOUNCE_MS = 200;
 
   const STORAGE_CONFIG: DraftStorageConfig = {

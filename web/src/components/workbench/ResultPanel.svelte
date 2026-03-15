@@ -131,10 +131,7 @@
   {#snippet header()}
     <PanelHeader
       titleText={t("方案评估", "Plan Summary")}
-      subtitleText={t(
-        "每次编辑后自动刷新收益与产线规模",
-        "After each edit, this panel auto-updates revenue and line size.",
-      )}
+      icon="analytics"
     >
       {#snippet controls()}
         <StatusPill {lang} state={solveMetaState} />

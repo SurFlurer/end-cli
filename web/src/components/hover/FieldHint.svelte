@@ -136,6 +136,7 @@
     box-shadow: var(--shadow-popover);
     padding: 10px 12px;
     font-size: 14px;
+    font-weight: 400;
     line-height: 1.35;
     opacity: 0;
     pointer-events: none;

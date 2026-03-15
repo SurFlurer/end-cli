@@ -32,7 +32,7 @@
   }
 
   .panel-header {
-    padding: clamp(12px, 1.6vw, 16px);
+    padding: var(--space-2) clamp(12px, 1.6vw, 16px);
     border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, var(--line-tint-1));
     min-width: 0;
   }

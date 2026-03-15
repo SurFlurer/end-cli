@@ -25,10 +25,7 @@
   {#snippet header()}
     <PanelHeader
       titleText={t("这个 App 如何工作", "How this app works")}
-      subtitleText={t(
-        "不用看了，右边复制原文给 ChatGPT",
-        "No read, just copy the text to ChatGPT, copy button on the right",
-      )}
+      icon="psychology"
     >
       {#snippet controls()}
         <CopyButton {lang} text={MODEL_V1_SOURCE_MARKDOWN} />

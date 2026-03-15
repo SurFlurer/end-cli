@@ -21,10 +21,7 @@
   {#snippet header()}
     <PanelHeader
       titleText={t("关于这个 App", "About this app")}
-      subtitleText={t(
-        "Rust + WebAssembly 的终末地产线规划器，使用 HiGHS 求解器在浏览器本地执行。",
-        "A Rust + WebAssembly production planner, using the HiGHS solver locally in the browser.",
-      )}
+      icon="info"
     ></PanelHeader>
   {/snippet}
 
