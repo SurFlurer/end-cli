@@ -11,6 +11,13 @@ en = "Fitting Unit"
 zh = "配件机"
 
 [[machines]]
+key = "Fluid Pump"
+power_w = 10
+en = "Fluid Pump"
+zh = "水泵"
+regions = ["wuling"]
+
+[[machines]]
 key = "Forge of the Sky"
 power_w = 50
 en = "Forge of the Sky"
@@ -78,13 +85,6 @@ key = "Shredding Unit"
 power_w = 5
 en = "Shredding Unit"
 zh = "粉碎机"
-
-[[machines]]
-key = "Fluid Pump"
-power_w = 10
-en = "Fluid Pump"
-zh = "水泵"
-regions = ["wuling"]
 
 [thermal_bank]
 key = "Thermal Bank"

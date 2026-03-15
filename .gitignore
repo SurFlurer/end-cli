@@ -15,3 +15,5 @@ target/
 /web/src/lib/generated
 /web/src-tauri/icons
 /web/src-tauri/gen/schemas
+
+*.pyc

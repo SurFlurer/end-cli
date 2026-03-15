@@ -1,0 +1,30 @@
+[project]
+name = "data-generator"
+version = "0.1.0"
+description = "Generate TOML data files for end-game from wiki Lua files"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "click>=8.3.1",
+    "lupa>=2.6",
+    "pydantic>=2.12.5",
+    "toml>=0.10.2",
+]
+
+[project.scripts]
+data-generator = "data_generator.cli:cli"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/data_generator"]
+
+[dependency-groups]
+dev = ["pyright>=1.1.396"]
+
+[tool.pyright]
+include = ["src"]
+pythonVersion = "3.12"
+typeCheckingMode = "strict"

@@ -1,3 +1,102 @@
+# Manual data for items, facilities, and recipes not in Lua files
+# This supplements the data from wiki_data/ Lua files
+
+# Machine definitions with power consumption and display names
+[[machines]]
+key = "Filling Unit"
+power_w = 20
+en = "Filling Unit"
+zh = "灌装机"
+
+[[machines]]
+key = "Fitting Unit"
+power_w = 20
+en = "Fitting Unit"
+zh = "配件机"
+
+[[machines]]
+key = "Forge of the Sky"
+power_w = 50
+en = "Forge of the Sky"
+zh = "天有洪炉"
+regions = ["wuling"]
+
+[[machines]]
+key = "Gearing Unit"
+power_w = 10
+en = "Gearing Unit"
+zh = "装备原件机"
+
+[[machines]]
+key = "Grinding Unit"
+power_w = 50
+en = "Grinding Unit"
+zh = "研磨机"
+
+[[machines]]
+key = "Moulding Unit"
+power_w = 10
+en = "Moulding Unit"
+zh = "塑形机"
+
+[[machines]]
+key = "Packaging Unit"
+power_w = 20
+en = "Packaging Unit"
+zh = "封装机"
+
+[[machines]]
+key = "Planting Unit"
+power_w = 20
+en = "Planting Unit"
+zh = "种植机"
+
+[[machines]]
+key = "Reactor Crucible"
+power_w = 50
+en = "Reactor Crucible"
+zh = "反应池"
+regions = ["wuling"]
+
+[[machines]]
+key = "Refining Unit"
+power_w = 5
+en = "Refining Unit"
+zh = "精炼炉"
+
+[[machines]]
+key = "Seed-Picking Unit"
+power_w = 10
+en = "Seed-Picking Unit"
+zh = "采种机"
+
+[[machines]]
+key = "Separating Unit"
+power_w = 20
+en = "Separating Unit"
+zh = "拆解机"
+regions = ["wuling"]
+
+[[machines]]
+key = "Shredding Unit"
+power_w = 5
+en = "Shredding Unit"
+zh = "粉碎机"
+
+# Fluid Pump is a manual recipe-only facility
+[[machines]]
+key = "Fluid Pump"
+power_w = 10
+en = "Fluid Pump"
+zh = "水泵"
+regions = ["wuling"]
+
+[thermal_bank]
+key = "Thermal Bank"
+en = "Thermal Bank"
+zh = "热能池"
+
+# Item display names (key -> {en, zh})
 [[items]]
 key = "Aketine"
 en = "Aketine"
@@ -647,3 +746,12 @@ zh = "高级芽针针剂"
 key = "Yazhen Syringe (C)"
 en = "Yazhen Syringe (C)"
 zh = "芽针针剂"
+
+# Manual recipes not in Lua files
+[[manual_recipes]]
+facility = "Fluid Pump"
+time_s = 1
+
+[[manual_recipes.products]]
+item = "Clean Water"
+count = 1

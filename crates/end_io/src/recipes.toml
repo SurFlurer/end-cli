@@ -23,11 +23,75 @@ item = "Amethyst Bottle"
 count = 1
 
 [[recipes.ingredients]]
+item = "Inert Xircon Effluent"
+count = 1
+
+[[recipes.products]]
+item = "Amethyst Bottle (Inert Xircon Effluent)"
+count = 1
+
+[[recipes]]
+facility = "Filling Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Amethyst Bottle"
+count = 1
+
+[[recipes.ingredients]]
 item = "Jincao Solution"
 count = 1
 
 [[recipes.products]]
 item = "Amethyst Bottle (Jincao Solution)"
+count = 1
+
+[[recipes]]
+facility = "Filling Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Amethyst Bottle"
+count = 1
+
+[[recipes.ingredients]]
+item = "Liquid Xiranite"
+count = 1
+
+[[recipes.products]]
+item = "Amethyst Bottle (Liquid Xiranite)"
+count = 1
+
+[[recipes]]
+facility = "Filling Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Amethyst Bottle"
+count = 1
+
+[[recipes.ingredients]]
+item = "Sewage"
+count = 1
+
+[[recipes.products]]
+item = "Amethyst Bottle (Sewage)"
+count = 1
+
+[[recipes]]
+facility = "Filling Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Amethyst Bottle"
+count = 1
+
+[[recipes.ingredients]]
+item = "Xircon Effluent"
+count = 1
+
+[[recipes.products]]
+item = "Amethyst Bottle (Xircon Effluent)"
 count = 1
 
 [[recipes]]
@@ -48,18 +112,98 @@ count = 1
 
 [[recipes]]
 facility = "Filling Unit"
-time_s = 2
+time_s = 10
+
+[[recipes.ingredients]]
+item = "Steel Bottle"
+count = 10
+
+[[recipes.ingredients]]
+item = "Ground Buckflower Powder"
+count = 10
+
+[[recipes.products]]
+item = "Buck Capsule (A)"
+count = 1
+
+[[recipes]]
+facility = "Filling Unit"
+time_s = 10
+
+[[recipes.ingredients]]
+item = "Ferrium Bottle"
+count = 10
+
+[[recipes.ingredients]]
+item = "Buckflower Powder"
+count = 10
+
+[[recipes.products]]
+item = "Buck Capsule (B)"
+count = 1
+
+[[recipes]]
+facility = "Filling Unit"
+time_s = 10
 
 [[recipes.ingredients]]
 item = "Amethyst Bottle"
-count = 1
+count = 5
 
 [[recipes.ingredients]]
-item = "Liquid Xiranite"
-count = 1
+item = "Buckflower Powder"
+count = 5
 
 [[recipes.products]]
-item = "Amethyst Bottle (Liquid Xiranite)"
+item = "Buck Capsule (C)"
+count = 1
+
+[[recipes]]
+facility = "Filling Unit"
+time_s = 10
+
+[[recipes.ingredients]]
+item = "Steel Bottle"
+count = 10
+
+[[recipes.ingredients]]
+item = "Ground Citrome Powder"
+count = 10
+
+[[recipes.products]]
+item = "Canned Citrome (A)"
+count = 1
+
+[[recipes]]
+facility = "Filling Unit"
+time_s = 10
+
+[[recipes.ingredients]]
+item = "Ferrium Bottle"
+count = 10
+
+[[recipes.ingredients]]
+item = "Citrome Powder"
+count = 10
+
+[[recipes.products]]
+item = "Canned Citrome (B)"
+count = 1
+
+[[recipes]]
+facility = "Filling Unit"
+time_s = 10
+
+[[recipes.ingredients]]
+item = "Amethyst Bottle"
+count = 5
+
+[[recipes.ingredients]]
+item = "Citrome Powder"
+count = 5
+
+[[recipes.products]]
+item = "Canned Citrome (C)"
 count = 1
 
 [[recipes]]
@@ -87,11 +231,75 @@ item = "Cryston Bottle"
 count = 1
 
 [[recipes.ingredients]]
+item = "Inert Xircon Effluent"
+count = 1
+
+[[recipes.products]]
+item = "Cryston Bottle (Inert Xircon Effluent)"
+count = 1
+
+[[recipes]]
+facility = "Filling Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Cryston Bottle"
+count = 1
+
+[[recipes.ingredients]]
 item = "Jincao Solution"
 count = 1
 
 [[recipes.products]]
 item = "Cryston Bottle (Jincao Solution)"
+count = 1
+
+[[recipes]]
+facility = "Filling Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Cryston Bottle"
+count = 1
+
+[[recipes.ingredients]]
+item = "Liquid Xiranite"
+count = 1
+
+[[recipes.products]]
+item = "Cryston Bottle (Liquid Xiranite)"
+count = 1
+
+[[recipes]]
+facility = "Filling Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Cryston Bottle"
+count = 1
+
+[[recipes.ingredients]]
+item = "Sewage"
+count = 1
+
+[[recipes.products]]
+item = "Cryston Bottle (Sewage)"
+count = 1
+
+[[recipes]]
+facility = "Filling Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Cryston Bottle"
+count = 1
+
+[[recipes.ingredients]]
+item = "Xircon Effluent"
+count = 1
+
+[[recipes.products]]
+item = "Cryston Bottle (Xircon Effluent)"
 count = 1
 
 [[recipes]]
@@ -115,7 +323,55 @@ facility = "Filling Unit"
 time_s = 2
 
 [[recipes.ingredients]]
-item = "Cryston Bottle"
+item = "Cuprium Bottle"
+count = 1
+
+[[recipes.ingredients]]
+item = "Clean Water"
+count = 1
+
+[[recipes.products]]
+item = "Cuprium Bottle (Clean Water)"
+count = 1
+
+[[recipes]]
+facility = "Filling Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Cuprium Bottle"
+count = 1
+
+[[recipes.ingredients]]
+item = "Inert Xircon Effluent"
+count = 1
+
+[[recipes.products]]
+item = "Cuprium Bottle (Inert Xircon Effluent)"
+count = 1
+
+[[recipes]]
+facility = "Filling Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Cuprium Bottle"
+count = 1
+
+[[recipes.ingredients]]
+item = "Jincao Solution"
+count = 1
+
+[[recipes.products]]
+item = "Cuprium Bottle (Jincao Solution)"
+count = 1
+
+[[recipes]]
+facility = "Filling Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Cuprium Bottle"
 count = 1
 
 [[recipes.ingredients]]
@@ -123,7 +379,55 @@ item = "Liquid Xiranite"
 count = 1
 
 [[recipes.products]]
-item = "Cryston Bottle (Liquid Xiranite)"
+item = "Cuprium Bottle (Liquid Xiranite)"
+count = 1
+
+[[recipes]]
+facility = "Filling Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Cuprium Bottle"
+count = 1
+
+[[recipes.ingredients]]
+item = "Sewage"
+count = 1
+
+[[recipes.products]]
+item = "Cuprium Bottle (Sewage)"
+count = 1
+
+[[recipes]]
+facility = "Filling Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Cuprium Bottle"
+count = 1
+
+[[recipes.ingredients]]
+item = "Xircon Effluent"
+count = 1
+
+[[recipes.products]]
+item = "Cuprium Bottle (Xircon Effluent)"
+count = 1
+
+[[recipes]]
+facility = "Filling Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Cuprium Bottle"
+count = 1
+
+[[recipes.ingredients]]
+item = "Yazhen Solution"
+count = 1
+
+[[recipes.products]]
+item = "Cuprium Bottle (Yazhen Solution)"
 count = 1
 
 [[recipes]]
@@ -151,6 +455,22 @@ item = "Ferrium Bottle"
 count = 1
 
 [[recipes.ingredients]]
+item = "Inert Xircon Effluent"
+count = 1
+
+[[recipes.products]]
+item = "Ferrium Bottle (Inert Xircon Effluent)"
+count = 1
+
+[[recipes]]
+facility = "Filling Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Ferrium Bottle"
+count = 1
+
+[[recipes.ingredients]]
 item = "Jincao Solution"
 count = 1
 
@@ -167,11 +487,11 @@ item = "Ferrium Bottle"
 count = 1
 
 [[recipes.ingredients]]
-item = "Yazhen Solution"
+item = "Liquid Xiranite"
 count = 1
 
 [[recipes.products]]
-item = "Ferrium Bottle (Yazhen Solution)"
+item = "Ferrium Bottle (Liquid Xiranite)"
 count = 1
 
 [[recipes]]
@@ -183,11 +503,43 @@ item = "Ferrium Bottle"
 count = 1
 
 [[recipes.ingredients]]
-item = "Liquid Xiranite"
+item = "Sewage"
 count = 1
 
 [[recipes.products]]
-item = "Ferrium Bottle (Liquid Xiranite)"
+item = "Ferrium Bottle (Sewage)"
+count = 1
+
+[[recipes]]
+facility = "Filling Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Ferrium Bottle"
+count = 1
+
+[[recipes.ingredients]]
+item = "Xircon Effluent"
+count = 1
+
+[[recipes.products]]
+item = "Ferrium Bottle (Xircon Effluent)"
+count = 1
+
+[[recipes]]
+facility = "Filling Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Ferrium Bottle"
+count = 1
+
+[[recipes.ingredients]]
+item = "Yazhen Solution"
+count = 1
+
+[[recipes.products]]
+item = "Ferrium Bottle (Yazhen Solution)"
 count = 1
 
 [[recipes]]
@@ -215,11 +567,11 @@ item = "Steel Bottle"
 count = 1
 
 [[recipes.ingredients]]
-item = "Jincao Solution"
+item = "Inert Xircon Effluent"
 count = 1
 
 [[recipes.products]]
-item = "Steel Bottle (Jincao Solution)"
+item = "Steel Bottle (Inert Xircon Effluent)"
 count = 1
 
 [[recipes]]
@@ -231,11 +583,11 @@ item = "Steel Bottle"
 count = 1
 
 [[recipes.ingredients]]
-item = "Yazhen Solution"
+item = "Jincao Solution"
 count = 1
 
 [[recipes.products]]
-item = "Steel Bottle (Yazhen Solution)"
+item = "Steel Bottle (Jincao Solution)"
 count = 1
 
 [[recipes]]
@@ -256,110 +608,50 @@ count = 1
 
 [[recipes]]
 facility = "Filling Unit"
-time_s = 10
-
-[[recipes.ingredients]]
-item = "Amethyst Bottle"
-count = 5
-
-[[recipes.ingredients]]
-item = "Citrome Powder"
-count = 5
-
-[[recipes.products]]
-item = "Canned Citrome (C)"
-count = 1
-
-[[recipes]]
-facility = "Filling Unit"
-time_s = 10
-
-[[recipes.ingredients]]
-item = "Ferrium Bottle"
-count = 10
-
-[[recipes.ingredients]]
-item = "Citrome Powder"
-count = 10
-
-[[recipes.products]]
-item = "Canned Citrome (B)"
-count = 1
-
-[[recipes]]
-facility = "Filling Unit"
-time_s = 10
-
-[[recipes.ingredients]]
-item = "Steel Bottle"
-count = 10
-
-[[recipes.ingredients]]
-item = "Ground Citrome Powder"
-count = 10
-
-[[recipes.products]]
-item = "Canned Citrome (A)"
-count = 1
-
-[[recipes]]
-facility = "Filling Unit"
-time_s = 10
-
-[[recipes.ingredients]]
-item = "Amethyst Bottle"
-count = 5
-
-[[recipes.ingredients]]
-item = "Buckflower Powder"
-count = 5
-
-[[recipes.products]]
-item = "Buck Capsule (C)"
-count = 1
-
-[[recipes]]
-facility = "Filling Unit"
-time_s = 10
-
-[[recipes.ingredients]]
-item = "Ferrium Bottle"
-count = 10
-
-[[recipes.ingredients]]
-item = "Buckflower Powder"
-count = 10
-
-[[recipes.products]]
-item = "Buck Capsule (B)"
-count = 1
-
-[[recipes]]
-facility = "Filling Unit"
-time_s = 10
-
-[[recipes.ingredients]]
-item = "Steel Bottle"
-count = 10
-
-[[recipes.ingredients]]
-item = "Ground Buckflower Powder"
-count = 10
-
-[[recipes.products]]
-item = "Buck Capsule (A)"
-count = 1
-
-[[recipes]]
-facility = "Fitting Unit"
 time_s = 2
 
 [[recipes.ingredients]]
-item = "Ferrium"
+item = "Steel Bottle"
+count = 1
+
+[[recipes.ingredients]]
+item = "Sewage"
 count = 1
 
 [[recipes.products]]
-item = "Ferrium Part"
+item = "Steel Bottle (Sewage)"
+count = 1
+
+[[recipes]]
+facility = "Filling Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Steel Bottle"
+count = 1
+
+[[recipes.ingredients]]
+item = "Xircon Effluent"
+count = 1
+
+[[recipes.products]]
+item = "Steel Bottle (Xircon Effluent)"
+count = 1
+
+[[recipes]]
+facility = "Filling Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Steel Bottle"
+count = 1
+
+[[recipes.ingredients]]
+item = "Yazhen Solution"
+count = 1
+
+[[recipes.products]]
+item = "Steel Bottle (Yazhen Solution)"
 count = 1
 
 [[recipes]]
@@ -379,18 +671,6 @@ facility = "Fitting Unit"
 time_s = 2
 
 [[recipes.ingredients]]
-item = "Steel"
-count = 1
-
-[[recipes.products]]
-item = "Steel Part"
-count = 1
-
-[[recipes]]
-facility = "Fitting Unit"
-time_s = 2
-
-[[recipes.ingredients]]
 item = "Cryston Fiber"
 count = 1
 
@@ -399,19 +679,47 @@ item = "Cryston Part"
 count = 1
 
 [[recipes]]
-facility = "Forge of the Sky"
+facility = "Fitting Unit"
 time_s = 2
 
 [[recipes.ingredients]]
-item = "Stabilized Carbon"
-count = 2
-
-[[recipes.ingredients]]
-item = "Clean Water"
+item = "Cuprium"
 count = 1
 
 [[recipes.products]]
-item = "Xiranite"
+item = "Cuprium Part"
+count = 1
+
+[[recipes]]
+facility = "Fitting Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Ferrium"
+count = 1
+
+[[recipes.products]]
+item = "Ferrium Part"
+count = 1
+
+[[recipes]]
+facility = "Fitting Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Steel"
+count = 1
+
+[[recipes.products]]
+item = "Steel Part"
+count = 1
+
+[[recipes]]
+facility = "Fluid Pump"
+time_s = 1
+
+[[recipes.products]]
+item = "Clean Water"
 count = 1
 
 [[recipes]]
@@ -431,6 +739,22 @@ item = "Bumper-Rich"
 count = 1
 
 [[recipes]]
+facility = "Forge of the Sky"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Stabilized Carbon"
+count = 2
+
+[[recipes.ingredients]]
+item = "Clean Water"
+count = 1
+
+[[recipes.products]]
+item = "Xiranite"
+count = 1
+
+[[recipes]]
 facility = "Gearing Unit"
 time_s = 10
 
@@ -444,6 +768,38 @@ count = 5
 
 [[recipes.products]]
 item = "Amethyst Component"
+count = 1
+
+[[recipes]]
+facility = "Gearing Unit"
+time_s = 10
+
+[[recipes.ingredients]]
+item = "Packed Origocrust"
+count = 10
+
+[[recipes.ingredients]]
+item = "Cryston Fiber"
+count = 10
+
+[[recipes.products]]
+item = "Cryston Component"
+count = 1
+
+[[recipes]]
+facility = "Gearing Unit"
+time_s = 10
+
+[[recipes.ingredients]]
+item = "Cuprium Part"
+count = 10
+
+[[recipes.ingredients]]
+item = "Xiranite"
+count = 10
+
+[[recipes.products]]
+item = "Cuprium Component"
 count = 1
 
 [[recipes]]
@@ -471,43 +827,11 @@ item = "Packed Origocrust"
 count = 10
 
 [[recipes.ingredients]]
-item = "Cryston Fiber"
-count = 10
-
-[[recipes.products]]
-item = "Cryston Component"
-count = 1
-
-[[recipes]]
-facility = "Gearing Unit"
-time_s = 10
-
-[[recipes.ingredients]]
-item = "Packed Origocrust"
-count = 10
-
-[[recipes.ingredients]]
 item = "Xiranite"
 count = 10
 
 [[recipes.products]]
 item = "Xiranite Component"
-count = 1
-
-[[recipes]]
-facility = "Grinding Unit"
-time_s = 2
-
-[[recipes.ingredients]]
-item = "Ferrium Powder"
-count = 2
-
-[[recipes.ingredients]]
-item = "Sandleaf Powder"
-count = 1
-
-[[recipes.products]]
-item = "Dense Ferrium Powder"
 count = 1
 
 [[recipes]]
@@ -531,22 +855,6 @@ facility = "Grinding Unit"
 time_s = 2
 
 [[recipes.ingredients]]
-item = "Originium Powder"
-count = 2
-
-[[recipes.ingredients]]
-item = "Sandleaf Powder"
-count = 1
-
-[[recipes.products]]
-item = "Dense Originium Powder"
-count = 1
-
-[[recipes]]
-facility = "Grinding Unit"
-time_s = 2
-
-[[recipes.ingredients]]
 item = "Carbon Powder"
 count = 2
 
@@ -556,6 +864,38 @@ count = 1
 
 [[recipes.products]]
 item = "Dense Carbon Powder"
+count = 1
+
+[[recipes]]
+facility = "Grinding Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Ferrium Powder"
+count = 2
+
+[[recipes.ingredients]]
+item = "Sandleaf Powder"
+count = 1
+
+[[recipes.products]]
+item = "Dense Ferrium Powder"
+count = 1
+
+[[recipes]]
+facility = "Grinding Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Originium Powder"
+count = 2
+
+[[recipes.ingredients]]
+item = "Sandleaf Powder"
+count = 1
+
+[[recipes.products]]
+item = "Dense Originium Powder"
 count = 1
 
 [[recipes]]
@@ -611,35 +951,11 @@ facility = "Moulding Unit"
 time_s = 2
 
 [[recipes.ingredients]]
-item = "Ferrium"
-count = 2
-
-[[recipes.products]]
-item = "Ferrium Bottle"
-count = 1
-
-[[recipes]]
-facility = "Moulding Unit"
-time_s = 2
-
-[[recipes.ingredients]]
 item = "Amethyst Fiber"
 count = 2
 
 [[recipes.products]]
 item = "Amethyst Bottle"
-count = 1
-
-[[recipes]]
-facility = "Moulding Unit"
-time_s = 2
-
-[[recipes.ingredients]]
-item = "Steel"
-count = 2
-
-[[recipes.products]]
-item = "Steel Bottle"
 count = 1
 
 [[recipes]]
@@ -655,51 +971,39 @@ item = "Cryston Bottle"
 count = 1
 
 [[recipes]]
-facility = "Packaging Unit"
-time_s = 10
+facility = "Moulding Unit"
+time_s = 2
 
 [[recipes.ingredients]]
-item = "Amethyst Part"
-count = 5
-
-[[recipes.ingredients]]
-item = "Aketine Powder"
-count = 1
+item = "Cuprium"
+count = 2
 
 [[recipes.products]]
-item = "Industrial Explosive"
+item = "Cuprium Bottle"
 count = 1
 
 [[recipes]]
-facility = "Packaging Unit"
-time_s = 10
+facility = "Moulding Unit"
+time_s = 2
 
 [[recipes.ingredients]]
-item = "Amethyst Part"
-count = 5
-
-[[recipes.ingredients]]
-item = "Originium Powder"
-count = 10
+item = "Ferrium"
+count = 2
 
 [[recipes.products]]
-item = "LC Valley Battery"
+item = "Ferrium Bottle"
 count = 1
 
 [[recipes]]
-facility = "Packaging Unit"
-time_s = 10
+facility = "Moulding Unit"
+time_s = 2
 
 [[recipes.ingredients]]
-item = "Ferrium Part"
-count = 10
-
-[[recipes.ingredients]]
-item = "Originium Powder"
-count = 15
+item = "Steel"
+count = 2
 
 [[recipes.products]]
-item = "SC Valley Battery"
+item = "Steel Bottle"
 count = 1
 
 [[recipes]]
@@ -723,15 +1027,15 @@ facility = "Packaging Unit"
 time_s = 10
 
 [[recipes.ingredients]]
-item = "Ferrium Part"
-count = 10
-
-[[recipes.ingredients]]
-item = "Ferrium Bottle (Yazhen Solution)"
+item = "Amethyst Part"
 count = 5
 
+[[recipes.ingredients]]
+item = "Aketine Powder"
+count = 1
+
 [[recipes.products]]
-item = "Yazhen Syringe (C)"
+item = "Industrial Explosive"
 count = 1
 
 [[recipes]]
@@ -755,6 +1059,38 @@ facility = "Packaging Unit"
 time_s = 10
 
 [[recipes.ingredients]]
+item = "Cuprium Part"
+count = 10
+
+[[recipes.ingredients]]
+item = "Cuprium Bottle (Jincao Solution)"
+count = 5
+
+[[recipes.products]]
+item = "Jincao Tea"
+count = 1
+
+[[recipes]]
+facility = "Packaging Unit"
+time_s = 10
+
+[[recipes.ingredients]]
+item = "Amethyst Part"
+count = 5
+
+[[recipes.ingredients]]
+item = "Originium Powder"
+count = 10
+
+[[recipes.products]]
+item = "LC Valley Battery"
+count = 1
+
+[[recipes]]
+facility = "Packaging Unit"
+time_s = 10
+
+[[recipes.ingredients]]
 item = "Xiranite"
 count = 5
 
@@ -764,6 +1100,82 @@ count = 15
 
 [[recipes.products]]
 item = "LC Wuling Battery"
+count = 1
+
+[[recipes]]
+facility = "Packaging Unit"
+time_s = 10
+
+[[recipes.ingredients]]
+item = "Ferrium Part"
+count = 10
+
+[[recipes.ingredients]]
+item = "Originium Powder"
+count = 15
+
+[[recipes.products]]
+item = "SC Valley Battery"
+count = 1
+
+[[recipes]]
+facility = "Packaging Unit"
+time_s = 10
+
+[[recipes.ingredients]]
+item = "Xircon"
+count = 5
+
+[[recipes.ingredients]]
+item = "Dense Originium Powder"
+count = 20
+
+[[recipes.products]]
+item = "SC Wuling Battery"
+count = 1
+
+[[recipes]]
+facility = "Packaging Unit"
+time_s = 10
+
+[[recipes.ingredients]]
+item = "Cuprium Part"
+count = 10
+
+[[recipes.ingredients]]
+item = "Cuprium Bottle (Yazhen Solution)"
+count = 5
+
+[[recipes.products]]
+item = "Yazhen Syringe (A)"
+count = 1
+
+[[recipes]]
+facility = "Packaging Unit"
+time_s = 10
+
+[[recipes.ingredients]]
+item = "Ferrium Part"
+count = 10
+
+[[recipes.ingredients]]
+item = "Ferrium Bottle (Yazhen Solution)"
+count = 5
+
+[[recipes.products]]
+item = "Yazhen Syringe (C)"
+count = 1
+
+[[recipes]]
+facility = "Planting Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Aketine Seed"
+count = 1
+
+[[recipes.products]]
+item = "Aketine"
 count = 1
 
 [[recipes]]
@@ -795,30 +1207,6 @@ facility = "Planting Unit"
 time_s = 2
 
 [[recipes.ingredients]]
-item = "Sandleaf Seed"
-count = 1
-
-[[recipes.products]]
-item = "Sandleaf"
-count = 1
-
-[[recipes]]
-facility = "Planting Unit"
-time_s = 2
-
-[[recipes.ingredients]]
-item = "Aketine Seed"
-count = 1
-
-[[recipes.products]]
-item = "Aketine"
-count = 1
-
-[[recipes]]
-facility = "Planting Unit"
-time_s = 2
-
-[[recipes.ingredients]]
 item = "Jincao Seed"
 count = 1
 
@@ -829,6 +1217,18 @@ count = 1
 [[recipes.products]]
 item = "Jincao"
 count = 2
+
+[[recipes]]
+facility = "Planting Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Sandleaf Seed"
+count = 1
+
+[[recipes.products]]
+item = "Sandleaf"
+count = 1
 
 [[recipes]]
 facility = "Planting Unit"
@@ -867,22 +1267,6 @@ facility = "Reactor Crucible"
 time_s = 2
 
 [[recipes.ingredients]]
-item = "Yazhen Powder"
-count = 1
-
-[[recipes.ingredients]]
-item = "Clean Water"
-count = 1
-
-[[recipes.products]]
-item = "Yazhen Solution"
-count = 1
-
-[[recipes]]
-facility = "Reactor Crucible"
-time_s = 2
-
-[[recipes.ingredients]]
 item = "Xiranite"
 count = 1
 
@@ -895,27 +1279,59 @@ item = "Liquid Xiranite"
 count = 1
 
 [[recipes]]
-facility = "Refining Unit"
+facility = "Reactor Crucible"
 time_s = 2
 
 [[recipes.ingredients]]
-item = "Ferrium Ore"
-count = 1
-
-[[recipes.products]]
-item = "Ferrium"
-count = 1
-
-[[recipes]]
-facility = "Refining Unit"
-time_s = 2
+item = "Xircon Effluent"
+count = 2
 
 [[recipes.ingredients]]
 item = "Ferrium Powder"
 count = 1
 
 [[recipes.products]]
-item = "Ferrium"
+item = "Xircon"
+count = 1
+
+[[recipes.products]]
+item = "Sewage"
+count = 1
+
+[[recipes]]
+facility = "Reactor Crucible"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Liquid Xiranite"
+count = 1
+
+[[recipes.ingredients]]
+item = "Sewage"
+count = 1
+
+[[recipes.products]]
+item = "Xircon Effluent"
+count = 1
+
+[[recipes.products]]
+item = "Inert Xircon Effluent"
+count = 1
+
+[[recipes]]
+facility = "Reactor Crucible"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Yazhen Powder"
+count = 1
+
+[[recipes.ingredients]]
+item = "Clean Water"
+count = 1
+
+[[recipes.products]]
+item = "Yazhen Solution"
 count = 1
 
 [[recipes]]
@@ -947,102 +1363,6 @@ facility = "Refining Unit"
 time_s = 2
 
 [[recipes.ingredients]]
-item = "Originium Ore"
-count = 1
-
-[[recipes.products]]
-item = "Origocrust"
-count = 1
-
-[[recipes]]
-facility = "Refining Unit"
-time_s = 2
-
-[[recipes.ingredients]]
-item = "Origocrust Powder"
-count = 1
-
-[[recipes.products]]
-item = "Origocrust"
-count = 1
-
-[[recipes]]
-facility = "Refining Unit"
-time_s = 2
-
-[[recipes.ingredients]]
-item = "Dense Origocrust Powder"
-count = 1
-
-[[recipes.products]]
-item = "Packed Origocrust"
-count = 1
-
-[[recipes]]
-facility = "Refining Unit"
-time_s = 2
-
-[[recipes.ingredients]]
-item = "Dense Ferrium Powder"
-count = 1
-
-[[recipes.products]]
-item = "Steel"
-count = 1
-
-[[recipes]]
-facility = "Refining Unit"
-time_s = 2
-
-[[recipes.ingredients]]
-item = "Cryston Powder"
-count = 1
-
-[[recipes.products]]
-item = "Cryston Fiber"
-count = 1
-
-[[recipes]]
-facility = "Refining Unit"
-time_s = 2
-
-[[recipes.ingredients]]
-item = "Dense Carbon Powder"
-count = 1
-
-[[recipes.products]]
-item = "Stabilized Carbon"
-count = 1
-
-[[recipes]]
-facility = "Refining Unit"
-time_s = 2
-
-[[recipes.ingredients]]
-item = "Dense Originium Powder"
-count = 1
-
-[[recipes.products]]
-item = "Dense Origocrust Powder"
-count = 1
-
-[[recipes]]
-facility = "Refining Unit"
-time_s = 2
-
-[[recipes.ingredients]]
-item = "Originium Powder"
-count = 1
-
-[[recipes.products]]
-item = "Origocrust Powder"
-count = 1
-
-[[recipes]]
-facility = "Refining Unit"
-time_s = 2
-
-[[recipes.ingredients]]
 item = "Buckflower"
 count = 1
 
@@ -1061,6 +1381,18 @@ count = 1
 [[recipes.products]]
 item = "Carbon"
 count = 1
+
+[[recipes]]
+facility = "Refining Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Jincao"
+count = 1
+
+[[recipes.products]]
+item = "Carbon"
+count = 2
 
 [[recipes]]
 facility = "Refining Unit"
@@ -1091,18 +1423,6 @@ facility = "Refining Unit"
 time_s = 2
 
 [[recipes.ingredients]]
-item = "Jincao"
-count = 1
-
-[[recipes.products]]
-item = "Carbon"
-count = 2
-
-[[recipes]]
-facility = "Refining Unit"
-time_s = 2
-
-[[recipes.ingredients]]
 item = "Yazhen"
 count = 1
 
@@ -1139,8 +1459,8 @@ facility = "Refining Unit"
 time_s = 2
 
 [[recipes.ingredients]]
-item = "Sandleaf Powder"
-count = 3
+item = "Jincao Powder"
+count = 1
 
 [[recipes.products]]
 item = "Carbon Powder"
@@ -1151,8 +1471,8 @@ facility = "Refining Unit"
 time_s = 2
 
 [[recipes.ingredients]]
-item = "Jincao Powder"
-count = 1
+item = "Sandleaf Powder"
+count = 3
 
 [[recipes.products]]
 item = "Carbon Powder"
@@ -1169,6 +1489,38 @@ count = 1
 [[recipes.products]]
 item = "Carbon Powder"
 count = 2
+
+[[recipes]]
+facility = "Refining Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Cryston Powder"
+count = 1
+
+[[recipes.products]]
+item = "Cryston Fiber"
+count = 1
+
+[[recipes]]
+facility = "Refining Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Cuprium Ore"
+count = 1
+
+[[recipes.ingredients]]
+item = "Clean Water"
+count = 1
+
+[[recipes.products]]
+item = "Cuprium"
+count = 1
+
+[[recipes.products]]
+item = "Sewage"
+count = 1
 
 [[recipes]]
 facility = "Refining Unit"
@@ -1193,6 +1545,138 @@ count = 1
 [[recipes.products]]
 item = "Dense Carbon Powder"
 count = 1
+
+[[recipes]]
+facility = "Refining Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Dense Originium Powder"
+count = 1
+
+[[recipes.products]]
+item = "Dense Origocrust Powder"
+count = 1
+
+[[recipes]]
+facility = "Refining Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Ferrium Ore"
+count = 1
+
+[[recipes.products]]
+item = "Ferrium"
+count = 1
+
+[[recipes]]
+facility = "Refining Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Ferrium Powder"
+count = 1
+
+[[recipes.products]]
+item = "Ferrium"
+count = 1
+
+[[recipes]]
+facility = "Refining Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Originium Ore"
+count = 1
+
+[[recipes.products]]
+item = "Origocrust"
+count = 1
+
+[[recipes]]
+facility = "Refining Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Origocrust Powder"
+count = 1
+
+[[recipes.products]]
+item = "Origocrust"
+count = 1
+
+[[recipes]]
+facility = "Refining Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Originium Powder"
+count = 1
+
+[[recipes.products]]
+item = "Origocrust Powder"
+count = 1
+
+[[recipes]]
+facility = "Refining Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Dense Origocrust Powder"
+count = 1
+
+[[recipes.products]]
+item = "Packed Origocrust"
+count = 1
+
+[[recipes]]
+facility = "Refining Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Dense Carbon Powder"
+count = 1
+
+[[recipes.products]]
+item = "Stabilized Carbon"
+count = 1
+
+[[recipes]]
+facility = "Refining Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Dense Ferrium Powder"
+count = 1
+
+[[recipes.products]]
+item = "Steel"
+count = 1
+
+[[recipes]]
+facility = "Seed-Picking Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Aketine"
+count = 1
+
+[[recipes.products]]
+item = "Aketine Seed"
+count = 2
+
+[[recipes]]
+facility = "Seed-Picking Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Amber Rice"
+count = 1
+
+[[recipes.products]]
+item = "Amber Rice Seed"
+count = 2
 
 [[recipes]]
 facility = "Seed-Picking Unit"
@@ -1223,30 +1707,6 @@ facility = "Seed-Picking Unit"
 time_s = 2
 
 [[recipes.ingredients]]
-item = "Sandleaf"
-count = 1
-
-[[recipes.products]]
-item = "Sandleaf Seed"
-count = 2
-
-[[recipes]]
-facility = "Seed-Picking Unit"
-time_s = 2
-
-[[recipes.ingredients]]
-item = "Aketine"
-count = 1
-
-[[recipes.products]]
-item = "Aketine Seed"
-count = 2
-
-[[recipes]]
-facility = "Seed-Picking Unit"
-time_s = 2
-
-[[recipes.ingredients]]
 item = "Jincao"
 count = 1
 
@@ -1259,12 +1719,12 @@ facility = "Seed-Picking Unit"
 time_s = 2
 
 [[recipes.ingredients]]
-item = "Yazhen"
+item = "Redjade Ginseng"
 count = 1
 
 [[recipes.products]]
-item = "Yazhen Seed"
-count = 1
+item = "Redjade Ginseng Seed"
+count = 2
 
 [[recipes]]
 facility = "Seed-Picking Unit"
@@ -1276,6 +1736,18 @@ count = 1
 
 [[recipes.products]]
 item = "Reed Rye Seed"
+count = 2
+
+[[recipes]]
+facility = "Seed-Picking Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Sandleaf"
+count = 1
+
+[[recipes.products]]
+item = "Sandleaf Seed"
 count = 2
 
 [[recipes]]
@@ -1295,24 +1767,12 @@ facility = "Seed-Picking Unit"
 time_s = 2
 
 [[recipes.ingredients]]
-item = "Redjade Ginseng"
+item = "Yazhen"
 count = 1
 
 [[recipes.products]]
-item = "Redjade Ginseng Seed"
-count = 2
-
-[[recipes]]
-facility = "Seed-Picking Unit"
-time_s = 2
-
-[[recipes.ingredients]]
-item = "Amber Rice"
+item = "Yazhen Seed"
 count = 1
-
-[[recipes.products]]
-item = "Amber Rice Seed"
-count = 2
 
 [[recipes]]
 facility = "Separating Unit"
@@ -1328,6 +1788,22 @@ count = 1
 
 [[recipes.products]]
 item = "Clean Water"
+count = 1
+
+[[recipes]]
+facility = "Separating Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Amethyst Bottle (Inert Xircon Effluent)"
+count = 1
+
+[[recipes.products]]
+item = "Amethyst Bottle"
+count = 1
+
+[[recipes.products]]
+item = "Inert Xircon Effluent"
 count = 1
 
 [[recipes]]
@@ -1351,22 +1827,6 @@ facility = "Separating Unit"
 time_s = 2
 
 [[recipes.ingredients]]
-item = "Amethyst Bottle (Yazhen Solution)"
-count = 1
-
-[[recipes.products]]
-item = "Amethyst Bottle"
-count = 1
-
-[[recipes.products]]
-item = "Yazhen Solution"
-count = 1
-
-[[recipes]]
-facility = "Separating Unit"
-time_s = 2
-
-[[recipes.ingredients]]
 item = "Amethyst Bottle (Liquid Xiranite)"
 count = 1
 
@@ -1383,15 +1843,15 @@ facility = "Separating Unit"
 time_s = 2
 
 [[recipes.ingredients]]
-item = "Ferrium Bottle (Clean Water)"
+item = "Amethyst Bottle (Sewage)"
 count = 1
 
 [[recipes.products]]
-item = "Ferrium Bottle"
+item = "Amethyst Bottle"
 count = 1
 
 [[recipes.products]]
-item = "Clean Water"
+item = "Sewage"
 count = 1
 
 [[recipes]]
@@ -1399,15 +1859,15 @@ facility = "Separating Unit"
 time_s = 2
 
 [[recipes.ingredients]]
-item = "Ferrium Bottle (Jincao Solution)"
+item = "Amethyst Bottle (Xircon Effluent)"
 count = 1
 
 [[recipes.products]]
-item = "Ferrium Bottle"
+item = "Amethyst Bottle"
 count = 1
 
 [[recipes.products]]
-item = "Jincao Solution"
+item = "Xircon Effluent"
 count = 1
 
 [[recipes]]
@@ -1415,31 +1875,15 @@ facility = "Separating Unit"
 time_s = 2
 
 [[recipes.ingredients]]
-item = "Ferrium Bottle (Yazhen Solution)"
+item = "Amethyst Bottle (Yazhen Solution)"
 count = 1
 
 [[recipes.products]]
-item = "Ferrium Bottle"
+item = "Amethyst Bottle"
 count = 1
 
 [[recipes.products]]
 item = "Yazhen Solution"
-count = 1
-
-[[recipes]]
-facility = "Separating Unit"
-time_s = 2
-
-[[recipes.ingredients]]
-item = "Ferrium Bottle (Liquid Xiranite)"
-count = 1
-
-[[recipes.products]]
-item = "Ferrium Bottle"
-count = 1
-
-[[recipes.products]]
-item = "Liquid Xiranite"
 count = 1
 
 [[recipes]]
@@ -1463,6 +1907,22 @@ facility = "Separating Unit"
 time_s = 2
 
 [[recipes.ingredients]]
+item = "Cryston Bottle (Inert Xircon Effluent)"
+count = 1
+
+[[recipes.products]]
+item = "Cryston Bottle"
+count = 1
+
+[[recipes.products]]
+item = "Inert Xircon Effluent"
+count = 1
+
+[[recipes]]
+facility = "Separating Unit"
+time_s = 2
+
+[[recipes.ingredients]]
 item = "Cryston Bottle (Jincao Solution)"
 count = 1
 
@@ -1472,22 +1932,6 @@ count = 1
 
 [[recipes.products]]
 item = "Jincao Solution"
-count = 1
-
-[[recipes]]
-facility = "Separating Unit"
-time_s = 2
-
-[[recipes.ingredients]]
-item = "Cryston Bottle (Yazhen Solution)"
-count = 1
-
-[[recipes.products]]
-item = "Cryston Bottle"
-count = 1
-
-[[recipes.products]]
-item = "Yazhen Solution"
 count = 1
 
 [[recipes]]
@@ -1511,6 +1955,278 @@ facility = "Separating Unit"
 time_s = 2
 
 [[recipes.ingredients]]
+item = "Cryston Bottle (Sewage)"
+count = 1
+
+[[recipes.products]]
+item = "Cryston Bottle"
+count = 1
+
+[[recipes.products]]
+item = "Sewage"
+count = 1
+
+[[recipes]]
+facility = "Separating Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Cryston Bottle (Xircon Effluent)"
+count = 1
+
+[[recipes.products]]
+item = "Cryston Bottle"
+count = 1
+
+[[recipes.products]]
+item = "Xircon Effluent"
+count = 1
+
+[[recipes]]
+facility = "Separating Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Cryston Bottle (Yazhen Solution)"
+count = 1
+
+[[recipes.products]]
+item = "Cryston Bottle"
+count = 1
+
+[[recipes.products]]
+item = "Yazhen Solution"
+count = 1
+
+[[recipes]]
+facility = "Separating Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Cuprium Bottle (Clean Water)"
+count = 1
+
+[[recipes.products]]
+item = "Cuprium Bottle"
+count = 1
+
+[[recipes.products]]
+item = "Clean Water"
+count = 1
+
+[[recipes]]
+facility = "Separating Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Cuprium Bottle (Inert Xircon Effluent)"
+count = 1
+
+[[recipes.products]]
+item = "Cuprium Bottle"
+count = 1
+
+[[recipes.products]]
+item = "Inert Xircon Effluent"
+count = 1
+
+[[recipes]]
+facility = "Separating Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Cuprium Bottle (Jincao Solution)"
+count = 1
+
+[[recipes.products]]
+item = "Cuprium Bottle"
+count = 1
+
+[[recipes.products]]
+item = "Jincao Solution"
+count = 1
+
+[[recipes]]
+facility = "Separating Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Cuprium Bottle (Liquid Xiranite)"
+count = 1
+
+[[recipes.products]]
+item = "Cuprium Bottle"
+count = 1
+
+[[recipes.products]]
+item = "Liquid Xiranite"
+count = 1
+
+[[recipes]]
+facility = "Separating Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Cuprium Bottle (Sewage)"
+count = 1
+
+[[recipes.products]]
+item = "Cuprium Bottle"
+count = 1
+
+[[recipes.products]]
+item = "Sewage"
+count = 1
+
+[[recipes]]
+facility = "Separating Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Cuprium Bottle (Xircon Effluent)"
+count = 1
+
+[[recipes.products]]
+item = "Cuprium Bottle"
+count = 1
+
+[[recipes.products]]
+item = "Xircon Effluent"
+count = 1
+
+[[recipes]]
+facility = "Separating Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Cuprium Bottle (Yazhen Solution)"
+count = 1
+
+[[recipes.products]]
+item = "Cuprium Bottle"
+count = 1
+
+[[recipes.products]]
+item = "Yazhen Solution"
+count = 1
+
+[[recipes]]
+facility = "Separating Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Ferrium Bottle (Clean Water)"
+count = 1
+
+[[recipes.products]]
+item = "Ferrium Bottle"
+count = 1
+
+[[recipes.products]]
+item = "Clean Water"
+count = 1
+
+[[recipes]]
+facility = "Separating Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Ferrium Bottle (Inert Xircon Effluent)"
+count = 1
+
+[[recipes.products]]
+item = "Ferrium Bottle"
+count = 1
+
+[[recipes.products]]
+item = "Inert Xircon Effluent"
+count = 1
+
+[[recipes]]
+facility = "Separating Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Ferrium Bottle (Jincao Solution)"
+count = 1
+
+[[recipes.products]]
+item = "Ferrium Bottle"
+count = 1
+
+[[recipes.products]]
+item = "Jincao Solution"
+count = 1
+
+[[recipes]]
+facility = "Separating Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Ferrium Bottle (Liquid Xiranite)"
+count = 1
+
+[[recipes.products]]
+item = "Ferrium Bottle"
+count = 1
+
+[[recipes.products]]
+item = "Liquid Xiranite"
+count = 1
+
+[[recipes]]
+facility = "Separating Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Ferrium Bottle (Sewage)"
+count = 1
+
+[[recipes.products]]
+item = "Ferrium Bottle"
+count = 1
+
+[[recipes.products]]
+item = "Sewage"
+count = 1
+
+[[recipes]]
+facility = "Separating Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Ferrium Bottle (Xircon Effluent)"
+count = 1
+
+[[recipes.products]]
+item = "Ferrium Bottle"
+count = 1
+
+[[recipes.products]]
+item = "Xircon Effluent"
+count = 1
+
+[[recipes]]
+facility = "Separating Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Ferrium Bottle (Yazhen Solution)"
+count = 1
+
+[[recipes.products]]
+item = "Ferrium Bottle"
+count = 1
+
+[[recipes.products]]
+item = "Yazhen Solution"
+count = 1
+
+[[recipes]]
+facility = "Separating Unit"
+time_s = 2
+
+[[recipes.ingredients]]
 item = "Steel Bottle (Clean Water)"
 count = 1
 
@@ -1520,6 +2236,22 @@ count = 1
 
 [[recipes.products]]
 item = "Clean Water"
+count = 1
+
+[[recipes]]
+facility = "Separating Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Steel Bottle (Inert Xircon Effluent)"
+count = 1
+
+[[recipes.products]]
+item = "Steel Bottle"
+count = 1
+
+[[recipes.products]]
+item = "Inert Xircon Effluent"
 count = 1
 
 [[recipes]]
@@ -1543,22 +2275,6 @@ facility = "Separating Unit"
 time_s = 2
 
 [[recipes.ingredients]]
-item = "Steel Bottle (Yazhen Solution)"
-count = 1
-
-[[recipes.products]]
-item = "Steel Bottle"
-count = 1
-
-[[recipes.products]]
-item = "Yazhen Solution"
-count = 1
-
-[[recipes]]
-facility = "Separating Unit"
-time_s = 2
-
-[[recipes.ingredients]]
 item = "Steel Bottle (Liquid Xiranite)"
 count = 1
 
@@ -1571,16 +2287,64 @@ item = "Liquid Xiranite"
 count = 1
 
 [[recipes]]
+facility = "Separating Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Steel Bottle (Sewage)"
+count = 1
+
+[[recipes.products]]
+item = "Steel Bottle"
+count = 1
+
+[[recipes.products]]
+item = "Sewage"
+count = 1
+
+[[recipes]]
+facility = "Separating Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Steel Bottle (Xircon Effluent)"
+count = 1
+
+[[recipes.products]]
+item = "Steel Bottle"
+count = 1
+
+[[recipes.products]]
+item = "Xircon Effluent"
+count = 1
+
+[[recipes]]
+facility = "Separating Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Steel Bottle (Yazhen Solution)"
+count = 1
+
+[[recipes.products]]
+item = "Steel Bottle"
+count = 1
+
+[[recipes.products]]
+item = "Yazhen Solution"
+count = 1
+
+[[recipes]]
 facility = "Shredding Unit"
 time_s = 2
 
 [[recipes.ingredients]]
-item = "Ferrium"
+item = "Aketine"
 count = 1
 
 [[recipes.products]]
-item = "Ferrium Powder"
-count = 1
+item = "Aketine Powder"
+count = 2
 
 [[recipes]]
 facility = "Shredding Unit"
@@ -1592,42 +2356,6 @@ count = 1
 
 [[recipes.products]]
 item = "Amethyst Powder"
-count = 1
-
-[[recipes]]
-facility = "Shredding Unit"
-time_s = 2
-
-[[recipes.ingredients]]
-item = "Originium Ore"
-count = 1
-
-[[recipes.products]]
-item = "Originium Powder"
-count = 1
-
-[[recipes]]
-facility = "Shredding Unit"
-time_s = 2
-
-[[recipes.ingredients]]
-item = "Carbon"
-count = 1
-
-[[recipes.products]]
-item = "Carbon Powder"
-count = 2
-
-[[recipes]]
-facility = "Shredding Unit"
-time_s = 2
-
-[[recipes.ingredients]]
-item = "Origocrust"
-count = 1
-
-[[recipes.products]]
-item = "Origocrust Powder"
 count = 1
 
 [[recipes]]
@@ -1647,6 +2375,18 @@ facility = "Shredding Unit"
 time_s = 2
 
 [[recipes.ingredients]]
+item = "Carbon"
+count = 1
+
+[[recipes.products]]
+item = "Carbon Powder"
+count = 2
+
+[[recipes]]
+facility = "Shredding Unit"
+time_s = 2
+
+[[recipes.ingredients]]
 item = "Citrome"
 count = 1
 
@@ -1659,24 +2399,24 @@ facility = "Shredding Unit"
 time_s = 2
 
 [[recipes.ingredients]]
-item = "Sandleaf"
+item = "Cuprium"
 count = 1
 
 [[recipes.products]]
-item = "Sandleaf Powder"
-count = 3
+item = "Cuprium Powder"
+count = 1
 
 [[recipes]]
 facility = "Shredding Unit"
 time_s = 2
 
 [[recipes.ingredients]]
-item = "Aketine"
+item = "Ferrium"
 count = 1
 
 [[recipes.products]]
-item = "Aketine Powder"
-count = 2
+item = "Ferrium Powder"
+count = 1
 
 [[recipes]]
 facility = "Shredding Unit"
@@ -1695,6 +2435,42 @@ facility = "Shredding Unit"
 time_s = 2
 
 [[recipes.ingredients]]
+item = "Originium Ore"
+count = 1
+
+[[recipes.products]]
+item = "Originium Powder"
+count = 1
+
+[[recipes]]
+facility = "Shredding Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Origocrust"
+count = 1
+
+[[recipes.products]]
+item = "Origocrust Powder"
+count = 1
+
+[[recipes]]
+facility = "Shredding Unit"
+time_s = 2
+
+[[recipes.ingredients]]
+item = "Sandleaf"
+count = 1
+
+[[recipes.products]]
+item = "Sandleaf Powder"
+count = 3
+
+[[recipes]]
+facility = "Shredding Unit"
+time_s = 2
+
+[[recipes.ingredients]]
 item = "Yazhen"
 count = 1
 
@@ -1702,20 +2478,12 @@ count = 1
 item = "Yazhen Powder"
 count = 2
 
-[[recipes]]
-facility = "Fluid Pump"
-time_s = 1
-
-[[recipes.products]]
-item = "Clean Water"
-count = 1
-
 [[power_recipes]]
-power_w = 1100
-time_s = 40
+power_w = 50
+time_s = 8
 
 [power_recipes.ingredient]
-item = "HC Valley Battery"
+item = "Originium Ore"
 count = 1
 
 [[power_recipes]]
@@ -1727,25 +2495,25 @@ item = "LC Valley Battery"
 count = 1
 
 [[power_recipes]]
-power_w = 1600
-time_s = 40
-
-[power_recipes.ingredient]
-item = "LC Wuling Battery"
-count = 1
-
-[[power_recipes]]
-power_w = 50
-time_s = 8
-
-[power_recipes.ingredient]
-item = "Originium Ore"
-count = 1
-
-[[power_recipes]]
 power_w = 420
 time_s = 40
 
 [power_recipes.ingredient]
 item = "SC Valley Battery"
+count = 1
+
+[[power_recipes]]
+power_w = 1100
+time_s = 40
+
+[power_recipes.ingredient]
+item = "HC Valley Battery"
+count = 1
+
+[[power_recipes]]
+power_w = 1600
+time_s = 40
+
+[power_recipes.ingredient]
+item = "LC Wuling Battery"
 count = 1
