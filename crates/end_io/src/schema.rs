@@ -90,7 +90,6 @@ pub(crate) struct RecipeToml {
     pub(crate) facility: Key,
     #[serde(deserialize_with = "deserialize_positive_u32")]
     pub(crate) time_s: NonZeroU32,
-    #[serde(default = "default_empty_spanned_stack_list")]
     pub(crate) ingredients: Spanned<Box<[Spanned<StackToml>]>>,
     pub(crate) products: Spanned<Box<[Spanned<StackToml>]>>,
 }
@@ -467,8 +466,4 @@ fn parse_supported_aic_version(value: i64) -> Result<u32, String> {
 
 fn default_empty_spanned_item_positive_u32_map() -> Spanned<BTreeMap<KeyToml, PositiveU32Toml>> {
     Spanned::new(0..0, BTreeMap::new())
-}
-
-fn default_empty_spanned_stack_list() -> Spanned<Box<[Spanned<StackToml>]>> {
-    Spanned::new(0..0, Vec::<Spanned<StackToml>>::new().into_boxed_slice())
 }

@@ -94,6 +94,12 @@ en = "Fluid Pump"
 zh = "水泵"
 regions = ["wuling"]
 
+[[machines]]
+key = "Water Treatment Unit"
+power_w = 50
+en = "Water Treatment Unit"
+zh = "废水处理机"
+
 [thermal_bank]
 key = "Thermal Bank"
 en = "Thermal Bank"
@@ -764,4 +770,32 @@ time_s = 1
 
 [[manual_recipes.products]]
 item = "Clean Water"
+count = 1
+
+# Water Treatment Unit recipes
+[[manual_recipes]]
+facility = "Water Treatment Unit"
+time_s = 2
+products = []
+
+[[manual_recipes.ingredients]]
+item = "Sewage"
+count = 1
+
+[[manual_recipes]]
+facility = "Water Treatment Unit"
+time_s = 2
+products = []
+
+[[manual_recipes.ingredients]]
+item = "Inert Xircon Effluent"
+count = 1
+
+[[manual_recipes]]
+facility = "Water Treatment Unit"
+time_s = 2
+products = []
+
+[[manual_recipes.ingredients]]
+item = "Xircon Effluent"
 count = 1

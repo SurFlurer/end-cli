@@ -160,9 +160,6 @@ impl<'id, State: ThermalBankState> CatalogBuilder<'id, State> {
         ingredients: Box<[Stack<'id>]>,
         products: Box<[Stack<'id>]>,
     ) -> Result<RecipeId<'id>, CatalogBuildError> {
-        if products.is_empty() {
-            return Err(CatalogBuildError::RecipeProductsMustNotBeEmpty);
-        }
         self.validate_recipe_stacks(&ingredients, |item_id| {
             CatalogBuildError::DuplicateRecipeIngredientItem { item_id }
         })?;

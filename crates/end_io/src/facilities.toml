@@ -89,6 +89,12 @@ power_w = 5
 en = "Shredding Unit"
 zh = "粉碎机"
 
+[[machines]]
+key = "Water Treatment Unit"
+power_w = 50
+en = "Water Treatment Unit"
+zh = "废水处理机"
+
 [thermal_bank]
 key = "Thermal Bank"
 en = "Thermal Bank"

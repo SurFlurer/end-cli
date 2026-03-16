@@ -13,6 +13,4 @@ pub enum CatalogBuildError {
     DuplicateRecipeProductItem { item_id: u32 },
     #[error("Recipe ingredients must not be empty")]
     RecipeIngredientsMustNotBeEmpty,
-    #[error("Recipe products must not be empty")]
-    RecipeProductsMustNotBeEmpty,
 }

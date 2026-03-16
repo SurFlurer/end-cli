@@ -325,8 +325,7 @@ pub fn map_recipe_build_error(
             spans.ingredients.or_else(|| spans.recipe.clone()),
         ),
 
-        CatalogBuildError::RecipeProductsMustNotBeEmpty
-        | CatalogBuildError::DuplicateRecipeProductItem { .. } => (
+        CatalogBuildError::DuplicateRecipeProductItem { .. } => (
             "recipes.products",
             spans.products.or_else(|| spans.recipe.clone()),
         ),

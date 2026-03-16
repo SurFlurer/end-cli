@@ -132,6 +132,37 @@ fn push_recipe_allows_empty_ingredients_with_non_empty_products() {
 }
 
 #[test]
+fn push_recipe_allows_empty_products() {
+    make_guard!(guard);
+    let (builder, a, _b, machine) = sample_builder(guard);
+    let mut builder = builder
+        .add_thermal_bank(ThermalBankDef {
+            key: key("Thermal Bank"),
+            en: name("Thermal Bank"),
+            zh: name("Thermal Bank"),
+        })
+        .expect("add thermal bank");
+
+    let recipe_id = builder
+        .push_recipe(
+            machine,
+            nz(1),
+            vec![Stack {
+                item: a,
+                count: nz(1),
+            }]
+            .into(),
+            Vec::new().into_boxed_slice(),
+        )
+        .expect("sink recipe should be accepted");
+
+    let catalog = builder.build();
+    let recipe = catalog.recipe(recipe_id);
+    assert_eq!(recipe.ingredients.len(), 1, "ingredients should stay non-empty");
+    assert!(recipe.products.is_empty(), "products should be empty");
+}
+
+#[test]
 fn add_facility_rejects_duplicate_key() {
     make_guard!(guard);
     let mut builder = Catalog::builder(guard);

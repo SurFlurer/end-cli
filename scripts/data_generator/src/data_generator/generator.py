@@ -191,6 +191,11 @@ def generate_facilities(manual_data_path: Path) -> FacilitiesToml:
     )
 
 
+def format_inline_table(item: str, count: int) -> str:
+    """Format a stack as an inline table."""
+    return f'{{ item = "{item}", count = {count} }}'
+
+
 def format_recipes_toml(recipes: List[RecipeToml], power_recipes: List[PowerRecipeToml]) -> str:
     """Format recipes.toml with exact matching format to original."""
     lines: List[str] = [
@@ -198,35 +203,33 @@ def format_recipes_toml(recipes: List[RecipeToml], power_recipes: List[PowerReci
         "# Do not edit manually. Edit scripts/data_generator/manual_data.toml instead.",
         "",
     ]
-    
+
     for recipe in recipes:
         lines.append("[[recipes]]")
         lines.append(f'facility = "{recipe.facility}"')
         lines.append(f"time_s = {recipe.time_s}")
+
+        # Format ingredients as inline array of tables
+        if recipe.ingredients:
+            lines.append(f"ingredients = [{', '.join(format_inline_table(ing.item, ing.count) for ing in recipe.ingredients)}]")
+        else:
+            lines.append("ingredients = []")
+
+        # Format products as inline array of tables
+        if recipe.products:
+            lines.append(f"products = [{', '.join(format_inline_table(prod.item, prod.count) for prod in recipe.products)}]")
+        else:
+            lines.append("products = []")
+
         lines.append("")
-        
-        for ing in recipe.ingredients:
-            lines.append("[[recipes.ingredients]]")
-            lines.append(f'item = "{ing.item}"')
-            lines.append(f"count = {ing.count}")
-            lines.append("")
-        
-        for prod in recipe.products:
-            lines.append("[[recipes.products]]")
-            lines.append(f'item = "{prod.item}"')
-            lines.append(f"count = {prod.count}")
-            lines.append("")
-    
+
     for power_recipe in power_recipes:
         lines.append("[[power_recipes]]")
         lines.append(f"power_w = {power_recipe.power_w}")
         lines.append(f"time_s = {power_recipe.time_s}")
+        lines.append(f"ingredient = {format_inline_table(power_recipe.ingredient.item, power_recipe.ingredient.count)}")
         lines.append("")
-        lines.append("[power_recipes.ingredient]")
-        lines.append(f'item = "{power_recipe.ingredient.item}"')
-        lines.append(f"count = {power_recipe.ingredient.count}")
-        lines.append("")
-    
+
     return '\n'.join(lines)
 
 
