@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "preview:e2e": "npm run build:wasm && npm run build -- --logLevel warn && npm run preview -- --host 127.0.0.1 --strictPort",
-    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "check": "vite build --mode development && svelte-check --tsconfig ./tsconfig.json",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test:unit": "vitest run",
