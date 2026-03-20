@@ -79,13 +79,13 @@ jobs:
           VITE_BASE_PATH: ./
         run: npm run build
 
-      - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy web/dist --project-name=end --branch=main
-          gitHubToken: ${{ github.token }}
+      # - name: Deploy to Cloudflare Pages
+      #   uses: cloudflare/wrangler-action@v3
+      #   with:
+      #     apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      #     accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      #     command: pages deploy web/dist --project-name=end --branch=main
+      #     gitHubToken: ${{ github.token }}
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
