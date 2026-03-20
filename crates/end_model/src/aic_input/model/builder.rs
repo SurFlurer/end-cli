@@ -3,15 +3,15 @@ use std::collections::HashSet;
 use generativity::Guard;
 
 use super::{
-    AicBuildError, AicInputs, ItemNonZeroU32Map, OutpostId, OutpostInput, PowerConfig, Region,
+    AicBuildError, AicInputs, ItemPosF64Map, OutpostId, OutpostInput, PowerConfig, Region,
     Stage2Weights,
 };
 
 #[derive(Debug)]
 pub struct AicInputsBuilder<'cid, 'sid> {
     region: Region,
-    supply_per_min: ItemNonZeroU32Map<'cid>,
-    external_consumption_per_min: ItemNonZeroU32Map<'cid>,
+    supply_per_min: ItemPosF64Map<'cid>,
+    external_consumption_per_min: ItemPosF64Map<'cid>,
     outposts: Vec<OutpostInput<'cid>>,
     outpost_keys: HashSet<crate::Key>,
     power_config: PowerConfig,
@@ -23,8 +23,8 @@ impl<'cid, 'sid> AicInputs<'cid, 'sid> {
     pub fn builder(
         guard: Guard<'sid>,
         power_config: PowerConfig,
-        supply_per_min: ItemNonZeroU32Map<'cid>,
-        external_consumption_per_min: ItemNonZeroU32Map<'cid>,
+        supply_per_min: ItemPosF64Map<'cid>,
+        external_consumption_per_min: ItemPosF64Map<'cid>,
     ) -> AicInputsBuilder<'cid, 'sid> {
         AicInputsBuilder {
             region: Region::FourthValley,

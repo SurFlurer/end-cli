@@ -3,7 +3,7 @@ mod types;
 
 pub use builder::AicInputsBuilder;
 pub use types::{
-    AicBuildError, AicInputs, ItemNonZeroU32Map, ItemU32Map, OutpostId, OutpostInput, PowerConfig,
+    AicBuildError, AicInputs, ItemNonZeroU32Map, ItemPosF64Map, ItemU32Map, OutpostId, OutpostInput, PowerConfig,
     Region, Stage2Weights,
 };
 
@@ -20,11 +20,11 @@ impl<'cid, 'sid> AicInputs<'cid, 'sid> {
         self.region
     }
 
-    pub fn supply_per_min(&self) -> &ItemNonZeroU32Map<'cid> {
+    pub fn supply_per_min(&self) -> &ItemPosF64Map<'cid> {
         &self.supply_per_min
     }
 
-    pub fn external_consumption_per_min(&self) -> &ItemNonZeroU32Map<'cid> {
+    pub fn external_consumption_per_min(&self) -> &ItemPosF64Map<'cid> {
         &self.external_consumption_per_min
     }
 

@@ -401,6 +401,7 @@
           <InputField
             type="number"
             min="0"
+            step="any"
             value={row.value}
             oninput={(event) =>
               actions.supply.setValue(
@@ -460,6 +461,7 @@
           <InputField
             type="number"
             min="0"
+            step="any"
             value={row.value}
             oninput={(event) =>
               actions.consumption.setValue(

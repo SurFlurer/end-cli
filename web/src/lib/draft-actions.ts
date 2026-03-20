@@ -100,7 +100,7 @@ export function setSupplyValue(draft: AicDraft, index: number, value: number): A
       rowIndex === index
         ? {
             ...row,
-            value: asNonNegativeInt(value)
+            value: asNonNegativeNumber(value)
           }
         : row
     )
@@ -128,7 +128,7 @@ export function setConsumptionValue(draft: AicDraft, index: number, value: numbe
       rowIndex === index
         ? {
             ...row,
-            value: asNonNegativeInt(value)
+            value: asNonNegativeNumber(value)
           }
         : row
     )

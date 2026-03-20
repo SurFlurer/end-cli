@@ -162,7 +162,7 @@ version = 2
     );
 
     let err = load_aic_from_str(&src, &catalog, aic_guard).expect_err("zero supply should fail");
-    assert_toml_parse_with_span(&err, "aic.toml", "must be >= 1, got 0");
+    assert_toml_parse_with_span(&err, "aic.toml", "must be > 0, got 0");
 }
 
 #[test]
@@ -182,7 +182,7 @@ version = 2
 
     let err =
         load_aic_from_str(&src, &catalog, aic_guard).expect_err("zero consumption should fail");
-    assert_toml_parse_with_span(&err, "aic.toml", "must be >= 1, got 0");
+    assert_toml_parse_with_span(&err, "aic.toml", "must be > 0, got 0");
 }
 
 #[test]

@@ -5,7 +5,7 @@ mod optimization;
 mod text;
 
 pub use aic_input::{
-    AicBuildError, AicInputs, AicInputsBuilder, ItemNonZeroU32Map, ItemU32Map, OutpostId,
+    AicBuildError, AicInputs, AicInputsBuilder, ItemNonZeroU32Map, ItemPosF64Map, ItemU32Map, OutpostId,
     OutpostInput, PowerConfig, Region, Stage2Weights,
 };
 pub use catalog::{

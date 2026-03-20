@@ -41,7 +41,7 @@ pub fn build_item_subproblems<'cid, 'sid, 'rid>(
             &mut per_item,
             item,
             SupplySite::ExternalSupply { item },
-            supply.get() as f64,
+            supply.get(),
             "external_supply",
         )?;
     }
@@ -56,7 +56,7 @@ pub fn build_item_subproblems<'cid, 'sid, 'rid>(
             &mut per_item,
             item,
             DemandSite::ExternalConsumption { item },
-            consumption.get() as f64,
+            consumption.get(),
             "external_consumption",
         )?;
     }
@@ -934,7 +934,7 @@ mod tests {
         let mut aic_builder = AicInputs::builder(
             aic_guard,
             PowerConfig::default(),
-            vec![(ore, nz(20))].into(),
+            vec![(ore, PosF64::new(20.0).expect("positive"))].into(),
             Default::default(),
         );
         aic_builder
@@ -1021,8 +1021,8 @@ mod tests {
         let mut aic_builder = AicInputs::builder(
             aic_guard,
             PowerConfig::default(),
-            vec![(item, nz(10))].into(),
-            vec![(item, nz(4))].into(),
+            vec![(item, PosF64::new(10.0).expect("positive"))].into(),
+            vec![(item, PosF64::new(4.0).expect("positive"))].into(),
         );
         aic_builder
             .add_outpost(OutpostInput {
@@ -1098,7 +1098,11 @@ mod tests {
         let mut aic_builder = AicInputs::builder(
             aic_guard,
             PowerConfig::default(),
-            vec![(ore, nz(10)), (ingot, nz(7))].into(),
+            vec![
+                (ore, PosF64::new(10.0).expect("positive")),
+                (ingot, PosF64::new(7.0).expect("positive")),
+            ]
+            .into(),
             Default::default(),
         );
         aic_builder

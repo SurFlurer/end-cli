@@ -2,7 +2,7 @@
 
 use end_model::{
     AicInputs, Catalog, DisplayName, FacilityDef, FacilityRegions, ItemDef, Key, OutpostInput,
-    PowerConfig, Region, Stack, Stage2Weights, ThermalBankDef,
+    PosF64, PowerConfig, Region, Stack, Stage2Weights, ThermalBankDef,
 };
 use end_opt::{Error, NEAR_INT_EPS, run_two_stage};
 use generativity::Guard;
@@ -153,7 +153,7 @@ fn run_two_stage_applies_region_facility_restrictions() {
     let mut aic_builder = AicInputs::builder(
         aic_guard,
         PowerConfig::default(),
-        vec![(ore, nz(10))].into(),
+        vec![(ore, PosF64::new(10.0).expect("positive"))].into(),
         Default::default(),
     )
     .region(Region::FourthValley);
@@ -191,7 +191,7 @@ fn sample_catalog_and_aic<'cid, 'sid>(
     let mut aic_builder = AicInputs::builder(
         aic_guard,
         PowerConfig::default(),
-        vec![(ore, nz(10))].into(),
+        vec![(ore, PosF64::new(10.0).expect("positive"))].into(),
         Default::default(),
     );
     aic_builder
@@ -216,7 +216,7 @@ fn run_two_stage_allows_empty_recipes_with_direct_external_sales() {
     let mut aic_builder = AicInputs::builder(
         aic_guard,
         PowerConfig::default(),
-        vec![(ore, nz(10))].into(),
+        vec![(ore, PosF64::new(10.0).expect("positive"))].into(),
         Default::default(),
     );
     aic_builder
@@ -327,7 +327,7 @@ fn max_money_slack_does_not_virtualize_fluid_surplus_into_stockpile() {
     let mut aic_builder = AicInputs::builder(
         aic_guard,
         PowerConfig::default(),
-        vec![(ore, nz(10))].into(),
+        vec![(ore, PosF64::new(10.0).expect("positive"))].into(),
         Default::default(),
     )
     .stage2_weights(Stage2Weights {
@@ -417,8 +417,8 @@ fn run_two_stage_rejects_infeasible_external_consumption() {
     let aic = AicInputs::builder(
         aic_guard,
         PowerConfig::default(),
-        vec![(ore, nz(10))].into(),
-        vec![(ore, nz(11))].into(),
+        vec![(ore, PosF64::new(10.0).expect("positive"))].into(),
+        vec![(ore, PosF64::new(11.0).expect("positive"))].into(),
     )
     .build();
 
