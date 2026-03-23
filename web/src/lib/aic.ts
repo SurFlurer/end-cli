@@ -22,7 +22,7 @@ function parseItemFlowRows(map: Record<string, unknown>): { itemKey: string; val
   return Object.entries(map)
     .map(([itemKey, value]) => ({
       itemKey,
-      value: asInt(value)
+      value: asNonNegativeNumber(value, 0)
     }))
     .filter((row) => row.itemKey.trim().length > 0)
     .sort((a, b) => a.itemKey.localeCompare(b.itemKey));
@@ -133,10 +133,16 @@ function cleanDraft(draft: AicDraft): AicDraft {
     },
     supply: draft.supply
       .filter((row) => row.itemKey.trim().length > 0)
-      .map((row) => ({ itemKey: row.itemKey.trim(), value: asInt(row.value) })),
+      .map((row) => ({
+        itemKey: row.itemKey.trim(),
+        value: asNonNegativeNumber(row.value, 0),
+      })),
     consumption: draft.consumption
       .filter((row) => row.itemKey.trim().length > 0)
-      .map((row) => ({ itemKey: row.itemKey.trim(), value: asInt(row.value) })),
+      .map((row) => ({
+        itemKey: row.itemKey.trim(),
+        value: asNonNegativeNumber(row.value, 0),
+      })),
     outposts: draft.outposts
       .filter((outpost) => outpost.key.trim().length > 0)
       .map((outpost) => ({
@@ -168,12 +174,12 @@ export function buildAicToml(draft: AicDraft): string {
   const supplyPerMin = Object.fromEntries(
     cleaned.supply
       .filter((row) => row.value > 0)
-      .map((row) => [row.itemKey, asInt(row.value)])
+      .map((row) => [row.itemKey, asNonNegativeNumber(row.value, 0)])
   );
   const externalConsumptionPerMin = Object.fromEntries(
     cleaned.consumption
       .filter((row) => row.value > 0)
-      .map((row) => [row.itemKey, asInt(row.value)])
+      .map((row) => [row.itemKey, asNonNegativeNumber(row.value, 0)])
   );
 
   const outposts = cleaned.outposts.map((outpost) => {

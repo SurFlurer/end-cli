@@ -3,10 +3,9 @@
 use generativity::make_guard;
 
 use crate::{
-    AicBuildError, Catalog, DisplayName, ItemDef, ItemNonZeroU32Map, ItemU32Map, Key, OutpostInput,
-    PowerConfig, ThermalBankDef,
+    AicBuildError, Catalog, DisplayName, ItemDef, ItemPosF64Map, ItemU32Map, Key, OutpostInput,
+    PosF64, PowerConfig, ThermalBankDef,
 };
-use std::num::NonZeroU32;
 
 fn key(value: &str) -> Key {
     value.try_into().expect("valid key")
@@ -71,19 +70,19 @@ fn item_u32_map_from_vec_uses_last_value_for_duplicates() {
 }
 
 #[test]
-fn item_non_zero_u32_map_from_vec_uses_last_value_for_duplicates() {
+fn item_pos_f64_map_from_vec_uses_last_value_for_duplicates() {
     make_guard!(guard);
     let (_, a, b) = sample_catalog(guard);
-    let map: ItemNonZeroU32Map = vec![
-        (a, NonZeroU32::new(1).expect("non-zero")),
-        (b, NonZeroU32::new(3).expect("non-zero")),
-        (a, NonZeroU32::new(2).expect("non-zero")),
+    let map: ItemPosF64Map = vec![
+        (a, PosF64::new(1.0).expect("positive")),
+        (b, PosF64::new(3.0).expect("positive")),
+        (a, PosF64::new(2.0).expect("positive")),
     ]
     .into();
 
     assert_eq!(map.len(), 2);
-    assert_eq!(map.get(a), Some(&NonZeroU32::new(2).expect("non-zero")));
-    assert_eq!(map.get(b), Some(&NonZeroU32::new(3).expect("non-zero")));
+    assert_eq!(map.get(a), Some(&PosF64::new(2.0).expect("positive")));
+    assert_eq!(map.get(b), Some(&PosF64::new(3.0).expect("positive")));
 }
 
 #[test]
@@ -95,7 +94,7 @@ fn aic_parse_rejects_duplicate_outpost_keys() {
     let mut builder = crate::AicInputs::builder(
         aic_guard,
         PowerConfig::default(),
-        vec![(b, NonZeroU32::new(1).expect("non-zero"))].into(),
+        vec![(b, PosF64::new(1.0).expect("positive"))].into(),
         Default::default(),
     );
 

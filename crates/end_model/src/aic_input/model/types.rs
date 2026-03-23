@@ -5,7 +5,7 @@ use generativity::Id;
 use thiserror::Error;
 use vector_map::VecMap;
 
-use crate::{DisplayName, ItemId, Key};
+use crate::{DisplayName, ItemId, Key, PosF64};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Stage2Weights {
@@ -233,6 +233,76 @@ impl<'id> IntoIterator for ItemNonZeroU32Map<'id> {
     }
 }
 
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct ItemPosF64Map<'id>(VecMap<ItemId<'id>, PosF64>);
+
+impl<'id> ItemPosF64Map<'id> {
+    pub fn new() -> Self {
+        Self(VecMap::new())
+    }
+
+    pub fn with_capacity(capacity: usize) -> Self {
+        Self(VecMap::with_capacity(capacity))
+    }
+
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+
+    pub fn insert(&mut self, item: ItemId<'id>, value: PosF64) -> Option<PosF64> {
+        self.0.insert(item, value)
+    }
+
+    pub fn get(&self, item: ItemId<'id>) -> Option<&PosF64> {
+        self.0.get(&item)
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = (ItemId<'id>, PosF64)> + '_ {
+        self.0.iter().map(|(item, value)| (*item, *value))
+    }
+}
+
+impl<'id> Extend<(ItemId<'id>, PosF64)> for ItemPosF64Map<'id> {
+    fn extend<T: IntoIterator<Item = (ItemId<'id>, PosF64)>>(&mut self, iter: T) {
+        for (item, value) in iter {
+            self.insert(item, value);
+        }
+    }
+}
+
+impl<'id> FromIterator<(ItemId<'id>, PosF64)> for ItemPosF64Map<'id> {
+    fn from_iter<T: IntoIterator<Item = (ItemId<'id>, PosF64)>>(iter: T) -> Self {
+        let mut map = Self::new();
+        map.extend(iter);
+        map
+    }
+}
+
+impl<'id, const N: usize> From<[(ItemId<'id>, PosF64); N]> for ItemPosF64Map<'id> {
+    fn from(value: [(ItemId<'id>, PosF64); N]) -> Self {
+        value.into_iter().collect()
+    }
+}
+
+impl<'id> From<Vec<(ItemId<'id>, PosF64)>> for ItemPosF64Map<'id> {
+    fn from(value: Vec<(ItemId<'id>, PosF64)>) -> Self {
+        value.into_iter().collect()
+    }
+}
+
+impl<'id> IntoIterator for ItemPosF64Map<'id> {
+    type Item = (ItemId<'id>, PosF64);
+    type IntoIter = vector_map::IntoIter<ItemId<'id>, PosF64>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct OutpostInput<'id> {
     pub key: Key,
@@ -245,8 +315,8 @@ pub struct OutpostInput<'id> {
 #[derive(Debug, Clone)]
 pub struct AicInputs<'cid, 'sid> {
     pub(super) region: Region,
-    pub(super) supply_per_min: ItemNonZeroU32Map<'cid>,
-    pub(super) external_consumption_per_min: ItemNonZeroU32Map<'cid>,
+    pub(super) supply_per_min: ItemPosF64Map<'cid>,
+    pub(super) external_consumption_per_min: ItemPosF64Map<'cid>,
     pub(super) outposts: Box<[OutpostInput<'cid>]>,
     pub(super) power_config: PowerConfig,
     pub(super) stage2_weights: Stage2Weights,

@@ -2,7 +2,7 @@
 
 use end_model::{
     AicInputs, Catalog, DisplayName, FacilityDef, FacilityRegions, ItemDef, Key, OutpostInput,
-    PowerConfig, Stack, ThermalBankDef,
+    PosF64, PowerConfig, Stack, ThermalBankDef,
 };
 use end_opt::run_two_stage;
 use end_report::{Lang, build_report};
@@ -87,8 +87,8 @@ fn sample_catalog_and_inputs<'cid, 'sid, 'rid>(
     let mut aic_builder = AicInputs::builder(
         aic_guard,
         PowerConfig::default(),
-        vec![(ore, nz(10))].into(),
-        vec![(ore, nz(1))].into(),
+        vec![(ore, PosF64::new(10.0).expect("positive"))].into(),
+        vec![(ore, PosF64::new(1.0).expect("positive"))].into(),
     );
     aic_builder
         .add_outpost(OutpostInput {

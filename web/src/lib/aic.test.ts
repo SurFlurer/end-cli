@@ -54,6 +54,35 @@ describe('aic toml conversions', () => {
     expect(parsed.outposts[0]?.prices).toHaveLength(2);
   });
 
+  it('preserves fractional supply/consumption flows when building and parsing TOML', () => {
+    const draft: AicDraft = {
+      region: 'wuling',
+      power: {
+        enabled: true,
+        externalProductionW: 200,
+        externalConsumptionW: 0
+      },
+      objective: {
+        minMachines: 0,
+        maxPowerSlack: 0,
+        maxMoneySlack: 0
+      },
+      supply: [
+        { itemKey: 'IronOre', value: 1.5 },
+        { itemKey: 'CopperOre', value: 0.25 }
+      ],
+      consumption: [{ itemKey: 'Water', value: 2.75 }],
+      outposts: []
+    };
+
+    const toml = buildAicToml(draft);
+    const parsed = parseAicToml(toml);
+
+    expect(parsed.supply.find((row) => row.itemKey === 'IronOre')?.value).toBeCloseTo(1.5);
+    expect(parsed.supply.find((row) => row.itemKey === 'CopperOre')?.value).toBeCloseTo(0.25);
+    expect(parsed.consumption.find((row) => row.itemKey === 'Water')?.value).toBeCloseTo(2.75);
+  });
+
   it('parses legacy en/zh outpost names into unified name field', () => {
     const toml = `version = 2
 region = "wuling"

@@ -38,7 +38,7 @@ const EMPTY_DRAFT: AicDraft = {
 };
 
 describe('draft actions', () => {
-  it('normalizes numeric inputs as non-negative integers', () => {
+  it('normalizes power/price as non-negative integers while keeping flows as non-negative numbers', () => {
     let draft = setPowerExternalConsumption(EMPTY_DRAFT, -12.3);
     draft = setPowerExternalProduction(draft, 66.2);
     draft = addSupplyRow(draft, 'IronOre');
@@ -48,8 +48,8 @@ describe('draft actions', () => {
 
     expect(draft.power.externalConsumptionW).toBe(0);
     expect(draft.power.externalProductionW).toBe(66);
-    expect(draft.supply[0]?.value).toBe(5);
-    expect(draft.consumption[0]?.value).toBe(7);
+    expect(draft.supply[0]?.value).toBe(4.8);
+    expect(draft.consumption[0]?.value).toBe(6.7);
   });
 
   it('adds and removes outposts while maintaining selected index', () => {

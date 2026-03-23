@@ -2,7 +2,7 @@ use crate::error::map_aic_build_error;
 use crate::schema::{AicToml, PowerToml};
 use crate::{Error, Result};
 use end_model::{
-    AicInputs, Catalog, ItemNonZeroU32Map, ItemU32Map, OutpostInput, PowerConfig, Stage2Weights,
+    AicInputs, Catalog, ItemPosF64Map, ItemU32Map, OutpostInput, PosF64, PowerConfig, Stage2Weights,
 };
 use generativity::{Guard, make_guard};
 use std::collections::BTreeMap;
@@ -100,10 +100,18 @@ fn resolve_aic<'cid, 'sid>(
 
     let supply_per_min_span = raw.supply_per_min.span();
     let raw_supply_per_min = raw.supply_per_min.into_inner();
-    let mut supply_per_min = ItemNonZeroU32Map::with_capacity(raw_supply_per_min.len());
+    let mut supply_per_min = ItemPosF64Map::with_capacity(raw_supply_per_min.len());
     for (item_key, value) in raw_supply_per_min {
         let item_key = item_key.into_inner();
         let value = value.into_inner();
+        let value = PosF64::new(value).ok_or_else(|| Error::Schema {
+            path: path.clone(),
+            field: "supply_per_min",
+            index: None,
+            span: Some(supply_per_min_span.clone()),
+            src: Some(Arc::clone(&src)),
+            message: format!("must be > 0, got {value}").into_boxed_str(),
+        })?;
         let item = catalog
             .item_id(item_key.as_str())
             .ok_or_else(|| Error::UnknownItem {
@@ -118,10 +126,18 @@ fn resolve_aic<'cid, 'sid>(
     let external_consumption_per_min_span = raw.external_consumption_per_min.span();
     let raw_external_consumption_per_min = raw.external_consumption_per_min.into_inner();
     let mut external_consumption_per_min =
-        ItemNonZeroU32Map::with_capacity(raw_external_consumption_per_min.len());
+        ItemPosF64Map::with_capacity(raw_external_consumption_per_min.len());
     for (item_key, value) in raw_external_consumption_per_min {
         let item_key = item_key.into_inner();
         let value = value.into_inner();
+        let value = PosF64::new(value).ok_or_else(|| Error::Schema {
+            path: path.clone(),
+            field: "external_consumption_per_min",
+            index: None,
+            span: Some(external_consumption_per_min_span.clone()),
+            src: Some(Arc::clone(&src)),
+            message: format!("must be > 0, got {value}").into_boxed_str(),
+        })?;
         let item = catalog
             .item_id(item_key.as_str())
             .ok_or_else(|| Error::UnknownItem {

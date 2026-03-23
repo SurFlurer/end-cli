@@ -367,7 +367,7 @@ fn solve_stage<'cid, 'sid>(
     let item_balance = aic.supply_per_min().iter().fold(
         ItemVec::filled(catalog, Expression::from(0.0)),
         |mut item_balance, (item, supply)| {
-            item_balance[item] = Expression::from(supply.get() as f64);
+            item_balance[item] = Expression::from(supply.get());
             item_balance
         },
     );
@@ -375,7 +375,7 @@ fn solve_stage<'cid, 'sid>(
     let item_balance = aic.external_consumption_per_min().iter().fold(
         item_balance,
         |mut item_balance, (item, consume)| {
-            item_balance[item] -= consume.get() as f64;
+            item_balance[item] -= consume.get();
             item_balance
         },
     );
@@ -648,7 +648,7 @@ fn solve_stage<'cid, 'sid>(
             ExternalSupplySlack {
                 item,
                 slack_per_min: solution.eval(expr),
-                supply_per_min: supply.get() as f64,
+                supply_per_min: supply.get(),
             }
         })
         .collect::<Vec<_>>();

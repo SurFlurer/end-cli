@@ -87,14 +87,14 @@ function parseStoredDraft(text: string): AicDraft | null {
         const record = asRecord(row);
         return {
           itemKey: asString(record.itemKey),
-          value: asInt(record.value)
+          value: asNonNegativeNumber(record.value)
         };
       }),
       consumption: consumptionRows.map((row) => {
         const record = asRecord(row);
         return {
           itemKey: asString(record.itemKey),
-          value: asInt(record.value)
+          value: asNonNegativeNumber(record.value)
         };
       }),
       outposts: outpostRows.map((row) => {
