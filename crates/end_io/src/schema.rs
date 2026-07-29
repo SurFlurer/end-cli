@@ -25,6 +25,23 @@ pub(crate) struct ItemToml {
     pub(crate) zh: DisplayName,
     #[serde(default)]
     pub(crate) fluid: bool,
+    #[serde(default)]
+    pub(crate) gas: bool,
+}
+
+/// Parsed shape of the combined built-in catalog fragments in `new-data`.
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct BuiltinCatalogToml {
+    #[serde(default)]
+    pub(crate) items: Box<[Spanned<ItemToml>]>,
+    #[serde(default)]
+    pub(crate) machines: Box<[Spanned<MachineToml>]>,
+    pub(crate) thermal_bank: Spanned<ThermalBankToml>,
+    #[serde(default)]
+    pub(crate) recipes: Box<[Spanned<RecipeToml>]>,
+    #[serde(default)]
+    pub(crate) power_recipes: Box<[Spanned<PowerRecipeToml>]>,
 }
 
 /// Parsed shape of `facilities.toml`.
@@ -91,6 +108,8 @@ pub(crate) struct RecipeToml {
     pub(crate) facility: Key,
     #[serde(deserialize_with = "deserialize_positive_u32")]
     pub(crate) time_s: NonZeroU32,
+    #[serde(default, rename = "gasEnv")]
+    pub(crate) _gas_env: Option<String>,
     pub(crate) ingredients: Spanned<Box<[Spanned<StackToml>]>>,
     pub(crate) products: Spanned<Box<[Spanned<StackToml>]>>,
 }

@@ -2,7 +2,9 @@ use crate::error::{
     RecipeSpanContext, map_item_build_error, map_machine_build_error, map_power_recipe_build_error,
     map_recipe_build_error, map_thermal_facility_build_error,
 };
-use crate::schema::{FacilitiesToml, ItemsToml, RecipesToml, StackToml};
+use crate::schema::{
+    BuiltinCatalogToml, FacilitiesToml, ItemsToml, RecipesToml, StackToml,
+};
 use crate::{Error, Result};
 use end_model::{
     Catalog, FacilityDef, FacilityRegions, ItemDef, ItemId, PowerRecipe, Region, Stack,
@@ -14,37 +16,26 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use toml::Spanned;
 
-const BUILTIN_ITEMS: &str = include_str!("items.toml");
-const BUILTIN_FACILITIES: &str = include_str!("facilities.toml");
-const BUILTIN_RECIPES: &str = include_str!("recipes.toml");
+const BUILTIN_CATALOG: &str = concat!(
+    include_str!("new-data/factory_items.toml"),
+    include_str!("new-data/factory_machines.toml"),
+    include_str!("new-data/liquid_undirectional.toml"),
+    include_str!("new-data/factory_recipes.toml"),
+    include_str!("new-data/battery.toml"),
+);
 
-/// Load one data file from `data_dir`, or fall back to built-in TOML contents.
-///
-/// Built-ins return a synthetic `<builtin>/...` path so error messages keep file context.
+/// Load one legacy-format catalog file from an explicit `data_dir`.
 struct LoadedToml<T> {
     path: PathBuf,
     src: Arc<str>,
     doc: T,
 }
 
-fn load_data_file<T: DeserializeOwned>(
-    data_dir: Option<&Path>,
-    filename: &str,
-    builtin: &'static str,
-) -> Result<LoadedToml<T>> {
-    let (path, src): (PathBuf, Arc<str>) = match data_dir {
-        Some(dir) => {
-            let path = dir.join(filename);
-            let src: Arc<str> = match std::fs::read_to_string(&path) {
-                Ok(src) => src.into(),
-                Err(source) => return Err(Error::Io { path, source }),
-            };
-            (path, src)
-        }
-        None => (
-            PathBuf::from(format!("<builtin>/{filename}")),
-            Arc::from(builtin),
-        ),
+fn load_data_file<T: DeserializeOwned>(data_dir: &Path, filename: &str) -> Result<LoadedToml<T>> {
+    let path = data_dir.join(filename);
+    let src: Arc<str> = match std::fs::read_to_string(&path) {
+        Ok(src) => src.into(),
+        Err(source) => return Err(Error::Io { path, source }),
     };
     let doc = match toml::from_str(src.as_ref()) {
         Ok(doc) => doc,
@@ -53,36 +44,74 @@ fn load_data_file<T: DeserializeOwned>(
     Ok(LoadedToml { path, src, doc })
 }
 
-/// Load and validate catalog inputs (`items.toml`, `facilities.toml`, `recipes.toml`).
+/// Load and validate catalog inputs.
 ///
-/// When `data_dir` is `None`, built-in TOML data embedded at compile time is used.
+/// When `data_dir` is `None`, the five catalog fragments under `new-data` embedded at compile
+/// time are used. An explicit directory retains support for the legacy `items.toml`,
+/// `facilities.toml`, and `recipes.toml` layout.
 pub fn load_catalog<'id>(data_dir: Option<&Path>, guard: Guard<'id>) -> Result<Catalog<'id>> {
-    // bring in our data
-    let LoadedToml {
-        path: items_path,
-        src: items_src,
-        doc: items_doc,
-    }: LoadedToml<ItemsToml> = load_data_file(data_dir, "items.toml", BUILTIN_ITEMS)?;
-    let LoadedToml {
-        path: fac_path,
-        src: fac_src,
-        doc: facilities_doc,
-    }: LoadedToml<FacilitiesToml> =
-        load_data_file(data_dir, "facilities.toml", BUILTIN_FACILITIES)?;
-    let LoadedToml {
-        path: recipes_path,
-        src: recipes_src,
-        doc: recipes_doc,
-    }: LoadedToml<RecipesToml> = load_data_file(data_dir, "recipes.toml", BUILTIN_RECIPES)?;
-    let items = items_doc.items;
-    let FacilitiesToml {
+    let (
+        items_path,
+        items_src,
+        items,
+        fac_path,
+        fac_src,
         machines,
         thermal_bank,
-    } = facilities_doc;
-    let RecipesToml {
+        recipes_path,
+        recipes_src,
         recipes,
         power_recipes,
-    } = recipes_doc;
+    ) = match data_dir {
+        Some(data_dir) => {
+            let items: LoadedToml<ItemsToml> = load_data_file(data_dir, "items.toml")?;
+            let facilities: LoadedToml<FacilitiesToml> =
+                load_data_file(data_dir, "facilities.toml")?;
+            let recipes: LoadedToml<RecipesToml> = load_data_file(data_dir, "recipes.toml")?;
+
+            (
+                items.path,
+                items.src,
+                items.doc.items,
+                facilities.path,
+                facilities.src,
+                facilities.doc.machines,
+                facilities.doc.thermal_bank,
+                recipes.path,
+                recipes.src,
+                recipes.doc.recipes,
+                recipes.doc.power_recipes,
+            )
+        }
+        None => {
+            let path = PathBuf::from("<builtin>/new-data");
+            let src: Arc<str> = Arc::from(BUILTIN_CATALOG);
+            let BuiltinCatalogToml {
+                items,
+                machines,
+                thermal_bank,
+                recipes,
+                power_recipes,
+            } = toml::from_str(src.as_ref()).map_err(|source| Error::TomlParse {
+                path: path.clone(),
+                source,
+            })?;
+
+            (
+                path.clone(),
+                Arc::clone(&src),
+                items,
+                path.clone(),
+                Arc::clone(&src),
+                machines,
+                thermal_bank,
+                path,
+                src,
+                recipes,
+                power_recipes,
+            )
+        }
+    };
 
     // create a builder
     let mut builder = Catalog::builder(guard);
@@ -96,7 +125,8 @@ pub fn load_catalog<'id>(data_dir: Option<&Path>, guard: Guard<'id>) -> Result<C
                 key: raw.key,
                 en: raw.en,
                 zh: raw.zh,
-                is_fluid: raw.fluid,
+                // Gases have the same no-storage/no-sale behavior as liquids.
+                is_fluid: raw.fluid || raw.gas,
             })
             .map_err(|source| {
                 map_item_build_error(&items_path, &items_src, i, Some(span), source)

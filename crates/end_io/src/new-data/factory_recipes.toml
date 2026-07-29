@@ -1,0 +1,2137 @@
+# Auto-generated from FactoryMachineCraftTable.json
+# Total recipes: 305
+
+[[recipes]]
+facility = "component_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_xiranite_powder", count = 1 }]
+products = [{ item = "item_activity_xiranite_cmpt", count = 1 }]
+
+[[recipes]]
+facility = "component_mc_1"
+time_s = 20
+gasEnv = "None"
+ingredients = [{ item = "item_xiranite_enr_powder", count = 1 }]
+products = [{ item = "item_activity_xiranite_enr_cmpt", count = 2 }]
+
+[[recipes]]
+facility = "component_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_nugget", count = 1 }]
+products = [{ item = "item_copper_cmpt", count = 1 }]
+
+[[recipes]]
+facility = "component_mc_1"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_copper_enr2", count = 5 }]
+products = [{ item = "item_copper_enr2_cmpt", count = 1 }]
+
+[[recipes]]
+facility = "component_mc_1"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_copper_enr", count = 5 }]
+products = [{ item = "item_copper_enr_cmpt", count = 1 }]
+
+[[recipes]]
+facility = "component_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_quartz_glass", count = 1 }]
+products = [{ item = "item_glass_cmpt", count = 1 }]
+
+[[recipes]]
+facility = "component_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_quartz_enr", count = 1 }]
+products = [{ item = "item_glass_enr_cmpt", count = 1 }]
+
+[[recipes]]
+facility = "component_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_nugget", count = 1 }]
+products = [{ item = "item_iron_cmpt", count = 1 }]
+
+[[recipes]]
+facility = "component_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_enr", count = 1 }]
+products = [{ item = "item_iron_enr_cmpt", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_copper_acid", count = 1 }]
+products = [{ item = "item_copper_bottle", count = 1 }, { item = "item_liquid_acid", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_copper_copper", count = 1 }]
+products = [{ item = "item_copper_bottle", count = 1 }, { item = "item_liquid_copper", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_copper_copper_enr", count = 1 }]
+products = [{ item = "item_copper_bottle", count = 1 }, { item = "item_liquid_copper_enr", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_copper_grass_1", count = 1 }]
+products = [{ item = "item_copper_bottle", count = 1 }, { item = "item_liquid_plant_grass_1", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_copper_grass_2", count = 1 }]
+products = [{ item = "item_copper_bottle", count = 1 }, { item = "item_liquid_plant_grass_2", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_copper_sewage", count = 1 }]
+products = [{ item = "item_copper_bottle", count = 1 }, { item = "item_liquid_sewage", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_copper_water", count = 1 }]
+products = [{ item = "item_copper_bottle", count = 1 }, { item = "item_liquid_water", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_copper_xiranite", count = 1 }]
+products = [{ item = "item_copper_bottle", count = 1 }, { item = "item_liquid_xiranite", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_copper_xiranite_enr", count = 1 }]
+products = [{ item = "item_copper_bottle", count = 1 }, { item = "item_liquid_xiranite_enr", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_copper_xiranite_lowpoly", count = 1 }]
+products = [{ item = "item_copper_bottle", count = 1 }, { item = "item_liquid_xiranite_lowpoly", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_copper_xiranite_poly", count = 1 }]
+products = [{ item = "item_copper_bottle", count = 1 }, { item = "item_liquid_xiranite_poly", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_copperenr_acid", count = 1 }]
+products = [{ item = "item_copper_enr_bottle", count = 1 }, { item = "item_liquid_acid", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_copperenr_copper", count = 1 }]
+products = [{ item = "item_copper_enr_bottle", count = 1 }, { item = "item_liquid_copper", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_copperenr_copper_enr", count = 1 }]
+products = [{ item = "item_copper_enr_bottle", count = 1 }, { item = "item_liquid_copper_enr", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_copperenr_grass_1", count = 1 }]
+products = [{ item = "item_copper_enr_bottle", count = 1 }, { item = "item_liquid_plant_grass_1", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_copperenr_grass_2", count = 1 }]
+products = [{ item = "item_copper_enr_bottle", count = 1 }, { item = "item_liquid_plant_grass_2", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_copperenr_sewage", count = 1 }]
+products = [{ item = "item_copper_enr_bottle", count = 1 }, { item = "item_liquid_sewage", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_copperenr_water", count = 1 }]
+products = [{ item = "item_copper_enr_bottle", count = 1 }, { item = "item_liquid_water", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_copperenr_xiranite", count = 1 }]
+products = [{ item = "item_copper_enr_bottle", count = 1 }, { item = "item_liquid_xiranite", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_copperenr_xiranite_enr", count = 1 }]
+products = [{ item = "item_copper_enr_bottle", count = 1 }, { item = "item_liquid_xiranite_enr", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_copperenr_xiranite_lowpoly", count = 1 }]
+products = [{ item = "item_copper_enr_bottle", count = 1 }, { item = "item_liquid_xiranite_lowpoly", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_copperenr_xiranite_poly", count = 1 }]
+products = [{ item = "item_copper_enr_bottle", count = 1 }, { item = "item_liquid_xiranite_poly", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_gasjar_copper_gas_acid", count = 1 }]
+products = [{ item = "item_copper_jar", count = 1 }, { item = "item_gas_acid", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_gasjar_copper_gas_copper", count = 1 }]
+products = [{ item = "item_copper_jar", count = 1 }, { item = "item_gas_copper", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_gasjar_copper_gas_copper_enr2", count = 1 }]
+products = [{ item = "item_copper_jar", count = 1 }, { item = "item_gas_copper_enr2", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_gasjar_copper_gas_copper_enr", count = 1 }]
+products = [{ item = "item_copper_jar", count = 1 }, { item = "item_gas_copper_enr", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_gasjar_copper_gas_inert", count = 1 }]
+products = [{ item = "item_copper_jar", count = 1 }, { item = "item_gas_inert", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_gasjar_copper_gas_water", count = 1 }]
+products = [{ item = "item_copper_jar", count = 1 }, { item = "item_gas_water", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_gasjar_copper_gas_xiranite", count = 1 }]
+products = [{ item = "item_copper_jar", count = 1 }, { item = "item_gas_xiranite", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_gasjar_copper_gas_xiranite_enr", count = 1 }]
+products = [{ item = "item_copper_jar", count = 1 }, { item = "item_gas_xiranite_enr", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_glass_acid", count = 1 }]
+products = [{ item = "item_glass_bottle", count = 1 }, { item = "item_liquid_acid", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_glass_copper", count = 1 }]
+products = [{ item = "item_glass_bottle", count = 1 }, { item = "item_liquid_copper", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_glass_copper_enr", count = 1 }]
+products = [{ item = "item_glass_bottle", count = 1 }, { item = "item_liquid_copper_enr", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_glass_grass_1", count = 1 }]
+products = [{ item = "item_glass_bottle", count = 1 }, { item = "item_liquid_plant_grass_1", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_glass_grass_2", count = 1 }]
+products = [{ item = "item_glass_bottle", count = 1 }, { item = "item_liquid_plant_grass_2", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_glass_sewage", count = 1 }]
+products = [{ item = "item_glass_bottle", count = 1 }, { item = "item_liquid_sewage", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_glass_water", count = 1 }]
+products = [{ item = "item_glass_bottle", count = 1 }, { item = "item_liquid_water", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_glass_xiranite", count = 1 }]
+products = [{ item = "item_glass_bottle", count = 1 }, { item = "item_liquid_xiranite", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_glass_xiranite_enr", count = 1 }]
+products = [{ item = "item_glass_bottle", count = 1 }, { item = "item_liquid_xiranite_enr", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_glass_xiranite_lowpoly", count = 1 }]
+products = [{ item = "item_glass_bottle", count = 1 }, { item = "item_liquid_xiranite_lowpoly", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_glass_xiranite_poly", count = 1 }]
+products = [{ item = "item_glass_bottle", count = 1 }, { item = "item_liquid_xiranite_poly", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_glassenr_acid", count = 1 }]
+products = [{ item = "item_glass_enr_bottle", count = 1 }, { item = "item_liquid_acid", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_glassenr_copper", count = 1 }]
+products = [{ item = "item_glass_enr_bottle", count = 1 }, { item = "item_liquid_copper", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_glassenr_copper_enr", count = 1 }]
+products = [{ item = "item_glass_enr_bottle", count = 1 }, { item = "item_liquid_copper_enr", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_glassenr_grass_1", count = 1 }]
+products = [{ item = "item_glass_enr_bottle", count = 1 }, { item = "item_liquid_plant_grass_1", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_glassenr_grass_2", count = 1 }]
+products = [{ item = "item_glass_enr_bottle", count = 1 }, { item = "item_liquid_plant_grass_2", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_glassenr_sewage", count = 1 }]
+products = [{ item = "item_glass_enr_bottle", count = 1 }, { item = "item_liquid_sewage", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_glassenr_water", count = 1 }]
+products = [{ item = "item_glass_enr_bottle", count = 1 }, { item = "item_liquid_water", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_glassenr_xiranite", count = 1 }]
+products = [{ item = "item_glass_enr_bottle", count = 1 }, { item = "item_liquid_xiranite", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_glassenr_xiranite_enr", count = 1 }]
+products = [{ item = "item_glass_enr_bottle", count = 1 }, { item = "item_liquid_xiranite_enr", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_glassenr_xiranite_lowpoly", count = 1 }]
+products = [{ item = "item_glass_enr_bottle", count = 1 }, { item = "item_liquid_xiranite_lowpoly", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_glassenr_xiranite_poly", count = 1 }]
+products = [{ item = "item_glass_enr_bottle", count = 1 }, { item = "item_liquid_xiranite_poly", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_iron_acid", count = 1 }]
+products = [{ item = "item_iron_bottle", count = 1 }, { item = "item_liquid_acid", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_iron_copper", count = 1 }]
+products = [{ item = "item_iron_bottle", count = 1 }, { item = "item_liquid_copper", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_iron_copper_enr", count = 1 }]
+products = [{ item = "item_iron_bottle", count = 1 }, { item = "item_liquid_copper_enr", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_iron_grass_1", count = 1 }]
+products = [{ item = "item_iron_bottle", count = 1 }, { item = "item_liquid_plant_grass_1", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_iron_grass_2", count = 1 }]
+products = [{ item = "item_iron_bottle", count = 1 }, { item = "item_liquid_plant_grass_2", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_iron_sewage", count = 1 }]
+products = [{ item = "item_iron_bottle", count = 1 }, { item = "item_liquid_sewage", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_iron_water", count = 1 }]
+products = [{ item = "item_iron_bottle", count = 1 }, { item = "item_liquid_water", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_iron_xiranite", count = 1 }]
+products = [{ item = "item_iron_bottle", count = 1 }, { item = "item_liquid_xiranite", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_iron_xiranite_enr", count = 1 }]
+products = [{ item = "item_iron_bottle", count = 1 }, { item = "item_liquid_xiranite_enr", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_iron_xiranite_lowpoly", count = 1 }]
+products = [{ item = "item_iron_bottle", count = 1 }, { item = "item_liquid_xiranite_lowpoly", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_iron_xiranite_poly", count = 1 }]
+products = [{ item = "item_iron_bottle", count = 1 }, { item = "item_liquid_xiranite_poly", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_ironenr_acid", count = 1 }]
+products = [{ item = "item_iron_enr_bottle", count = 1 }, { item = "item_liquid_acid", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_ironenr_copper", count = 1 }]
+products = [{ item = "item_iron_enr_bottle", count = 1 }, { item = "item_liquid_copper", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_ironenr_copper_enr", count = 1 }]
+products = [{ item = "item_iron_enr_bottle", count = 1 }, { item = "item_liquid_copper_enr", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_ironenr_grass_1", count = 1 }]
+products = [{ item = "item_iron_enr_bottle", count = 1 }, { item = "item_liquid_plant_grass_1", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_ironenr_grass_2", count = 1 }]
+products = [{ item = "item_iron_enr_bottle", count = 1 }, { item = "item_liquid_plant_grass_2", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_ironenr_sewage", count = 1 }]
+products = [{ item = "item_iron_enr_bottle", count = 1 }, { item = "item_liquid_sewage", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_ironenr_water", count = 1 }]
+products = [{ item = "item_iron_enr_bottle", count = 1 }, { item = "item_liquid_water", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_ironenr_xiranite", count = 1 }]
+products = [{ item = "item_iron_enr_bottle", count = 1 }, { item = "item_liquid_xiranite", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_ironenr_xiranite_enr", count = 1 }]
+products = [{ item = "item_iron_enr_bottle", count = 1 }, { item = "item_liquid_xiranite_enr", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_ironenr_xiranite_lowpoly", count = 1 }]
+products = [{ item = "item_iron_enr_bottle", count = 1 }, { item = "item_liquid_xiranite_lowpoly", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_ironenr_xiranite_poly", count = 1 }]
+products = [{ item = "item_iron_enr_bottle", count = 1 }, { item = "item_liquid_xiranite_poly", count = 1 }]
+
+[[recipes]]
+facility = "dismantler_1"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_xiranenr_grass_2", count = 1 }]
+products = [{ item = "item_activity_xiranite_enr_bottle", count = 1 }, { item = "item_liquid_plant_grass_2", count = 5 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_bottle", count = 1 }, { item = "item_liquid_acid", count = 1 }]
+products = [{ item = "item_fbottle_copper_acid", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_bottle", count = 1 }, { item = "item_liquid_copper", count = 1 }]
+products = [{ item = "item_fbottle_copper_copper", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_bottle", count = 1 }, { item = "item_liquid_copper_enr", count = 1 }]
+products = [{ item = "item_fbottle_copper_copper_enr", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_bottle", count = 1 }, { item = "item_liquid_plant_grass_1", count = 1 }]
+products = [{ item = "item_fbottle_copper_grass_1", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_bottle", count = 1 }, { item = "item_liquid_plant_grass_2", count = 1 }]
+products = [{ item = "item_fbottle_copper_grass_2", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_bottle", count = 1 }, { item = "item_liquid_sewage", count = 1 }]
+products = [{ item = "item_fbottle_copper_sewage", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_bottle", count = 1 }, { item = "item_liquid_water", count = 1 }]
+products = [{ item = "item_fbottle_copper_water", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_bottle", count = 1 }, { item = "item_liquid_xiranite", count = 1 }]
+products = [{ item = "item_fbottle_copper_xiranite", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_bottle", count = 1 }, { item = "item_liquid_xiranite_enr", count = 1 }]
+products = [{ item = "item_fbottle_copper_xiranite_enr", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_bottle", count = 1 }, { item = "item_liquid_xiranite_lowpoly", count = 1 }]
+products = [{ item = "item_fbottle_copper_xiranite_lowpoly", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_bottle", count = 1 }, { item = "item_liquid_xiranite_poly", count = 1 }]
+products = [{ item = "item_fbottle_copper_xiranite_poly", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_enr_bottle", count = 1 }, { item = "item_liquid_acid", count = 1 }]
+products = [{ item = "item_fbottle_copperenr_acid", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_enr_bottle", count = 1 }, { item = "item_liquid_copper", count = 1 }]
+products = [{ item = "item_fbottle_copperenr_copper", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_enr_bottle", count = 1 }, { item = "item_liquid_copper_enr", count = 1 }]
+products = [{ item = "item_fbottle_copperenr_copper_enr", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_enr_bottle", count = 1 }, { item = "item_liquid_plant_grass_1", count = 1 }]
+products = [{ item = "item_fbottle_copperenr_grass_1", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_enr_bottle", count = 1 }, { item = "item_liquid_plant_grass_2", count = 1 }]
+products = [{ item = "item_fbottle_copperenr_grass_2", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_enr_bottle", count = 1 }, { item = "item_liquid_sewage", count = 1 }]
+products = [{ item = "item_fbottle_copperenr_sewage", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_enr_bottle", count = 1 }, { item = "item_liquid_water", count = 1 }]
+products = [{ item = "item_fbottle_copperenr_water", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_enr_bottle", count = 1 }, { item = "item_liquid_xiranite", count = 1 }]
+products = [{ item = "item_fbottle_copperenr_xiranite", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_enr_bottle", count = 1 }, { item = "item_liquid_xiranite_enr", count = 1 }]
+products = [{ item = "item_fbottle_copperenr_xiranite_enr", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_enr_bottle", count = 1 }, { item = "item_liquid_xiranite_lowpoly", count = 1 }]
+products = [{ item = "item_fbottle_copperenr_xiranite_lowpoly", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_enr_bottle", count = 1 }, { item = "item_liquid_xiranite_poly", count = 1 }]
+products = [{ item = "item_fbottle_copperenr_xiranite_poly", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_glass_bottle", count = 5 }, { item = "item_plant_moss_powder_2", count = 5 }]
+products = [{ item = "item_bottled_food_1", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_iron_bottle", count = 10 }, { item = "item_plant_moss_powder_2", count = 10 }]
+products = [{ item = "item_bottled_food_2", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_iron_enr_bottle", count = 10 }, { item = "item_plant_moss_enr_powder_2", count = 10 }]
+products = [{ item = "item_bottled_food_3", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_glass_bottle", count = 1 }, { item = "item_liquid_acid", count = 1 }]
+products = [{ item = "item_fbottle_glass_acid", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_glass_bottle", count = 1 }, { item = "item_liquid_copper", count = 1 }]
+products = [{ item = "item_fbottle_glass_copper", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_glass_bottle", count = 1 }, { item = "item_liquid_copper_enr", count = 1 }]
+products = [{ item = "item_fbottle_glass_copper_enr", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_glass_bottle", count = 1 }, { item = "item_liquid_plant_grass_1", count = 1 }]
+products = [{ item = "item_fbottle_glass_grass_1", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_glass_bottle", count = 1 }, { item = "item_liquid_plant_grass_2", count = 1 }]
+products = [{ item = "item_fbottle_glass_grass_2", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_glass_bottle", count = 1 }, { item = "item_liquid_sewage", count = 1 }]
+products = [{ item = "item_fbottle_glass_sewage", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_glass_bottle", count = 1 }, { item = "item_liquid_water", count = 1 }]
+products = [{ item = "item_fbottle_glass_water", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_glass_bottle", count = 1 }, { item = "item_liquid_xiranite", count = 1 }]
+products = [{ item = "item_fbottle_glass_xiranite", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_glass_bottle", count = 1 }, { item = "item_liquid_xiranite_enr", count = 1 }]
+products = [{ item = "item_fbottle_glass_xiranite_enr", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_glass_bottle", count = 1 }, { item = "item_liquid_xiranite_lowpoly", count = 1 }]
+products = [{ item = "item_fbottle_glass_xiranite_lowpoly", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_glass_bottle", count = 1 }, { item = "item_liquid_xiranite_poly", count = 1 }]
+products = [{ item = "item_fbottle_glass_xiranite_poly", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_glass_enr_bottle", count = 1 }, { item = "item_liquid_acid", count = 1 }]
+products = [{ item = "item_fbottle_glassenr_acid", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_glass_enr_bottle", count = 1 }, { item = "item_liquid_copper", count = 1 }]
+products = [{ item = "item_fbottle_glassenr_copper", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_glass_enr_bottle", count = 1 }, { item = "item_liquid_copper_enr", count = 1 }]
+products = [{ item = "item_fbottle_glassenr_copper_enr", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_glass_enr_bottle", count = 1 }, { item = "item_liquid_plant_grass_1", count = 1 }]
+products = [{ item = "item_fbottle_glassenr_grass_1", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_glass_enr_bottle", count = 1 }, { item = "item_liquid_plant_grass_2", count = 1 }]
+products = [{ item = "item_fbottle_glassenr_grass_2", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_glass_enr_bottle", count = 1 }, { item = "item_liquid_sewage", count = 1 }]
+products = [{ item = "item_fbottle_glassenr_sewage", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_glass_enr_bottle", count = 1 }, { item = "item_liquid_water", count = 1 }]
+products = [{ item = "item_fbottle_glassenr_water", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_glass_enr_bottle", count = 1 }, { item = "item_liquid_xiranite", count = 1 }]
+products = [{ item = "item_fbottle_glassenr_xiranite", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_glass_enr_bottle", count = 1 }, { item = "item_liquid_xiranite_enr", count = 1 }]
+products = [{ item = "item_fbottle_glassenr_xiranite_enr", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_glass_enr_bottle", count = 1 }, { item = "item_liquid_xiranite_lowpoly", count = 1 }]
+products = [{ item = "item_fbottle_glassenr_xiranite_lowpoly", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_glass_enr_bottle", count = 1 }, { item = "item_liquid_xiranite_poly", count = 1 }]
+products = [{ item = "item_fbottle_glassenr_xiranite_poly", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_bottle", count = 1 }, { item = "item_liquid_acid", count = 1 }]
+products = [{ item = "item_fbottle_iron_acid", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_bottle", count = 1 }, { item = "item_liquid_copper", count = 1 }]
+products = [{ item = "item_fbottle_iron_copper", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_bottle", count = 1 }, { item = "item_liquid_copper_enr", count = 1 }]
+products = [{ item = "item_fbottle_iron_copper_enr", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_bottle", count = 1 }, { item = "item_liquid_plant_grass_1", count = 1 }]
+products = [{ item = "item_fbottle_iron_grass_1", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_bottle", count = 1 }, { item = "item_liquid_plant_grass_2", count = 1 }]
+products = [{ item = "item_fbottle_iron_grass_2", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_bottle", count = 1 }, { item = "item_liquid_sewage", count = 1 }]
+products = [{ item = "item_fbottle_iron_sewage", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_bottle", count = 1 }, { item = "item_liquid_water", count = 1 }]
+products = [{ item = "item_fbottle_iron_water", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_bottle", count = 1 }, { item = "item_liquid_xiranite", count = 1 }]
+products = [{ item = "item_fbottle_iron_xiranite", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_bottle", count = 1 }, { item = "item_liquid_xiranite_enr", count = 1 }]
+products = [{ item = "item_fbottle_iron_xiranite_enr", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_bottle", count = 1 }, { item = "item_liquid_xiranite_lowpoly", count = 1 }]
+products = [{ item = "item_fbottle_iron_xiranite_lowpoly", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_bottle", count = 1 }, { item = "item_liquid_xiranite_poly", count = 1 }]
+products = [{ item = "item_fbottle_iron_xiranite_poly", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_enr_bottle", count = 1 }, { item = "item_liquid_acid", count = 1 }]
+products = [{ item = "item_fbottle_ironenr_acid", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_enr_bottle", count = 1 }, { item = "item_liquid_copper", count = 1 }]
+products = [{ item = "item_fbottle_ironenr_copper", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_enr_bottle", count = 1 }, { item = "item_liquid_copper_enr", count = 1 }]
+products = [{ item = "item_fbottle_ironenr_copper_enr", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_enr_bottle", count = 1 }, { item = "item_liquid_plant_grass_1", count = 1 }]
+products = [{ item = "item_fbottle_ironenr_grass_1", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_enr_bottle", count = 1 }, { item = "item_liquid_plant_grass_2", count = 1 }]
+products = [{ item = "item_fbottle_ironenr_grass_2", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_enr_bottle", count = 1 }, { item = "item_liquid_sewage", count = 1 }]
+products = [{ item = "item_fbottle_ironenr_sewage", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_enr_bottle", count = 1 }, { item = "item_liquid_water", count = 1 }]
+products = [{ item = "item_fbottle_ironenr_water", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_enr_bottle", count = 1 }, { item = "item_liquid_xiranite", count = 1 }]
+products = [{ item = "item_fbottle_ironenr_xiranite", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_enr_bottle", count = 1 }, { item = "item_liquid_xiranite_enr", count = 1 }]
+products = [{ item = "item_fbottle_ironenr_xiranite_enr", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_enr_bottle", count = 1 }, { item = "item_liquid_xiranite_lowpoly", count = 1 }]
+products = [{ item = "item_fbottle_ironenr_xiranite_lowpoly", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_enr_bottle", count = 1 }, { item = "item_liquid_xiranite_poly", count = 1 }]
+products = [{ item = "item_fbottle_ironenr_xiranite_poly", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_glass_bottle", count = 5 }, { item = "item_plant_moss_powder_1", count = 5 }]
+products = [{ item = "item_bottled_rec_hp_1", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_iron_bottle", count = 10 }, { item = "item_plant_moss_powder_1", count = 10 }]
+products = [{ item = "item_bottled_rec_hp_2", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_iron_enr_bottle", count = 10 }, { item = "item_plant_moss_enr_powder_1", count = 10 }]
+products = [{ item = "item_bottled_rec_hp_3", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_activity_xiranite_enr_bottle", count = 1 }, { item = "item_liquid_plant_grass_2", count = 5 }]
+products = [{ item = "item_fbottle_xiranenr_grass_2", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_jar", count = 1 }, { item = "item_gas_copper_enr2", count = 1 }]
+products = [{ item = "item_gasjar_copper_gas_copper_enr2", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_jar", count = 1 }, { item = "item_gas_acid", count = 1 }]
+products = [{ item = "item_gasjar_copper_gas_acid", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_jar", count = 1 }, { item = "item_gas_copper", count = 1 }]
+products = [{ item = "item_gasjar_copper_gas_copper", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_jar", count = 1 }, { item = "item_gas_copper_enr", count = 1 }]
+products = [{ item = "item_gasjar_copper_gas_copper_enr", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_jar", count = 1 }, { item = "item_gas_inert", count = 1 }]
+products = [{ item = "item_gasjar_copper_gas_inert", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_jar", count = 1 }, { item = "item_gas_water", count = 1 }]
+products = [{ item = "item_gasjar_copper_gas_water", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_jar", count = 1 }, { item = "item_gas_xiranite", count = 1 }]
+products = [{ item = "item_gasjar_copper_gas_xiranite", count = 1 }]
+
+[[recipes]]
+facility = "filling_powder_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_jar", count = 1 }, { item = "item_gas_xiranite_enr", count = 1 }]
+products = [{ item = "item_gasjar_copper_gas_xiranite_enr", count = 1 }]
+
+[[recipes]]
+facility = "furnance_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_carbon_enr_powder", count = 1 }]
+products = [{ item = "item_carbon_enr", count = 1 }]
+
+[[recipes]]
+facility = "furnance_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_moss_enr_powder_1", count = 1 }]
+products = [{ item = "item_carbon_enr_powder", count = 1 }]
+
+[[recipes]]
+facility = "furnance_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_moss_enr_powder_2", count = 1 }]
+products = [{ item = "item_carbon_enr_powder", count = 1 }]
+
+[[recipes]]
+facility = "furnance_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_moss_1", count = 1 }]
+products = [{ item = "item_carbon_mtl", count = 1 }]
+
+[[recipes]]
+facility = "furnance_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_moss_2", count = 1 }]
+products = [{ item = "item_carbon_mtl", count = 1 }]
+
+[[recipes]]
+facility = "furnance_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_moss_3", count = 1 }]
+products = [{ item = "item_carbon_mtl", count = 1 }]
+
+[[recipes]]
+facility = "furnance_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_tundra_wood", count = 1 }]
+products = [{ item = "item_carbon_mtl", count = 1 }]
+
+[[recipes]]
+facility = "furnance_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_grass_1", count = 1 }]
+products = [{ item = "item_carbon_mtl", count = 2 }]
+
+[[recipes]]
+facility = "furnance_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_grass_2", count = 1 }]
+products = [{ item = "item_carbon_mtl", count = 2 }]
+
+[[recipes]]
+facility = "furnance_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_moss_powder_1", count = 1 }]
+products = [{ item = "item_carbon_powder", count = 1 }]
+
+[[recipes]]
+facility = "furnance_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_moss_powder_2", count = 1 }]
+products = [{ item = "item_carbon_powder", count = 1 }]
+
+[[recipes]]
+facility = "furnance_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_moss_powder_3", count = 3 }]
+products = [{ item = "item_carbon_powder", count = 2 }]
+
+[[recipes]]
+facility = "furnance_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_grass_powder_1", count = 1 }]
+products = [{ item = "item_carbon_powder", count = 2 }]
+
+[[recipes]]
+facility = "furnance_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_grass_powder_2", count = 1 }]
+products = [{ item = "item_carbon_powder", count = 2 }]
+
+[[recipes]]
+facility = "furnance_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_ore", count = 1 }, { item = "item_liquid_water", count = 1 }]
+products = [{ item = "item_copper_nugget", count = 1 }, { item = "item_liquid_sewage", count = 1 }]
+
+[[recipes]]
+facility = "furnance_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_crystal_enr_powder", count = 1 }]
+products = [{ item = "item_crystal_enr", count = 1 }]
+
+[[recipes]]
+facility = "furnance_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_originium_enr_powder", count = 1 }]
+products = [{ item = "item_crystal_enr_powder", count = 1 }]
+
+[[recipes]]
+facility = "furnance_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_originium_powder", count = 1 }]
+products = [{ item = "item_crystal_powder", count = 1 }]
+
+[[recipes]]
+facility = "furnance_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_originium_ore", count = 1 }]
+products = [{ item = "item_crystal_shell", count = 1 }]
+
+[[recipes]]
+facility = "furnance_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_crystal_powder", count = 1 }]
+products = [{ item = "item_crystal_shell", count = 1 }]
+
+[[recipes]]
+facility = "furnance_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_enr_powder", count = 1 }]
+products = [{ item = "item_iron_enr", count = 1 }]
+
+[[recipes]]
+facility = "furnance_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_ore", count = 1 }]
+products = [{ item = "item_iron_nugget", count = 1 }]
+
+[[recipes]]
+facility = "furnance_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_powder", count = 1 }]
+products = [{ item = "item_iron_nugget", count = 1 }]
+
+[[recipes]]
+facility = "furnance_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_quartz_enr_powder", count = 1 }]
+products = [{ item = "item_quartz_enr", count = 1 }]
+
+[[recipes]]
+facility = "furnance_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_quartz_sand", count = 1 }]
+products = [{ item = "item_quartz_glass", count = 1 }]
+
+[[recipes]]
+facility = "furnance_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_quartz_powder", count = 1 }]
+products = [{ item = "item_quartz_glass", count = 1 }]
+
+[[recipes]]
+facility = "gas_reactor_1"
+time_s = 2
+gasEnv = "Acid"
+ingredients = [{ item = "item_gas_copper_enr", count = 2 }, { item = "item_gas_xiranite", count = 1 }]
+products = [{ item = "item_gas_copper_enr2", count = 1 }]
+
+[[recipes]]
+facility = "grinder_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_carbon_mtl", count = 1 }]
+products = [{ item = "item_carbon_powder", count = 2 }]
+
+[[recipes]]
+facility = "grinder_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_nugget", count = 1 }]
+products = [{ item = "item_copper_powder", count = 1 }]
+
+[[recipes]]
+facility = "grinder_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_crystal_shell", count = 1 }]
+products = [{ item = "item_crystal_powder", count = 1 }]
+
+[[recipes]]
+facility = "grinder_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_nugget", count = 1 }]
+products = [{ item = "item_iron_powder", count = 1 }]
+
+[[recipes]]
+facility = "grinder_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_originium_ore", count = 1 }]
+products = [{ item = "item_originium_powder", count = 1 }]
+
+[[recipes]]
+facility = "grinder_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_bbflower_1", count = 1 }]
+products = [{ item = "item_plant_bbflower_powder_1", count = 2 }]
+
+[[recipes]]
+facility = "grinder_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_grass_1", count = 1 }]
+products = [{ item = "item_plant_grass_powder_1", count = 2 }]
+
+[[recipes]]
+facility = "grinder_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_grass_2", count = 1 }]
+products = [{ item = "item_plant_grass_powder_2", count = 2 }]
+
+[[recipes]]
+facility = "grinder_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_moss_1", count = 1 }]
+products = [{ item = "item_plant_moss_powder_1", count = 2 }]
+
+[[recipes]]
+facility = "grinder_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_moss_2", count = 1 }]
+products = [{ item = "item_plant_moss_powder_2", count = 2 }]
+
+[[recipes]]
+facility = "grinder_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_moss_3", count = 1 }]
+products = [{ item = "item_plant_moss_powder_3", count = 3 }]
+
+[[recipes]]
+facility = "grinder_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_quartz_glass", count = 1 }]
+products = [{ item = "item_quartz_powder", count = 1 }]
+
+[[recipes]]
+facility = "liquid_purifier_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_liquid_copper", count = 4 }]
+products = [{ item = "item_liquid_copper_enr", count = 1 }, { item = "item_liquid_acid", count = 1 }]
+
+[[recipes]]
+facility = "liquid_purifier_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_gas_copper", count = 2 }, { item = "item_filter_core", count = 2 }]
+products = [{ item = "item_gas_copper_enr", count = 2 }]
+
+[[recipes]]
+facility = "liquid_purifier_1"
+time_s = 2
+gasEnv = "Stable"
+ingredients = [{ item = "item_gas_copper", count = 2 }, { item = "item_filter_core", count = 1 }]
+products = [{ item = "item_gas_copper_enr", count = 2 }]
+
+[[recipes]]
+facility = "liquid_purifier_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_gas_xiranite", count = 2 }, { item = "item_filter_core", count = 2 }]
+products = [{ item = "item_gas_xiranite_enr", count = 1 }]
+
+[[recipes]]
+facility = "liquid_purifier_1"
+time_s = 2
+gasEnv = "Stable"
+ingredients = [{ item = "item_gas_xiranite", count = 2 }, { item = "item_filter_core", count = 1 }]
+products = [{ item = "item_gas_xiranite_enr", count = 1 }]
+
+[[recipes]]
+facility = "liquid_purifier_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_liquid_xiranite_lowpoly", count = 4 }]
+products = [{ item = "item_liquid_xiranite_poly", count = 1 }, { item = "item_liquid_water", count = 1 }]
+
+[[recipes]]
+facility = "transmuter_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_liquid_acid", count = 1 }]
+products = [{ item = "item_gas_acid", count = 1 }]
+
+[[recipes]]
+facility = "transmuter_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_liquid_copper", count = 2 }]
+products = [{ item = "item_gas_copper", count = 1 }]
+
+[[recipes]]
+facility = "transmuter_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_liquid_copper_enr", count = 1 }]
+products = [{ item = "item_gas_copper_enr", count = 1 }]
+
+[[recipes]]
+facility = "transmuter_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_liquid_water", count = 1 }]
+products = [{ item = "item_gas_water", count = 1 }]
+
+[[recipes]]
+facility = "transmuter_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_liquid_xiranite", count = 1 }]
+products = [{ item = "item_gas_xiranite", count = 1 }]
+
+[[recipes]]
+facility = "transmuter_1"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_liquid_xiranite_enr", count = 2 }]
+products = [{ item = "item_gas_xiranite_enr", count = 5 }]
+
+[[recipes]]
+facility = "transmuter_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_gas_acid", count = 1 }]
+products = [{ item = "item_liquid_acid", count = 1 }]
+
+[[recipes]]
+facility = "transmuter_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_gas_copper", count = 1 }]
+products = [{ item = "item_liquid_copper", count = 2 }]
+
+[[recipes]]
+facility = "transmuter_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_gas_copper_enr", count = 1 }]
+products = [{ item = "item_liquid_copper_enr", count = 1 }]
+
+[[recipes]]
+facility = "transmuter_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_gas_water", count = 1 }]
+products = [{ item = "item_liquid_water", count = 1 }]
+
+[[recipes]]
+facility = "transmuter_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_gas_xiranite", count = 1 }]
+products = [{ item = "item_liquid_xiranite", count = 1 }]
+
+[[recipes]]
+facility = "transmuter_1"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_gas_xiranite_enr", count = 5 }]
+products = [{ item = "item_liquid_xiranite_enr", count = 2 }]
+
+[[recipes]]
+facility = "transmuter_2"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_nugget", count = 2 }]
+products = [{ item = "item_gas_copper", count = 1 }]
+
+[[recipes]]
+facility = "transmuter_2"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_enr2", count = 1 }]
+products = [{ item = "item_gas_copper_enr2", count = 1 }]
+
+[[recipes]]
+facility = "transmuter_2"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_enr", count = 1 }]
+products = [{ item = "item_gas_copper_enr", count = 2 }]
+
+[[recipes]]
+facility = "transmuter_2"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_xiranite_powder", count = 1 }]
+products = [{ item = "item_gas_xiranite", count = 1 }]
+
+[[recipes]]
+facility = "transmuter_2"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_xiranite_enr_powder", count = 2 }]
+products = [{ item = "item_gas_xiranite_enr", count = 5 }]
+
+[[recipes]]
+facility = "transmuter_2"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_gas_copper_enr2", count = 1 }]
+products = [{ item = "item_copper_enr2", count = 1 }]
+
+[[recipes]]
+facility = "transmuter_2"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_gas_copper_enr", count = 2 }]
+products = [{ item = "item_copper_enr", count = 1 }]
+
+[[recipes]]
+facility = "transmuter_2"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_gas_copper", count = 1 }]
+products = [{ item = "item_copper_nugget", count = 2 }]
+
+[[recipes]]
+facility = "transmuter_2"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_gas_xiranite_enr", count = 5 }]
+products = [{ item = "item_xiranite_enr_powder", count = 2 }]
+
+[[recipes]]
+facility = "transmuter_2"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_gas_xiranite", count = 1 }]
+products = [{ item = "item_xiranite_powder", count = 1 }]
+
+[[recipes]]
+facility = "planter_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_bbflower_seed_1", count = 1 }]
+products = [{ item = "item_plant_bbflower_1", count = 1 }]
+
+[[recipes]]
+facility = "planter_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_grass_seed_1", count = 1 }, { item = "item_liquid_water", count = 1 }]
+products = [{ item = "item_plant_grass_1", count = 2 }]
+
+[[recipes]]
+facility = "planter_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_grass_seed_2", count = 1 }, { item = "item_liquid_water", count = 1 }]
+products = [{ item = "item_plant_grass_2", count = 2 }]
+
+[[recipes]]
+facility = "planter_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_moss_seed_1", count = 1 }]
+products = [{ item = "item_plant_moss_1", count = 1 }]
+
+[[recipes]]
+facility = "planter_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_moss_seed_2", count = 1 }]
+products = [{ item = "item_plant_moss_2", count = 1 }]
+
+[[recipes]]
+facility = "planter_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_moss_seed_3", count = 1 }]
+products = [{ item = "item_plant_moss_3", count = 1 }]
+
+[[recipes]]
+facility = "mix_pool_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_liquid_copper_enr", count = 2 }, { item = "item_iron_powder", count = 1 }]
+products = [{ item = "item_copper_enr", count = 1 }, { item = "item_liquid_sewage", count = 1 }]
+
+[[recipes]]
+facility = "mix_pool_2"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_liquid_copper_enr", count = 2 }, { item = "item_iron_powder", count = 1 }]
+products = [{ item = "item_copper_enr", count = 1 }, { item = "item_liquid_sewage", count = 1 }]
+
+[[recipes]]
+facility = "mix_pool_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_powder", count = 1 }, { item = "item_liquid_acid", count = 1 }]
+products = [{ item = "item_liquid_copper", count = 1 }]
+
+[[recipes]]
+facility = "mix_pool_2"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_powder", count = 1 }, { item = "item_liquid_acid", count = 1 }]
+products = [{ item = "item_liquid_copper", count = 1 }]
+
+[[recipes]]
+facility = "mix_pool_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_xiranite_powder", count = 1 }, { item = "item_liquid_water", count = 1 }]
+products = [{ item = "item_liquid_xiranite", count = 1 }]
+
+[[recipes]]
+facility = "mix_pool_2"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_xiranite_powder", count = 1 }, { item = "item_liquid_water", count = 1 }]
+products = [{ item = "item_liquid_xiranite", count = 1 }]
+
+[[recipes]]
+facility = "mix_pool_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_grass_powder_1", count = 1 }, { item = "item_liquid_water", count = 1 }]
+products = [{ item = "item_liquid_plant_grass_1", count = 1 }]
+
+[[recipes]]
+facility = "mix_pool_2"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_grass_powder_1", count = 1 }, { item = "item_liquid_water", count = 1 }]
+products = [{ item = "item_liquid_plant_grass_1", count = 1 }]
+
+[[recipes]]
+facility = "mix_pool_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_grass_powder_2", count = 1 }, { item = "item_liquid_water", count = 1 }]
+products = [{ item = "item_liquid_plant_grass_2", count = 1 }]
+
+[[recipes]]
+facility = "mix_pool_2"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_grass_powder_2", count = 1 }, { item = "item_liquid_water", count = 1 }]
+products = [{ item = "item_liquid_plant_grass_2", count = 1 }]
+
+[[recipes]]
+facility = "mix_pool_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_xiranite_enr_powder", count = 1 }, { item = "item_liquid_acid", count = 1 }]
+products = [{ item = "item_liquid_xiranite_enr", count = 1 }]
+
+[[recipes]]
+facility = "mix_pool_2"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_xiranite_enr_powder", count = 1 }, { item = "item_liquid_acid", count = 1 }]
+products = [{ item = "item_liquid_xiranite_enr", count = 1 }]
+
+[[recipes]]
+facility = "mix_pool_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_liquid_xiranite", count = 1 }, { item = "item_liquid_sewage", count = 1 }]
+products = [{ item = "item_liquid_xiranite_poly", count = 1 }, { item = "item_liquid_xiranite_lowpoly", count = 1 }]
+
+[[recipes]]
+facility = "mix_pool_2"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_liquid_xiranite", count = 1 }, { item = "item_liquid_sewage", count = 1 }]
+products = [{ item = "item_liquid_xiranite_poly", count = 1 }, { item = "item_liquid_xiranite_lowpoly", count = 1 }]
+
+[[recipes]]
+facility = "mix_pool_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_liquid_xiranite_poly", count = 2 }, { item = "item_iron_powder", count = 1 }]
+products = [{ item = "item_xiranite_poly", count = 1 }, { item = "item_liquid_sewage", count = 1 }]
+
+[[recipes]]
+facility = "mix_pool_2"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_liquid_xiranite_poly", count = 2 }, { item = "item_iron_powder", count = 1 }]
+products = [{ item = "item_xiranite_poly", count = 1 }, { item = "item_liquid_sewage", count = 1 }]
+
+[[recipes]]
+facility = "seedcollector_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_bbflower_1", count = 1 }]
+products = [{ item = "item_plant_bbflower_seed_1", count = 2 }]
+
+[[recipes]]
+facility = "seedcollector_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_grass_1", count = 1 }]
+products = [{ item = "item_plant_grass_seed_1", count = 1 }]
+
+[[recipes]]
+facility = "seedcollector_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_grass_2", count = 1 }]
+products = [{ item = "item_plant_grass_seed_2", count = 1 }]
+
+[[recipes]]
+facility = "seedcollector_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_moss_1", count = 1 }]
+products = [{ item = "item_plant_moss_seed_1", count = 2 }]
+
+[[recipes]]
+facility = "seedcollector_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_moss_2", count = 1 }]
+products = [{ item = "item_plant_moss_seed_2", count = 2 }]
+
+[[recipes]]
+facility = "seedcollector_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_moss_3", count = 1 }]
+products = [{ item = "item_plant_moss_seed_3", count = 2 }]
+
+[[recipes]]
+facility = "seedcollector_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_sp_1", count = 1 }]
+products = [{ item = "item_plant_sp_seed_1", count = 2 }]
+
+[[recipes]]
+facility = "seedcollector_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_sp_2", count = 1 }]
+products = [{ item = "item_plant_sp_seed_2", count = 2 }]
+
+[[recipes]]
+facility = "seedcollector_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_sp_3", count = 1 }]
+products = [{ item = "item_plant_sp_seed_3", count = 2 }]
+
+[[recipes]]
+facility = "seedcollector_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_sp_4", count = 1 }]
+products = [{ item = "item_plant_sp_seed_4", count = 2 }]
+
+[[recipes]]
+facility = "shaper_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_xiranite_powder", count = 2 }]
+products = [{ item = "item_activity_xiranite_bottle", count = 1 }]
+
+[[recipes]]
+facility = "shaper_1"
+time_s = 20
+gasEnv = "None"
+ingredients = [{ item = "item_xiranite_enr_powder", count = 1 }]
+products = [{ item = "item_activity_xiranite_enr_bottle", count = 2 }]
+
+[[recipes]]
+facility = "shaper_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_nugget", count = 2 }]
+products = [{ item = "item_copper_bottle", count = 1 }]
+
+[[recipes]]
+facility = "shaper_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_enr", count = 2 }]
+products = [{ item = "item_copper_enr_bottle", count = 1 }]
+
+[[recipes]]
+facility = "shaper_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_nugget", count = 2 }, { item = "item_gas_inert", count = 1 }]
+products = [{ item = "item_copper_jar", count = 1 }]
+
+[[recipes]]
+facility = "shaper_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_quartz_glass", count = 2 }]
+products = [{ item = "item_glass_bottle", count = 1 }]
+
+[[recipes]]
+facility = "shaper_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_quartz_enr", count = 2 }]
+products = [{ item = "item_glass_enr_bottle", count = 1 }]
+
+[[recipes]]
+facility = "shaper_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_nugget", count = 2 }]
+products = [{ item = "item_iron_bottle", count = 1 }]
+
+[[recipes]]
+facility = "shaper_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_enr", count = 2 }]
+products = [{ item = "item_iron_enr_bottle", count = 1 }]
+
+[[recipes]]
+facility = "thickener_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_carbon_powder", count = 2 }, { item = "item_plant_moss_powder_3", count = 1 }]
+products = [{ item = "item_carbon_enr_powder", count = 1 }]
+
+[[recipes]]
+facility = "thickener_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_crystal_powder", count = 2 }, { item = "item_plant_moss_powder_3", count = 1 }]
+products = [{ item = "item_crystal_enr_powder", count = 1 }]
+
+[[recipes]]
+facility = "thickener_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_powder", count = 2 }, { item = "item_plant_moss_powder_3", count = 1 }]
+products = [{ item = "item_iron_enr_powder", count = 1 }]
+
+[[recipes]]
+facility = "thickener_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_originium_powder", count = 2 }, { item = "item_plant_moss_powder_3", count = 1 }]
+products = [{ item = "item_originium_enr_powder", count = 1 }]
+
+[[recipes]]
+facility = "thickener_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_moss_powder_1", count = 2 }, { item = "item_plant_moss_powder_3", count = 1 }]
+products = [{ item = "item_plant_moss_enr_powder_1", count = 1 }]
+
+[[recipes]]
+facility = "thickener_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_plant_moss_powder_2", count = 2 }, { item = "item_plant_moss_powder_3", count = 1 }]
+products = [{ item = "item_plant_moss_enr_powder_2", count = 1 }]
+
+[[recipes]]
+facility = "thickener_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_quartz_powder", count = 2 }, { item = "item_plant_moss_powder_3", count = 1 }]
+products = [{ item = "item_quartz_enr_powder", count = 1 }]
+
+[[recipes]]
+facility = "tools_assebling_mc_1"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_fbottle_xiranenr_grass_2", count = 1 }, { item = "item_activity_xiranite_enr_tool", count = 1 }]
+products = [{ item = "item_activity_xiranite_enr_hulu", count = 1 }]
+
+[[recipes]]
+facility = "tools_assebling_mc_1"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_activity_xiranite_enr_cmpt", count = 1 }, { item = "item_copper_enr", count = 1 }]
+products = [{ item = "item_activity_xiranite_enr_tool", count = 1 }]
+
+[[recipes]]
+facility = "tools_assebling_mc_1"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_activity_xiranite_bottle", count = 5 }, { item = "item_activity_xiranite_cmpt", count = 5 }]
+products = [{ item = "item_activity_xiranite_hulu", count = 1 }]
+
+[[recipes]]
+facility = "tools_assebling_mc_1"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_glass_cmpt", count = 5 }, { item = "item_originium_powder", count = 10 }]
+products = [{ item = "item_proc_battery_1", count = 1 }]
+
+[[recipes]]
+facility = "tools_assebling_mc_1"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_iron_cmpt", count = 10 }, { item = "item_originium_powder", count = 15 }]
+products = [{ item = "item_proc_battery_2", count = 1 }]
+
+[[recipes]]
+facility = "tools_assebling_mc_1"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_iron_enr_cmpt", count = 10 }, { item = "item_originium_enr_powder", count = 15 }]
+products = [{ item = "item_proc_battery_3", count = 1 }]
+
+[[recipes]]
+facility = "tools_assebling_mc_1"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_xiranite_powder", count = 5 }, { item = "item_originium_enr_powder", count = 15 }]
+products = [{ item = "item_proc_battery_4", count = 1 }]
+
+[[recipes]]
+facility = "tools_assebling_mc_1"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_xiranite_poly", count = 5 }, { item = "item_originium_enr_powder", count = 20 }]
+products = [{ item = "item_proc_battery_5", count = 1 }]
+
+[[recipes]]
+facility = "tools_assebling_mc_1"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_glass_cmpt", count = 5 }, { item = "item_plant_bbflower_powder_1", count = 1 }]
+products = [{ item = "item_proc_bomb_1", count = 1 }]
+
+[[recipes]]
+facility = "tools_assebling_mc_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_copper_jar", count = 1 }, { item = "item_xiranite_powder", count = 1 }]
+products = [{ item = "item_filter_core", count = 2 }]
+
+[[recipes]]
+facility = "tools_assebling_mc_1"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_iron_cmpt", count = 10 }, { item = "item_fbottle_iron_grass_1", count = 5 }]
+products = [{ item = "item_bottled_food_4", count = 1 }]
+
+[[recipes]]
+facility = "tools_assebling_mc_1"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_copper_cmpt", count = 10 }, { item = "item_fbottle_copper_grass_1", count = 5 }]
+products = [{ item = "item_bottled_food_5", count = 1 }]
+
+[[recipes]]
+facility = "tools_assebling_mc_1"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_iron_cmpt", count = 10 }, { item = "item_fbottle_iron_grass_2", count = 5 }]
+products = [{ item = "item_bottled_rec_hp_4", count = 1 }]
+
+[[recipes]]
+facility = "tools_assebling_mc_1"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_copper_cmpt", count = 10 }, { item = "item_fbottle_copper_grass_2", count = 5 }]
+products = [{ item = "item_bottled_rec_hp_5", count = 1 }]
+
+[[recipes]]
+facility = "winder_1"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_crystal_shell", count = 5 }, { item = "item_quartz_glass", count = 5 }]
+products = [{ item = "item_equip_script_1", count = 1 }]
+
+[[recipes]]
+facility = "winder_1"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_crystal_shell", count = 10 }, { item = "item_iron_nugget", count = 10 }]
+products = [{ item = "item_equip_script_2", count = 1 }]
+
+[[recipes]]
+facility = "winder_1"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_crystal_enr", count = 10 }, { item = "item_quartz_enr", count = 10 }]
+products = [{ item = "item_equip_script_3", count = 1 }]
+
+[[recipes]]
+facility = "winder_1"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_crystal_enr", count = 10 }, { item = "item_xiranite_powder", count = 10 }]
+products = [{ item = "item_equip_script_4", count = 1 }]
+
+[[recipes]]
+facility = "winder_1"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_copper_cmpt", count = 10 }, { item = "item_xiranite_powder", count = 10 }]
+products = [{ item = "item_equip_script_4_1", count = 1 }]
+
+[[recipes]]
+facility = "winder_1"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_copper_enr_cmpt", count = 2 }, { item = "item_xiranite_enr_powder", count = 2 }]
+products = [{ item = "item_equip_script_4_2", count = 1 }]
+
+[[recipes]]
+facility = "winder_1"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_copper_enr2_cmpt", count = 1 }, { item = "item_xiranite_enr_powder", count = 2 }]
+products = [{ item = "item_equip_script_4_3", count = 1 }]
+
+[[recipes]]
+facility = "xiranite_oven_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_muck_feces_1", count = 1 }, { item = "item_liquid_xiranite", count = 1 }]
+products = [{ item = "item_muck_xiranite_1", count = 1 }]
+
+[[recipes]]
+facility = "xiranite_oven_1"
+time_s = 10
+gasEnv = "None"
+ingredients = [{ item = "item_xiranite_powder", count = 10 }, { item = "item_liquid_xiranite_poly", count = 5 }]
+products = [{ item = "item_xiranite_enr_powder", count = 1 }]
+
+[[recipes]]
+facility = "xiranite_oven_1"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_carbon_enr", count = 2 }, { item = "item_liquid_water", count = 1 }]
+products = [{ item = "item_xiranite_powder", count = 1 }]
+
+[[recipes]]
+facility = "xiranite_oven_1"
+time_s = 2
+gasEnv = "Stable"
+ingredients = [{ item = "item_carbon_mtl", count = 1 }, { item = "item_liquid_water", count = 1 }]
+products = [{ item = "item_xiranite_powder", count = 1 }]

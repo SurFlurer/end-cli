@@ -1,0 +1,47 @@
+[[machines]]
+key = "pump_1"
+power_w = 10
+en = "Fluid Pump"
+zh = "水泵"
+
+[[machines]]
+key = "pump_2"
+power_w = 20
+en = "Acid Resistant Pump Mk II"
+zh = "二型耐酸水泵"
+
+[[machines]]
+key = "liquid_cleaner_1"
+power_w = 50
+en = "Water Treatment Unit"
+zh = "废水处理机"
+
+[[recipes]]
+facility = "pump_1"
+time_s = 1
+ingredients = []
+products = [{ item = "item_liquid_water", count = 1 }]
+
+[[recipes]]
+facility = "pump_2"
+time_s = 1
+ingredients = []
+products = [{ item = "item_liquid_acid", count = 1 }]
+
+[[recipes]]
+facility = "liquid_cleaner_1"
+time_s = 2
+ingredients = [{ item = "item_liquid_xiranite_lowpoly", count = 1 }]
+products = []
+
+[[recipes]]
+facility = "liquid_cleaner_1"
+time_s = 2
+ingredients = [{ item = "item_liquid_sewage", count = 1 }]
+products = []
+
+[[recipes]]
+facility = "liquid_cleaner_1"
+time_s = 2
+ingredients = [{ item = "item_liquid_xiranite_poly", count = 1 }]
+products = []

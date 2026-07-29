@@ -1,0 +1,35 @@
+[thermal_bank]
+key = "power_station_1"
+en = "Thermal Bank"
+zh = "热能池"
+
+[[power_recipes]]
+power_w = 50
+time_s = 8
+ingredient = { item = "item_originium_ore", count = 1 }
+
+[[power_recipes]]
+power_w = 220
+time_s = 40
+ingredient = { item = "item_proc_battery_1", count = 1 }
+
+[[power_recipes]]
+power_w = 420
+time_s = 40
+ingredient = { item = "item_proc_battery_2", count = 1 }
+
+[[power_recipes]]
+power_w = 1100
+time_s = 40
+ingredient = { item = "item_proc_battery_3", count = 1 }
+
+[[power_recipes]]
+power_w = 1600
+time_s = 40
+ingredient = { item = "item_proc_battery_4", count = 1 }
+
+[[power_recipes]]
+power_w = 3200
+time_s = 40
+ingredient = { item = "item_proc_battery_5", count = 1 }
+

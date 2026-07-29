@@ -657,3 +657,23 @@ zh = "优质芽针针剂"
 key = "Yazhen Syringe (C)"
 en = "Yazhen Syringe (C)"
 zh = "芽针针剂"
+
+[[items]]
+key = "Acid Liquid"
+en = "Acid Liquid"
+zh = "沉积酸"
+
+[[items]]
+key = "Cuprium Liquid"
+en = "Cuprium Liquid"
+zh = "液态赤铜"
+
+[[items]]
+key = "Cuprium 2 Liquid"
+en = "Cuprium Liquid"
+zh = "液态赫铜"
+
+[[items]]
+key = "Cuprium 3 Liquid"
+en = "Cuprium Liquid"
+zh = "液态灼铜"

@@ -8,7 +8,7 @@
 
 version = 2
 
-region = "fourth_valley"
+region = "wuling"
 
 [power]
 enabled = true
@@ -16,69 +16,73 @@ enabled = true
 # Defaults to 200W (core power).
 external_production = 200
 # External stable consumption from non-production systems.
-external_consumption = 1800
+external_consumption = 800
 
 [objective]
 max_money_slack = 1.0
 
 # External item supply per minute.
 [supply_per_min]
-"Originium Ore" = 560
-"Amethyst Ore" = 240
-"Ferrium Ore" = 1080
+"item_originium_ore" = 540
+"item_originium_enr_powder" = 25
+"item_copper_ore" = 420
+"item_iron_ore" = 120
+"item_gas_inert" = 120
+"item_gas_xiranite" = 100
+
 
 # External item consumption per minute.
 # e.g. Consumables, Delivery
 [external_consumption_per_min]
-"Industrial Explosive" = 6
+
 
 [[outposts]]
 # Unique identifier.
-key = "Refugee Camp"
+key = "tianwang"
 # Max revenue accepted by this outpost per hour.
-money_cap_per_hour = 29148
+money_cap_per_hour = 42000
 # Display name (Optional).
-en = "Refugee Camp"
-zh = "难民暂居处"
+en = "天王坪"
+zh = "天王坪"
 
 # Item -> price
 [outposts.prices]
-"HC Valley Battery" = 70
-"SC Valley Battery" = 30
-"Buck Capsule (A)" = 70
-"Buck Capsule (B)" = 27
-"Buck Capsule (C)" = 10
-"Canned Citrome (A)" = 70
-"Canned Citrome (B)" = 27
-"Canned Citrome (C)" = 10
+"item_proc_battery_5" = 54
+"item_copper_enr2_cmpt" = 70
+"item_copper_enr_cmpt" = 48
+"item_xiranite_enr_powder" = 27
+"item_bottled_rec_hp_5" = 22
 
 [[outposts]]
-key = "Infra Station"
-money_cap_per_hour = 38976
-en = "Infra Station"
-zh = "基建前站"
+# Unique identifier.
+key = "shoudun"
+# Max revenue accepted by this outpost per hour.
+money_cap_per_hour = 27360
+# Display name (Optional).
+en = "心脏修缮站"
+zh = "心脏修缮站"
 
+# Item -> price
 [outposts.prices]
-"HC Valley Battery" = 70
-"SC Valley Battery" = 30
-"LC Valley Battery" = 16
-"Buck Capsule (A)" = 70
-"Buck Capsule (B)" = 27
-"Canned Citrome (A)" = 70
-"Canned Citrome (B)" = 27
-"Canned Citrome (C)" = 10
+"item_proc_battery_5" = 54
+"item_copper_enr2_cmpt" = 70
+"item_copper_enr_cmpt" = 48
+"item_xiranite_enr_powder" = 27
+"item_bottled_rec_hp_5" = 22
 
 [[outposts]]
-key = "Reconstruction HQ"
-money_cap_per_hour = 51408
-en = "Reconstruction HQ"
-zh = "重建指挥部"
+# Unique identifier.
+key = "yinglong"
+# Max revenue accepted by this outpost per hour.
+money_cap_per_hour = 19440
+# Display name (Optional).
+en = "盈天台"
+zh = "盈天台"
 
+# Item -> price
 [outposts.prices]
-"Buck Capsule (A)" = 70
-"Buck Capsule (B)" = 27
-"Canned Citrome (A)" = 70
-"Canned Citrome (B)" = 27
-"Canned Citrome (C)" = 10
-"HC Valley Battery" = 70
-"SC Valley Battery" = 30
+"item_proc_battery_5" = 54
+"item_copper_enr2_cmpt" = 70
+"item_copper_enr_cmpt" = 48
+"item_xiranite_enr_powder" = 27
+"item_bottled_rec_hp_5" = 22

@@ -1,0 +1,110 @@
+# Auto-generated from FactoryMachineCraftTable.json + FactoryBuildingTable.json + I18nTextTable_*.json
+# Total machines: 18
+
+[[machines]]
+key = "component_mc_1"
+power_w = 20
+en = "Fitting Unit"
+zh = "配件机"
+
+[[machines]]
+key = "dismantler_1"
+power_w = 20
+en = "Separating Unit"
+zh = "拆解机"
+
+[[machines]]
+key = "filling_powder_mc_1"
+power_w = 20
+en = "Filling Unit"
+zh = "灌装机"
+
+[[machines]]
+key = "furnance_1"
+power_w = 5
+en = "Refining Unit"
+zh = "精炼炉"
+
+[[machines]]
+key = "gas_reactor_1"
+power_w = 50
+en = "Gas Reactor Globe"
+zh = "气体反应炉"
+
+[[machines]]
+key = "grinder_1"
+power_w = 5
+en = "Shredding Unit"
+zh = "粉碎机"
+
+[[machines]]
+key = "liquid_purifier_1"
+power_w = 50
+en = "Purification Unit"
+zh = "提纯机"
+
+[[machines]]
+key = "mix_pool_1"
+power_w = 50
+en = "Reactor Crucible"
+zh = "反应池"
+
+[[machines]]
+key = "mix_pool_2"
+power_w = 100
+en = "Expanded Crucible"
+zh = "扩容反应池"
+
+[[machines]]
+key = "planter_1"
+power_w = 20
+en = "Planting Unit"
+zh = "种植机"
+
+[[machines]]
+key = "seedcollector_1"
+power_w = 10
+en = "Seed-Picking Unit"
+zh = "采种机"
+
+[[machines]]
+key = "shaper_1"
+power_w = 10
+en = "Moulding Unit"
+zh = "塑形机"
+
+[[machines]]
+key = "thickener_1"
+power_w = 50
+en = "Grinding Unit"
+zh = "研磨机"
+
+[[machines]]
+key = "tools_assebling_mc_1"
+power_w = 20
+en = "Packaging Unit"
+zh = "封装机"
+
+[[machines]]
+key = "transmuter_1"
+power_w = 50
+en = "Fluid-Gas Transmuting Unit"
+zh = "液气转化机"
+
+[[machines]]
+key = "transmuter_2"
+power_w = 50
+en = "Solid-Gas Transmuting Unit"
+zh = "固气转化机"
+
+[[machines]]
+key = "winder_1"
+power_w = 10
+en = "Gearing Unit"
+zh = "装备原件机"
+
+[[machines]]
+key = "xiranite_oven_1"
+power_w = 50
+en = "Forge of the Sky"
+zh = "天有洪炉"
