@@ -7,6 +7,8 @@ pub enum CatalogBuildError {
     DuplicateItemKey(Key),
     #[error("Duplicate facility key: {0}")]
     DuplicateFacilityKey(Key),
+    #[error("Duplicate fixed consumption for facility id {facility_id}")]
+    DuplicateFacilityConsumption { facility_id: u32 },
     #[error("Recipe ingredients contains duplicate item id {item_id}")]
     DuplicateRecipeIngredientItem { item_id: u32 },
     #[error("Recipe products contains duplicate item id {item_id}")]

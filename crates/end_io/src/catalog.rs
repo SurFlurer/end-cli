@@ -7,8 +7,8 @@ use crate::schema::{
 };
 use crate::{Error, Result};
 use end_model::{
-    Catalog, FacilityDef, FacilityRegions, ItemDef, ItemId, PowerRecipe, Region, Stack,
-    ThermalBankDef,
+    Catalog, FacilityConsumption, FacilityDef, FacilityRegions, ItemDef, ItemId, PowerRecipe,
+    Region, Stack, ThermalBankDef,
 };
 use generativity::Guard;
 use serde::de::DeserializeOwned;
@@ -22,6 +22,7 @@ const BUILTIN_CATALOG: &str = concat!(
     include_str!("new-data/liquid_undirectional.toml"),
     include_str!("new-data/factory_recipes.toml"),
     include_str!("new-data/battery.toml"),
+    include_str!("new-data/factory_transmuters.toml"),
 );
 
 /// Load one legacy-format catalog file from an explicit `data_dir`.
@@ -46,7 +47,7 @@ fn load_data_file<T: DeserializeOwned>(data_dir: &Path, filename: &str) -> Resul
 
 /// Load and validate catalog inputs.
 ///
-/// When `data_dir` is `None`, the five catalog fragments under `new-data` embedded at compile
+/// When `data_dir` is `None`, the catalog fragments under `new-data` embedded at compile
 /// time are used. An explicit directory retains support for the legacy `items.toml`,
 /// `facilities.toml`, and `recipes.toml` layout.
 pub fn load_catalog<'id>(data_dir: Option<&Path>, guard: Guard<'id>) -> Result<Catalog<'id>> {
@@ -62,6 +63,7 @@ pub fn load_catalog<'id>(data_dir: Option<&Path>, guard: Guard<'id>) -> Result<C
         recipes_src,
         recipes,
         power_recipes,
+        facility_consumptions,
     ) = match data_dir {
         Some(data_dir) => {
             let items: LoadedToml<ItemsToml> = load_data_file(data_dir, "items.toml")?;
@@ -81,6 +83,7 @@ pub fn load_catalog<'id>(data_dir: Option<&Path>, guard: Guard<'id>) -> Result<C
                 recipes.src,
                 recipes.doc.recipes,
                 recipes.doc.power_recipes,
+                Box::default(),
             )
         }
         None => {
@@ -92,6 +95,7 @@ pub fn load_catalog<'id>(data_dir: Option<&Path>, guard: Guard<'id>) -> Result<C
                 thermal_bank,
                 recipes,
                 power_recipes,
+                facility_consumptions,
             } = toml::from_str(src.as_ref()).map_err(|source| Error::TomlParse {
                 path: path.clone(),
                 source,
@@ -109,6 +113,7 @@ pub fn load_catalog<'id>(data_dir: Option<&Path>, guard: Guard<'id>) -> Result<C
                 src,
                 recipes,
                 power_recipes,
+                facility_consumptions,
             )
         }
     };
@@ -162,6 +167,42 @@ pub fn load_catalog<'id>(data_dir: Option<&Path>, guard: Guard<'id>) -> Result<C
         .map_err(|source| {
             map_thermal_facility_build_error(&fac_path, &fac_src, Some(thermal_bank_span), source)
         })?;
+
+    // Add fixed per-machine material consumption (for example, transmuter media).
+    for (i, raw) in facility_consumptions.into_iter().enumerate() {
+        let span = raw.span();
+        let raw = raw.into_inner();
+        let facility = builder
+            .facility_id(raw.facility.as_str())
+            .ok_or_else(|| Error::UnknownFacility {
+                path: recipes_path.clone(),
+                key: raw.facility.to_string().into_boxed_str(),
+                span: Some(span.clone()),
+                src: Some(Arc::clone(&recipes_src)),
+            })?;
+        let item = builder
+            .item_id(raw.item.as_str())
+            .ok_or_else(|| Error::UnknownItem {
+                path: recipes_path.clone(),
+                key: raw.item.to_string().into_boxed_str(),
+                span: Some(span.clone()),
+                src: Some(Arc::clone(&recipes_src)),
+            })?;
+        builder
+            .push_facility_consumption(FacilityConsumption {
+                facility,
+                item,
+                count_per_min: raw.count_per_min,
+            })
+            .map_err(|source| Error::Schema {
+                path: recipes_path.clone(),
+                field: "facility_consumptions",
+                index: Some(i),
+                span: Some(span),
+                src: Some(Arc::clone(&recipes_src)),
+                message: source.to_string().into_boxed_str(),
+            })?;
+    }
 
     // add recipes
     for (i, raw) in recipes.into_iter().enumerate() {

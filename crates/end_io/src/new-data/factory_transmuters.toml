@@ -1,0 +1,12 @@
+# Converted from FactoryTransmuterTable.json.
+# Fixed material consumption is expressed per active machine per minute.
+
+[[facility_consumptions]]
+facility = "transmuter_1"
+item = "item_liquid_xiranite"
+count_per_min = 6
+
+[[facility_consumptions]]
+facility = "transmuter_2"
+item = "item_gas_xiranite"
+count_per_min = 6

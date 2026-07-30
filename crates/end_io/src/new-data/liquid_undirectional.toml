@@ -45,3 +45,8 @@ facility = "liquid_cleaner_1"
 time_s = 2
 ingredients = [{ item = "item_liquid_xiranite_poly", count = 1 }]
 products = []
+
+[vaporizer]
+key = "vaporizer_1"
+en = "Gas Dispersing Unit"
+zh = "气体散布机"

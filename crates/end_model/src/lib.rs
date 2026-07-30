@@ -9,8 +9,9 @@ pub use aic_input::{
     ItemU32Map, OutpostId, OutpostInput, PowerConfig, Region, Stage2Weights,
 };
 pub use catalog::{
-    Catalog, CatalogBuildError, CatalogBuilder, FacilityDef, FacilityId, FacilityRegions, ItemDef,
-    ItemId, PowerRecipe, PowerRecipeId, Recipe, RecipeId, Stack, ThermalBankDef,
+    Catalog, CatalogBuildError, CatalogBuilder, FacilityConsumption, FacilityDef, FacilityId,
+    FacilityRegions, ItemDef, ItemId, PowerRecipe, PowerRecipeId, Recipe, RecipeId, Stack,
+    ThermalBankDef,
 };
 pub use item_vec::ItemVec;
 pub use optimization::{

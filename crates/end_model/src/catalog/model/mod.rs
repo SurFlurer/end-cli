@@ -3,8 +3,8 @@ mod types;
 
 pub use builder::CatalogBuilder;
 pub use types::{
-    FacilityDef, FacilityId, FacilityRegions, ItemDef, ItemId, PowerRecipe, PowerRecipeId, Recipe,
-    RecipeId, Stack, ThermalBankDef,
+    FacilityConsumption, FacilityDef, FacilityId, FacilityRegions, ItemDef, ItemId, PowerRecipe,
+    PowerRecipeId, Recipe, RecipeId, Stack, ThermalBankDef,
 };
 
 use std::collections::HashMap;
@@ -27,6 +27,7 @@ pub struct Catalog<'id> {
     brand: Id<'id>,
     items: Box<[ItemDef]>,
     facilities: Box<[FacilityDef]>,
+    facility_consumptions: Box<[FacilityConsumption<'id>]>,
     recipes: Box<[Recipe<'id>]>,
     power_recipes: Box<[PowerRecipe<'id>]>,
     item_index: HashMap<Key, ItemId<'id>>,
@@ -129,6 +130,21 @@ impl<'id> Catalog<'id> {
     /// Returns whether a facility can be used in the specified scenario region.
     pub fn facility_available_in_region(&self, facility: FacilityId<'id>, region: Region) -> bool {
         self.facility(facility).regions.supports(region)
+    }
+
+    /// Returns fixed per-machine material consumption for a facility, when present.
+    pub fn facility_consumption(
+        &self,
+        facility: FacilityId<'id>,
+    ) -> Option<&FacilityConsumption<'id>> {
+        self.facility_consumptions
+            .iter()
+            .find(|consumption| consumption.facility == facility)
+    }
+
+    /// Returns all fixed per-machine material consumptions.
+    pub fn facility_consumptions(&self) -> &[FacilityConsumption<'id>] {
+        &self.facility_consumptions
     }
 
     /// Returns all production recipes.

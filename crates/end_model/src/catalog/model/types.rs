@@ -181,6 +181,14 @@ pub struct FacilityDef {
     pub regions: FacilityRegions,
 }
 
+/// Fixed material consumed per active facility machine per minute.
+#[derive(Debug, Clone, Copy)]
+pub struct FacilityConsumption<'id> {
+    pub facility: FacilityId<'id>,
+    pub item: ItemId<'id>,
+    pub count_per_min: NonZeroU32,
+}
+
 /// Thermal bank metadata and display texts.
 #[derive(Debug, Clone)]
 pub struct ThermalBankDef {

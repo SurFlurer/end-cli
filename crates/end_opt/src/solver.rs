@@ -75,6 +75,7 @@ struct RecipeVars<'id> {
     y: Variable,
     throughput_per_min: f64,
     net: SmallVec<[(ItemId<'id>, f64); 4]>,
+    fixed_consumption: Option<(ItemId<'id>, u32)>,
 }
 
 #[derive(Debug, Clone)]
@@ -277,6 +278,9 @@ fn solve_stage<'cid, 'sid>(
                 y,
                 throughput_per_min: 60.0 / time_s,
                 net,
+                fixed_consumption: catalog
+                    .facility_consumption(recipe.facility)
+                    .map(|consumption| (consumption.item, consumption.count_per_min.get())),
             }
         })
         .collect::<Vec<_>>();
@@ -386,6 +390,9 @@ fn solve_stage<'cid, 'sid>(
             rv.net.iter().for_each(|(item, delta)| {
                 item_balance[*item] += *delta * rv.x;
             });
+            if let Some((item, count_per_min)) = rv.fixed_consumption {
+                item_balance[item] -= count_per_min as f64 * rv.y;
+            }
             item_balance
         });
 
@@ -682,6 +689,9 @@ fn solve_stage<'cid, 'sid>(
     for rv in &recipe_vars {
         for (item, _) in &rv.net {
             touched_items.insert(*item);
+        }
+        if let Some((item, _)) = rv.fixed_consumption {
+            touched_items.insert(item);
         }
     }
     for ov in &outpost_vars {

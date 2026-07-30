@@ -65,11 +65,11 @@ pub fn build_item_subproblems<'cid, 'sid, 'rid>(
     recipe_usage.sort_by_key(|run| run.recipe_index.as_u32());
 
     for run in recipe_usage {
-        if run.executions_per_min <= LOGISTICS_EPS {
+        let recipe = catalog.recipe(run.recipe_index);
+        let fixed_consumption = catalog.facility_consumption(recipe.facility);
+        if run.executions_per_min <= LOGISTICS_EPS && fixed_consumption.is_none() {
             continue;
         }
-
-        let recipe = catalog.recipe(run.recipe_index);
 
         let throughput_per_machine_per_min = 60.0 / recipe.time_s as f64;
         let machine_capacity = throughput_per_machine_per_min * run.machines.get() as f64;
@@ -86,16 +86,23 @@ pub fn build_item_subproblems<'cid, 'sid, 'rid>(
         }
         let executions_per_min = run.executions_per_min.min(machine_capacity);
 
-        let net = recipe_net_deltas(recipe);
-        for (item, delta) in &net {
-            let flow = *delta * executions_per_min;
+        let mut flow_by_item = recipe_net_deltas(recipe)
+            .into_iter()
+            .map(|(item, delta)| (item, delta * executions_per_min))
+            .collect::<BTreeMap<_, _>>();
+        if let Some(consumption) = fixed_consumption {
+            *flow_by_item.entry(consumption.item).or_insert(0.0) -=
+                consumption.count_per_min.get() as f64 * run.machines.get() as f64;
+        }
+
+        for (item, flow) in flow_by_item {
             if flow > LOGISTICS_EPS {
                 push_supply(
                     &mut per_item,
-                    *item,
+                    item,
                     SupplySite::RecipeOutput {
                         recipe_index: run.recipe_index,
-                        item: *item,
+                        item,
                     },
                     flow,
                     "recipe_output",
@@ -103,10 +110,10 @@ pub fn build_item_subproblems<'cid, 'sid, 'rid>(
             } else if flow < -LOGISTICS_EPS {
                 push_demand(
                     &mut per_item,
-                    *item,
+                    item,
                     DemandSite::RecipeInput {
                         recipe_index: run.recipe_index,
-                        item: *item,
+                        item,
                     },
                     -flow,
                     "recipe_input",

@@ -7,8 +7,8 @@ use crate::Key;
 
 use super::super::CatalogBuildError;
 use super::{
-    Catalog, FacilityDef, FacilityId, ItemDef, ItemId, PowerRecipe, PowerRecipeId, Recipe,
-    RecipeId, Stack, ThermalBankDef,
+    Catalog, FacilityConsumption, FacilityDef, FacilityId, ItemDef, ItemId, PowerRecipe,
+    PowerRecipeId, Recipe, RecipeId, Stack, ThermalBankDef,
 };
 
 /// Marker state: thermal bank has not been provided yet.
@@ -52,6 +52,7 @@ pub struct CatalogBuilder<'id, State = ThermalBankMissing> {
     brand: Id<'id>,
     items: Vec<ItemDef>,
     facilities: Vec<FacilityDef>,
+    facility_consumptions: Vec<FacilityConsumption<'id>>,
     recipes: Vec<Recipe<'id>>,
     power_recipes: Vec<PowerRecipe<'id>>,
     item_index: HashMap<Key, ItemId<'id>>,
@@ -66,6 +67,7 @@ impl<'id> CatalogBuilder<'id, ThermalBankMissing> {
             brand: guard.into(),
             items: Vec::new(),
             facilities: Vec::new(),
+            facility_consumptions: Vec::new(),
             recipes: Vec::new(),
             power_recipes: Vec::new(),
             item_index: HashMap::new(),
@@ -86,6 +88,7 @@ impl<'id> CatalogBuilder<'id, ThermalBankMissing> {
             brand,
             items,
             facilities,
+            facility_consumptions,
             recipes,
             power_recipes,
             item_index,
@@ -96,6 +99,7 @@ impl<'id> CatalogBuilder<'id, ThermalBankMissing> {
             brand,
             items,
             facilities,
+            facility_consumptions,
             recipes,
             power_recipes,
             item_index,
@@ -202,6 +206,24 @@ impl<'id, State: ThermalBankState> CatalogBuilder<'id, State> {
         self.facility_index.get(key).copied()
     }
 
+    /// Adds fixed material consumption for one active facility machine.
+    pub fn push_facility_consumption(
+        &mut self,
+        consumption: FacilityConsumption<'id>,
+    ) -> Result<(), CatalogBuildError> {
+        if self
+            .facility_consumptions
+            .iter()
+            .any(|existing| existing.facility == consumption.facility)
+        {
+            return Err(CatalogBuildError::DuplicateFacilityConsumption {
+                facility_id: consumption.facility.as_u32(),
+            });
+        }
+        self.facility_consumptions.push(consumption);
+        Ok(())
+    }
+
     fn validate_recipe_stacks(
         &self,
         stacks: &[Stack<'id>],
@@ -224,6 +246,7 @@ impl<'id> CatalogBuilder<'id, ThermalBankReady> {
             brand,
             items,
             facilities,
+            facility_consumptions,
             recipes,
             power_recipes,
             item_index,
@@ -234,6 +257,7 @@ impl<'id> CatalogBuilder<'id, ThermalBankReady> {
             brand,
             items: items.into_boxed_slice(),
             facilities: facilities.into_boxed_slice(),
+            facility_consumptions: facility_consumptions.into_boxed_slice(),
             recipes: recipes.into_boxed_slice(),
             power_recipes: power_recipes.into_boxed_slice(),
             item_index,

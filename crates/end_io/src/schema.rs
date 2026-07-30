@@ -42,6 +42,8 @@ pub(crate) struct BuiltinCatalogToml {
     pub(crate) recipes: Box<[Spanned<RecipeToml>]>,
     #[serde(default)]
     pub(crate) power_recipes: Box<[Spanned<PowerRecipeToml>]>,
+    #[serde(default)]
+    pub(crate) facility_consumptions: Box<[Spanned<FacilityConsumptionToml>]>,
 }
 
 /// Parsed shape of `facilities.toml`.
@@ -123,6 +125,18 @@ pub(crate) struct PowerRecipeToml {
     pub(crate) power_w: NonZeroU32,
     #[serde(deserialize_with = "deserialize_positive_u32")]
     pub(crate) time_s: NonZeroU32,
+}
+
+/// Fixed material consumption for each active machine of a facility.
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct FacilityConsumptionToml {
+    #[serde(deserialize_with = "deserialize_key")]
+    pub(crate) facility: Key,
+    #[serde(deserialize_with = "deserialize_key")]
+    pub(crate) item: Key,
+    #[serde(deserialize_with = "deserialize_positive_u32")]
+    pub(crate) count_per_min: NonZeroU32,
 }
 
 /// Parsed shape of `aic.toml`.
