@@ -386,8 +386,8 @@
     <div class="hint-wrap">
       <p class="hint">
         {t(
-          "先在左侧改一条参数并触发求解，随后这里会显示物流网络。",
-          "Edit a parameter on the left to solve first, then the logistics network will appear here.",
+          "设置参数并点击“方案评估”中的“开始计算”，随后这里会显示物流网络。",
+          "Set the parameters and select Calculate in Plan Summary, then the logistics network will appear here.",
         )}
       </p>
     </div>

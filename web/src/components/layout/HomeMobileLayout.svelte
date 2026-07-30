@@ -21,6 +21,7 @@
     isBootstrapping: boolean;
     solveState: SolveState;
     editorActions: EditorActions;
+    onSolve: () => void;
     onOpenShare: (snapshot: FlowSnapshot | null) => void;
     onImportFile: (file: File) => void | Promise<void>;
   }
@@ -34,6 +35,7 @@
     isBootstrapping,
     solveState,
     editorActions,
+    onSolve,
     onOpenShare,
     onImportFile,
   }: Props = $props();
@@ -93,7 +95,7 @@
   </section>
 
   <section class={`${activeTab !== "result" ? "tab-hidden" : "result"}`}>
-    <ResultPanel {lang} {isBootstrapping} {solveState} />
+    <ResultPanel {lang} {isBootstrapping} {solveState} {onSolve} />
   </section>
 
   <section class={`${activeTab !== "graph" ? "tab-hidden" : "graph"}`}>

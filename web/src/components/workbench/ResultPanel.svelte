@@ -4,6 +4,7 @@
   import { SvelteSet } from "svelte/reactivity";
   import Panel from "../pane/Panel.svelte";
   import PanelHeader from "../pane/PanelHeader.svelte";
+  import IconActionButton from "../button/IconActionButton.svelte";
   import StatusPill from "../button/StatusPill.svelte";
   import { translateByLang } from "../../lib/lang";
   import type { LangTag, LogisticsGraph } from "../../lib/types";
@@ -23,9 +24,10 @@
     lang: LangTag;
     isBootstrapping: boolean;
     solveState: SolveState;
+    onSolve: () => void;
   }
 
-  let { lang, isBootstrapping, solveState }: Props = $props();
+  let { lang, isBootstrapping, solveState, onSolve }: Props = $props();
 
   let liveElapsedMs = $state<number | null>(null);
   let solveTimerId: number | null = null;
@@ -134,6 +136,14 @@
       icon="analytics"
     >
       {#snippet controls()}
+        <IconActionButton
+          icon="analytics"
+          label={t("开始计算", "Calculate")}
+          ariaLabel={t("开始计算方案", "Calculate plan")}
+          title={t("使用当前输入开始计算", "Calculate using the current inputs")}
+          disabled={isBootstrapping || isSolving}
+          onClick={onSolve}
+        />
         <StatusPill {lang} state={solveMetaState} />
       {/snippet}
     </PanelHeader>
@@ -150,8 +160,8 @@
   {:else if !result}
     <p class="hint">
       {t(
-        "先在左侧修改任意参数，这里会自动更新结果。",
-        "Edit any parameter on the left, and results will update here automatically.",
+        "设置参数后，点击上方的“开始计算”生成结果。",
+        "Set the parameters, then select Calculate above to generate results.",
       )}
     </p>
   {:else}

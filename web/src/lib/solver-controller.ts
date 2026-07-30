@@ -160,7 +160,6 @@ export function createSolverController(options: CreateSolverControllerOptions): 
 
   function updateSnapshot(snapshot: SolveSnapshot): void {
     latestSnapshot = snapshot;
-    scheduleAutoSolve();
   }
 
   return {

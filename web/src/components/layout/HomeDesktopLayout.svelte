@@ -33,6 +33,7 @@
     isBootstrapping: boolean;
     solveState: SolveState;
     editorActions: EditorActions;
+    onSolve: () => void;
     onOpenShare: (snapshot: FlowSnapshot | null) => void;
     onImportFile: (file: File) => void | Promise<void>;
 
@@ -51,6 +52,7 @@
     isBootstrapping,
     solveState,
     editorActions,
+    onSolve,
     onOpenShare,
     onImportFile,
     minEditorWidthPx,
@@ -147,7 +149,7 @@
     bind:this={rightPaneElement}
     style={`--right-top-height: ${(rightPaneRatio * 100).toFixed(2)}%; --right-min-top-height: ${minTopPanelHeightPx}px; --right-min-bottom-height: ${minBottomPanelHeightPx}px`}
   >
-    <ResultPanel {lang} {isBootstrapping} {solveState} />
+    <ResultPanel {lang} {isBootstrapping} {solveState} {onSolve} />
 
     <HorizontalSplitter
       layoutElement={rightPaneElement}

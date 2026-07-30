@@ -136,6 +136,10 @@
     errorToast = { kind: "closed" };
   }
 
+  function runSolve(): void {
+    void solverController.runSolve();
+  }
+
   function closeShareDialog(): void {
     isShareDialogOpen = false;
   }
@@ -446,6 +450,7 @@
     {isBootstrapping}
     {solveState}
     {editorActions}
+    onSolve={runSolve}
     onOpenShare={openShareDialog}
     onImportFile={importTomlFile}
   />
@@ -459,6 +464,7 @@
     {isBootstrapping}
     {solveState}
     {editorActions}
+    onSolve={runSolve}
     onOpenShare={openShareDialog}
     onImportFile={importTomlFile}
     minEditorWidthPx={MIN_EDITOR_WIDTH_PX}
