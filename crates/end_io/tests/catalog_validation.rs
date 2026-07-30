@@ -115,7 +115,7 @@ fn load_builtin_catalog_success() {
     );
 
     let thermal_bank = catalog.thermal_bank();
-    assert_eq!(thermal_bank.key.as_str(), "Thermal Bank");
+    assert_eq!(thermal_bank.key.as_str(), "power_station_1");
 }
 
 #[test]
