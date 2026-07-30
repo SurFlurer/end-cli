@@ -34,6 +34,10 @@ max_money_slack = 1.0
 # External item consumption per minute.
 # e.g. Consumables, Delivery
 [external_consumption_per_min]
+"item_equip_script_4_3" = 1
+
+[facility_machines_max]
+"xiranite_oven_1" = 12
 
 
 [[outposts]]
