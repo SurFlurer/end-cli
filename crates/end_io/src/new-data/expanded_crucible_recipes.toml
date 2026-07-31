@@ -1,0 +1,88 @@
+# Hand-authored merged recipes for the Expanded Crucible (扩容反应池, mix_pool_2).
+#
+# Unlike factory_recipes.toml (which is auto-generated from game data files), this file
+# is NOT auto-generated. It encodes the in-game behavior where one Expanded Crucible can
+# run several single-step recipes simultaneously, consuming intermediate products
+# internally so they never need to be transported between machines.
+#
+# These are not "discounted" recipes: time_s matches the single-step recipes (2s, i.e.
+# 30/min throughput). The electricity saving comes purely from collapsing the machine
+# count needed to balance intermediate fluids, not from any throughput bonus.
+#
+# All entries below were produced by scripts/find_expanded_crucible_merges.py and
+# verified against the xiranite (息壤) production line for a full-speed battery line
+# (6/min, requiring 30/min xiranite_poly):
+#   - 5x Reactor Crucible (mix_pool_1): R3x2 + R7x2 + R8x1 = 250W
+#   - 2x Expanded Crucible (mix_pool_2): pool1x1 + pool2x1 = 200W   -> saves 50W (-20%)
+# Net material balance is identical between the two approaches.
+#
+# 配方分类:
+#   「省电」= 用 1 台 100W 扩容池替代 ≥3 台 50W 普通池, 单池合并省电 50W.
+#   「平手 feeder」= 2 反应合并, 单池既不省电也不费电, 但消化了流体中间产物,
+#     适合作为上游供料池(像上面 Pool 1 那样把产物喂给另一台扩容池).
+
+# [省电] R2+R3+R6 合并 3 反应: 替代 3 台×50W=150W -> 1 台×100W, 省电 50W (33.3%)
+#   池内消化: 液化息壤(item_liquid_xiranite)
+# 外部输入 : 💧污水(item_liquid_sewage)×1, 💧清水(item_liquid_water)×2,   锦草粉末(item_plant_grass_powder_1)×1,   息壤(item_xiranite_powder)×1
+# 外部输出 : 💧锦草溶液(item_liquid_plant_grass_1)×1, 💧惰性壤晶废液(item_liquid_xiranite_lowpoly)×1, 💧壤晶废液(item_liquid_xiranite_poly)×1
+[[recipes]]
+facility = "mix_pool_2"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_liquid_sewage", count = 1 }, { item = "item_liquid_water", count = 2 }, { item = "item_plant_grass_powder_1", count = 1 }, { item = "item_xiranite_powder", count = 1 }]
+products = [{ item = "item_liquid_plant_grass_1", count = 1 }, { item = "item_liquid_xiranite_lowpoly", count = 1 }, { item = "item_liquid_xiranite_poly", count = 1 }]
+
+# [省电] R2+R4+R6 合并 3 反应: 替代 3 台×50W=150W -> 1 台×100W, 省电 50W (33.3%)
+#   池内消化: 液化息壤(item_liquid_xiranite)
+# 外部输入 : 💧污水(item_liquid_sewage)×1, 💧清水(item_liquid_water)×2,   芽针粉末(item_plant_grass_powder_2)×1,   息壤(item_xiranite_powder)×1
+# 外部输出 : 💧芽针溶液(item_liquid_plant_grass_2)×1, 💧惰性壤晶废液(item_liquid_xiranite_lowpoly)×1, 💧壤晶废液(item_liquid_xiranite_poly)×1
+[[recipes]]
+facility = "mix_pool_2"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_liquid_sewage", count = 1 }, { item = "item_liquid_water", count = 2 }, { item = "item_plant_grass_powder_2", count = 1 }, { item = "item_xiranite_powder", count = 1 }]
+products = [{ item = "item_liquid_plant_grass_2", count = 1 }, { item = "item_liquid_xiranite_lowpoly", count = 1 }, { item = "item_liquid_xiranite_poly", count = 1 }]
+
+# [省电] R2+R6+R7 合并 3 反应: 替代 3 台×50W=150W -> 1 台×100W, 省电 50W (33.3%)
+#   池内消化: 污水(item_liquid_sewage), 液化息壤(item_liquid_xiranite)
+# 外部输入 :   蓝铁粉末(item_iron_powder)×1, 💧清水(item_liquid_water)×1, 💧壤晶废液(item_liquid_xiranite_poly)×1,   息壤(item_xiranite_powder)×1
+# 外部输出 : 💧惰性壤晶废液(item_liquid_xiranite_lowpoly)×1,   壤晶(item_xiranite_poly)×1
+[[recipes]]
+facility = "mix_pool_2"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_powder", count = 1 }, { item = "item_liquid_water", count = 1 }, { item = "item_liquid_xiranite_poly", count = 1 }, { item = "item_xiranite_powder", count = 1 }]
+products = [{ item = "item_liquid_xiranite_lowpoly", count = 1 }, { item = "item_xiranite_poly", count = 1 }]
+
+# [平手 feeder] R0+R6 合并 2 反应: 替代 2 台×50W=100W -> 1 台×100W, 省电 0W (0.0%)
+#   池内消化: 污水(item_liquid_sewage)
+# 外部输入 :   蓝铁粉末(item_iron_powder)×1, 💧赫铜溶液(item_liquid_copper_enr)×2, 💧液化息壤(item_liquid_xiranite)×1
+# 外部输出 :   赫铜块(item_copper_enr)×1, 💧惰性壤晶废液(item_liquid_xiranite_lowpoly)×1, 💧壤晶废液(item_liquid_xiranite_poly)×1
+[[recipes]]
+facility = "mix_pool_2"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_powder", count = 1 }, { item = "item_liquid_copper_enr", count = 2 }, { item = "item_liquid_xiranite", count = 1 }]
+products = [{ item = "item_copper_enr", count = 1 }, { item = "item_liquid_xiranite_lowpoly", count = 1 }, { item = "item_liquid_xiranite_poly", count = 1 }]
+
+# [平手 feeder] R2+R6 合并 2 反应: 替代 2 台×50W=100W -> 1 台×100W, 省电 0W (0.0%)
+#   池内消化: 液化息壤(item_liquid_xiranite)
+# 外部输入 : 💧污水(item_liquid_sewage)×1, 💧清水(item_liquid_water)×1,   息壤(item_xiranite_powder)×1
+# 外部输出 : 💧惰性壤晶废液(item_liquid_xiranite_lowpoly)×1, 💧壤晶废液(item_liquid_xiranite_poly)×1
+[[recipes]]
+facility = "mix_pool_2"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_liquid_sewage", count = 1 }, { item = "item_liquid_water", count = 1 }, { item = "item_xiranite_powder", count = 1 }]
+products = [{ item = "item_liquid_xiranite_lowpoly", count = 1 }, { item = "item_liquid_xiranite_poly", count = 1 }]
+
+# [平手 feeder] R6+R7 合并 2 反应: 替代 2 台×50W=100W -> 1 台×100W, 省电 0W (0.0%)
+#   池内消化: 污水(item_liquid_sewage)
+# 外部输入 :   蓝铁粉末(item_iron_powder)×1, 💧液化息壤(item_liquid_xiranite)×1, 💧壤晶废液(item_liquid_xiranite_poly)×1
+# 外部输出 : 💧惰性壤晶废液(item_liquid_xiranite_lowpoly)×1,   壤晶(item_xiranite_poly)×1
+[[recipes]]
+facility = "mix_pool_2"
+time_s = 2
+gasEnv = "None"
+ingredients = [{ item = "item_iron_powder", count = 1 }, { item = "item_liquid_xiranite", count = 1 }, { item = "item_liquid_xiranite_poly", count = 1 }]
+products = [{ item = "item_liquid_xiranite_lowpoly", count = 1 }, { item = "item_xiranite_poly", count = 1 }]
