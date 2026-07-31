@@ -500,14 +500,20 @@ fn solve_stage<'cid, 'sid>(
         });
 
     // Apply item balance constraints:
-    // - For fluids: equality (must be exactly 0, no storage allowed)
-    // - For non-fluids: inequality (>= 0, surplus can go to warehouse)
+    // - For non-fluids: inequality (>= 0, surplus can go to warehouse).
+    // - For fluids/gases: same inequality. Fluids/gases cannot be stored, but the
+    //   surplus is interpreted as "discarded / vented" rather than forced to zero.
+    //   Forcing equality (= 0) would require 100% utilization of every supplied
+    //   fluid, which cascades through the production graph and forces the
+    //   optimizer to over-produce downstream items (e.g. extra furnaces) just
+    //   to consume the supplied gas/liquid. The slack is reported via
+    //   `external_supply_slack` for diagnostic purposes.
     model = catalog
         .items_with_id()
         .fold(model, |model, (item_id, item_def)| {
             let expr = &item_balance[item_id];
             if item_def.is_fluid {
-                model.with(constraint!(expr.clone() == 0.0))
+                model.with(constraint!(expr.clone() >= 0.0))
             } else {
                 model.with(constraint!(expr.clone() >= 0.0))
             }
