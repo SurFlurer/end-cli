@@ -21,6 +21,7 @@ const BUILTIN_CATALOG: &str = concat!(
     include_str!("new-data/factory_machines.toml"),
     include_str!("new-data/liquid_undirectional.toml"),
     include_str!("new-data/factory_recipes.toml"),
+    include_str!("new-data/expanded_crucible_recipes.toml"),
     include_str!("new-data/battery.toml"),
     include_str!("new-data/factory_transmuters.toml"),
 );

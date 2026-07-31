@@ -525,3 +525,135 @@ fn run_two_stage_rejects_infeasible_external_consumption() {
         "unexpected error: {err:?}"
     );
 }
+
+// ---------------------------------------------------------------------------
+// Regression: 1 input -> 2 products recipe must consume 1 input per execution
+// and produce 2 products per execution. The solver should compute throughput
+// from time_s (2s => 30/min/machine), independent of the product count.
+//
+// Reported symptom: 180/min plant_grass_1 -> 360/min carbon_mtl (1:2 ratio,
+// 2s recipe, 30/min throughput) was reported as needing 139 furnaces instead
+// of 6. Baseline: copper_ore 1:1 ratio, 420/min -> 14 furnaces works fine.
+// ---------------------------------------------------------------------------
+
+fn build_furnace_catalog<'id>(
+    guard: Guard<'id>,
+    recipe_product_count: u32,
+) -> (
+    Catalog<'id>,
+    end_model::ItemId<'id>,
+    end_model::ItemId<'id>,
+    end_model::FacilityId<'id>,
+) {
+    let mut b = Catalog::builder(guard);
+    let input = b
+        .add_item(ItemDef {
+            key: key("InputOre"),
+            en: name("InputOre"),
+            zh: name("InputOre_zh"),
+            is_fluid: false,
+        })
+        .expect("add input");
+    let output = b
+        .add_item(ItemDef {
+            key: key("OutputSolid"),
+            en: name("OutputSolid"),
+            zh: name("OutputSolid_zh"),
+            is_fluid: false,
+        })
+        .expect("add output");
+    let furnace = b
+        .add_facility(FacilityDef {
+            key: key("Furnace"),
+            power_w: nz(5),
+            en: name("Furnace"),
+            zh: name("Furnace_zh"),
+            regions: FacilityRegions::All,
+        })
+        .expect("add furnace");
+    let mut b = b
+        .add_thermal_bank(ThermalBankDef {
+            key: key("Thermal Bank"),
+            en: name("Thermal Bank"),
+            zh: name("Thermal_Bank_zh"),
+        })
+        .expect("add thermal bank");
+    b.push_recipe(
+        furnace,
+        nz(2),
+        vec![Stack {
+            item: input,
+            count: nz(1),
+        }]
+        .into(),
+        vec![Stack {
+            item: output,
+            count: nz(recipe_product_count),
+        }]
+        .into(),
+    )
+    .expect("push recipe");
+    (b.build(), input, output, furnace)
+}
+
+fn run_furnace_test(input_per_min: f64, output_demand: f64, recipe_product_count: u32) -> u32 {
+    make_guard!(catalog_guard);
+    let (catalog, input, output, furnace) =
+        build_furnace_catalog(catalog_guard, recipe_product_count);
+
+    make_guard!(aic_guard);
+    let aic = AicInputs::builder(
+        aic_guard,
+        PowerConfig::default(),
+        vec![(input, PosF64::new(input_per_min).expect("positive"))].into(),
+        vec![(output, PosF64::new(output_demand).expect("positive"))].into(),
+    )
+    // Force stage2 to minimize machines (revenue floor = 0 means any feasible plan
+    // is acceptable). Without this, default MaxRevenue would accept any feasible
+    // furnace count as optimal (revenue is identically 0 with no outpost).
+    .stage2_weights(Stage2Weights {
+        min_machines: 1.0,
+        max_power_slack: 0.0,
+        max_money_slack: 0.0,
+    })
+    .build();
+
+    make_guard!(result_guard);
+    let result = run_two_stage(&catalog, &aic, result_guard).expect("solve");
+
+    let count = result
+        .stage2
+        .machines_by_facility
+        .iter()
+        .find(|m| m.facility == furnace)
+        .map(|m| m.machines)
+        .unwrap_or(0);
+
+    eprintln!(
+        "input={input_per_min}/min demand={output_demand}/min product_count={recipe_product_count} \
+         -> furnaces={count} (recipes_used={:?})",
+        result.stage2.recipes_used
+    );
+    count
+}
+
+#[test]
+fn furnace_one_to_one_throughput_matches_time_s() {
+    // Baseline: copper_ore (1:1, 420/min) -> 14 furnaces. Must keep working.
+    let count = run_furnace_test(420.0, 420.0, 1);
+    assert_eq!(count, 14, "1:1 recipe expected 14 furnaces, got {count}");
+}
+
+#[test]
+fn furnace_one_to_two_throughput_matches_time_s() {
+    // Bug repro: plant_grass_1 (1:2, 180/min -> 360/min) -> expected 6 furnaces.
+    let count = run_furnace_test(180.0, 360.0, 2);
+    assert_eq!(count, 6, "1:2 recipe expected 6 furnaces, got {count}");
+}
+
+#[test]
+fn furnace_one_to_three_throughput_matches_time_s() {
+    // Even higher product ratio should still match 30/min throughput.
+    let count = run_furnace_test(60.0, 180.0, 3);
+    assert_eq!(count, 2, "1:3 recipe expected 2 furnaces, got {count}");
+}
